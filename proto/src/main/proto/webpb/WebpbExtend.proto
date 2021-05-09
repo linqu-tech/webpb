@@ -1,0 +1,117 @@
+syntax = "proto2";
+
+import "google/protobuf/descriptor.proto";
+
+// file options
+extend google.protobuf.FileOptions {
+    optional FileOpts f_opts = 1000;
+}
+
+message FileOpts {
+    oneof fileOpts {
+        OptFileOpts opt = 1000;
+        JavaFileOpts java = 1001;
+        TsFileOpts ts = 1002;
+    }
+}
+
+message OptFileOpts {
+}
+
+message JavaFileOpts {
+    optional bool gen_getter = 1000;
+
+    optional bool gen_setter = 1001;
+
+    optional bool gen_to_string = 1002;
+
+    repeated string import = 1003;
+
+    repeated string annotation = 1004;
+}
+
+message TsFileOpts {
+    optional bool int64_as_string = 1000;
+}
+
+// message options
+extend google.protobuf.MessageOptions {
+    optional MessageOpts m_opts = 1000;
+}
+
+message MessageOpts {
+    oneof messageOpt {
+        OptMessageOpts opt = 1000;
+        JavaMessageOpts java = 1001;
+        TsMessageOpts ts = 1002;
+    }
+}
+
+message OptMessageOpts {
+    repeated string tag = 1000;
+
+    optional bool ignore = 1001;
+
+    optional string method = 1002;
+
+    optional string path = 1003;
+}
+
+message JavaMessageOpts {
+    repeated string annotation = 1000;
+}
+
+message TsMessageOpts {
+}
+
+// enum options
+extend google.protobuf.EnumOptions {
+    optional EnumOpts e_opts = 1000;
+}
+
+message EnumOpts {
+    oneof messageOpt {
+        OptEnumOpts opt = 1000;
+        JavaEnumOpts java = 1001;
+        TsEnumOpts ts = 1002;
+    }
+}
+
+message OptEnumOpts {
+    repeated string tag = 1000;
+
+    optional bool ignore = 1001;
+}
+
+message JavaEnumOpts {
+    repeated string annotation = 1000;
+}
+
+message TsEnumOpts {
+}
+
+// field options
+extend google.protobuf.FieldOptions {
+    optional FieldOpts opts = 1000;
+}
+
+message FieldOpts {
+    oneof fieldOpts {
+        OptFieldOpts opt = 1000;
+        JavaFieldOpts java = 1001;
+        TsFieldOpts ts = 1002;
+    }
+}
+
+message OptFieldOpts {
+    optional bool omitted = 1000;
+    optional bool in_query = 1001;
+}
+
+message JavaFieldOpts {
+    repeated string annotation = 1000;
+}
+
+message TsFieldOpts {
+    optional bool as_string = 1000;
+}

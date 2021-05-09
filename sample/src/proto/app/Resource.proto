@@ -1,0 +1,19 @@
+syntax = "proto2";
+
+package ResourceProto;
+
+option java_package = "tech.linqu.webpb.example.resource";
+
+message PageablePb {
+    optional bool pagination = 1;
+    optional int32 page = 2;
+    optional int32 size = 3;
+    optional string sort = 4;
+}
+
+message PagingPb {
+    required int32 page = 1;
+    required int32 size = 2;
+    required int32 totalCount = 3;
+    required int32 totalPage = 4;
+}
