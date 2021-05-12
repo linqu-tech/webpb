@@ -1,0 +1,21 @@
+{
+    "name": "webpb",
+    "version": "0.0.9",
+    "description": "The webpb runtime library for javascript",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsc && cp README.md ./dist && cp package.json ./dist",
+        "publish": "npm run build && npm publish ./dist --access public",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "156023966@qq.com",
+    "license": "Apache-2.0",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/linqu-tech/webpb"
+    },
+    "devDependencies": {
+        "typescript": "^4.2.4"
+    }
+}

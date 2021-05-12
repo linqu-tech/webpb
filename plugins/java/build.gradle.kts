@@ -24,12 +24,12 @@ dependencies {
     implementation(project(":libs:utilities"))
 }
 
-val filename = "protoc-webpb-${project.name}"
-
 tasks.bootJar {
     archiveBaseName.set(filename)
     launchScript()
 }
+
+val filename = "protoc-webpb-${project.name}"
 
 publishing {
     publications {
@@ -44,41 +44,12 @@ publishing {
                     fromResolutionResult()
                 }
             }
-            pom {
-                name.set(filename)
-                description.set("The webpb protoc plugin for java")
-                url.set("https://github.com/linqu-tech/webpb")
-                licenses {
-                    license {
-                        name.set("The Apache License, Version 2.0")
-                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-                    }
-                }
-                developers {
-                    developer {
-                        id.set("gan.jin")
-                        name.set("Gan Jin")
-                        email.set("156023966@qq.com")
-                    }
-                }
-                scm {
-                    connection.set("scm:git:git://github.com/linqu-tech/webpb.git")
-                    developerConnection.set("scm:git:ssh://github.com/linqu-tech/webpb.git")
-                    url.set("http://github.com/linqu-tech/webpb")
-                }
-            }
-        }
-    }
-    repositories {
-        maven {
-            name = "oss"
-            val releasesRepoUrl = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
-            val snapshotsRepoUrl = uri("https://s01.oss.sonatype.org/content/repositories/snapshots")
-            url = if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl
-            credentials(PasswordCredentials::class)
         }
     }
 }
+
+val updatePublishing: (publishing: PublishingExtension, publication: String, filename: String, desc: String) -> Void by rootProject.extra
+updatePublishing(publishing, "webpbJava", filename, "The webpb protoc plugin for java")
 
 signing {
     sign(publishing.publications["webpbJava"])
