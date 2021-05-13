@@ -43,7 +43,7 @@ Any line of the commit message cannot be longer than 100 characters.
   │       │             │
   │       │             └─⫸ Summary in present tense. Not capitalized. No period at the end.
   │       │
-  │       └─⫸ Commit Scope: webpb|libs|libs.commons|libs.utilities|plugins|plugins.capture|
+  │       └─⫸ Commit Scope: webpb|libs|libs.commons|libs.utilities|plugins|plugins.java|
   |                          plugins.ts|proto|runtime|sample
   │
   └─⫸ Commit Type: build|ci|docs|feat|fix|perf|refactor|test

@@ -11,4 +11,9 @@ public class UserController {
     public Long getUser(@Valid @RequestBody UserDataRequest request) {
         return request.getId();
     }
+
+    @WebpbRequestMapping
+    public Long getUser2(@Valid @RequestBody UserDataRequest request) {
+        return request.getId();
+    }
 }
