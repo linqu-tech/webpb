@@ -19,6 +19,7 @@ import com.sun.source.util.TreePath;
 import com.sun.source.util.Trees;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Symbol.ClassSymbol;
+import com.sun.tools.javac.code.Symbol.TypeSymbol;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.processing.JavacProcessingEnvironment;
 import com.sun.tools.javac.tree.JCTree;
@@ -39,9 +40,7 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static com.sun.source.tree.Tree.Kind.ASSIGNMENT;
@@ -94,23 +93,19 @@ public class WebpbRequestMappingProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        Map<String, ClassSymbol> classSymbolMap = roundEnv.getRootElements().stream()
-            .filter((Predicate<Element>) element -> element instanceof ClassSymbol)
-            .collect(Collectors.toMap(
-                element -> ((ClassSymbol) element).fullname.toString(),
-                element -> (ClassSymbol) element
-            ));
-        for (ClassSymbol classSymbol : classSymbolMap.values()) {
-            JCCompilationUnit unit = toUnit(classSymbol);
-            if (unit == null) {
-                continue;
+        for (Element element : roundEnv.getRootElements()) {
+            if (element instanceof ClassSymbol) {
+                JCCompilationUnit unit = toUnit(element);
+                if (unit == null) {
+                    continue;
+                }
+                processUnit(unit);
             }
-            processUnit(unit, classSymbolMap);
         }
         return true;
     }
 
-    private void processUnit(JCCompilationUnit unit, Map<String, ClassSymbol> classSymbolMap) {
+    private void processUnit(JCCompilationUnit unit) {
         new TreeScanner() {
             @Override
             public void visitMethodDef(JCMethodDecl tree) {
@@ -138,7 +133,7 @@ public class WebpbRequestMappingProcessor extends AbstractProcessor {
                         if (type == null) {
                             continue;
                         }
-                        ClassSymbol symbol = (ClassSymbol) type.tsym;
+                        TypeSymbol symbol = type.tsym;
                         if (symbol == null) {
                             processingEnv.getMessager().printMessage(ERROR, "Cannot find class symbol: " + type);
                             continue;
@@ -154,7 +149,7 @@ public class WebpbRequestMappingProcessor extends AbstractProcessor {
         }.scan(unit);
     }
 
-    private void processSymbolUnit(JCCompilationUnit unit, ClassSymbol symbol, ArrayList<JCTree.JCExpression> args) {
+    private void processSymbolUnit(JCCompilationUnit unit, TypeSymbol symbol, ArrayList<JCTree.JCExpression> args) {
         for (Symbol element : symbol.getEnclosedElements()) {
             if (!(element instanceof Symbol.VarSymbol)) {
                 continue;
@@ -187,9 +182,9 @@ public class WebpbRequestMappingProcessor extends AbstractProcessor {
         ), false);
         ArrayList<JCTree> jcTrees = new ArrayList<>();
         for (JCTree tree : trees) {
-            if (jcImport != null && tree.hasTag(JCTree.Tag.PACKAGEDEF)) {
-                jcTrees.add(tree);
+            if (jcImport != null && tree.hasTag(JCTree.Tag.CLASSDEF)) {
                 jcTrees.add(jcImport);
+                jcTrees.add(tree);
                 jcImport = null;
             } else {
                 jcTrees.add(tree);

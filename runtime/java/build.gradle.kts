@@ -30,6 +30,7 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:2.12.3")
     implementation("org.eclipse.jdt:core:3.3.0-v_771")
     implementation(project(":libs:commons"))
+    compileOnly(files(org.gradle.internal.jvm.Jvm.current().toolsJar))
 }
 
 tasks.jar {
