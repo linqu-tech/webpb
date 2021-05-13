@@ -1,0 +1,104 @@
+syntax = "proto2";
+
+package StoreProto;
+
+option java_package = "tech.linqu.webpb.sample.proto.store";
+
+import "Resource.proto";
+import "webpb/WebpbExtend.proto";
+import "WebpbOptions.proto";
+
+message StorePb {
+    option (m_opts).java = {
+        annotation: '@JsonInclude(Include.NON_NULL)'
+    };
+
+    required int32 id = 1;
+    required string name = 2 [default = 'store'];
+    required int32 city = 3 [default = 100];
+}
+
+message Project {
+}
+
+enum StoreType {
+    NORMAL = 0;
+}
+
+message StoreRequest {
+    option (m_opts).opt = {
+        method: "GET"
+        context: "store"
+        path: "/stores/{id}"
+    };
+
+    required int32 id = 1 [(opts).opt = {in_query: true}];
+    required string email = 2 [(opts).java = {annotation: '@Pattern(regexp = Const.EMAIL_REGEX)'}];
+    optional bool valid = 3;
+    map<string, int32> data = 4;
+    map<string, Project> projects = 5;
+    repeated int32 unpacked = 6 [packed = false];
+    repeated int32 packed = 7 [packed = true];
+    repeated Project projectList = 8;
+    required Project project = 9;
+    required int64 max = 10 [default = 0xfffffFFFFFFFF];
+    map<int64, int32> longMap = 11;
+    map<int64, Project> projectMap = 12;
+    map<int64, StoreType> typeMap = 13;
+    required bytes binary = 14;
+    required StoreType type = 15;
+    required float floatData = 16;
+    oneof anyData {
+        string anyName = 20;
+        Project anyProject = 21;
+        StoreType anyStore = 22;
+    }
+    required int64 stringField = 24 [(opts).ts = {as_string: true}];
+}
+
+message StoreResponse {
+    message StoreNestedPb {
+        required string employee = 1;
+    }
+
+    required StorePb store = 1;
+    required StoreNestedPb nested = 2;
+    required ResourceProto.PagingPb paging = 3;
+}
+
+message StoreCurrentRequest {
+    option (m_opts).opt = {
+        method: "GET"
+        path: "/stores/current"
+    };
+}
+
+message EmptyPb {
+    message EnclosingPb {
+        required int64 innerString = 24 [(opts).ts = {as_string: true}];
+    }
+}
+
+message StoresRequest {
+    option (m_opts).opt = {
+        method: "POST"
+        path: "/stores/{type}?page={pageable.page}&size={pageable.size}"
+    };
+
+    required ResourceProto.PageablePb pageable = 1 [(opts).opt = {in_query: true}];
+    required int32 type = 2 [(opts).opt = {in_query: true omitted: true}];
+    required int32 city = 3 [(opts).java = {
+        annotation: '@NotNull(message = "City is required")'
+        annotation: '@Range(min = 0)'
+    }];
+}
+
+message StoresResponse {
+    required StorePb stores = 1;
+    required ResourceProto.PagingPb paging = 2;
+}
+
+message UserMpLoginRequest {
+    required string appId = 1;
+    required string code = 2;
+}

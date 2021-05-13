@@ -1,0 +1,15 @@
+syntax = "proto2";
+
+package ErrorProto;
+
+option java_package = "tech.linqu.webpb.sample.proto.error";
+
+enum ErrorCode {
+    OK = 0;
+    ERROR = 1;
+}
+
+message ErrorMessage {
+    required ErrorCode code = 1;
+    optional string message = 2;
+}

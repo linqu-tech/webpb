@@ -41,6 +41,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static tech.linqu.webpb.utilities.utils.OptionUtils.getOpts;
 import static com.google.protobuf.Descriptors.EnumDescriptor;
@@ -121,18 +122,26 @@ public final class Generator {
     private boolean handleDescriptors(List<Descriptor> descriptors) {
         boolean hasContent = false;
         for (Descriptor descriptor : descriptors) {
-            if (StringUtils.equals(Const.MAP_DATA_ENTRY, descriptor.getName())) {
-                continue;
-            }
             OptMessageOpts messageOpts = getOpts(descriptor, MessageOpts::hasOpt).getOpt();
             if (OptionUtils.shouldSkip(messageOpts.getTagList(), this.tags)) {
                 continue;
             }
             hasContent = true;
             generateMessage(descriptor, messageOpts);
-            level(() -> handleDescriptors(descriptor.getNestedTypes()));
+            level(() -> generateNested(descriptor));
         }
         return hasContent;
+    }
+
+    private void generateNested(Descriptor descriptor) {
+        Set<String> mapFields = descriptor.getFields().stream()
+            .filter(FieldDescriptor::isMapField)
+            .map(fieldDescriptor -> StringUtils.capitalize(fieldDescriptor.getName()) + "Entry")
+            .collect(Collectors.toSet());
+        List<Descriptor> nestedDescriptors = descriptor.getNestedTypes().stream()
+            .filter(d -> !mapFields.contains(d.getName()))
+            .collect(Collectors.toList());
+        handleDescriptors(nestedDescriptors);
     }
 
     private void generateEnum(EnumDescriptor descriptor) {
@@ -166,7 +175,7 @@ public final class Generator {
 
         level(() -> {
             generateMessageFields(descriptor, false);
-            indent().append("META: () => Webpb.WebpbMeta;\n\n");
+            indent().append("webpbMeta: () => Webpb.WebpbMeta;\n\n");
             generateConstructor(descriptor, messageOpts, className);
         });
         closeBracket();
@@ -209,7 +218,7 @@ public final class Generator {
         if (descriptor.getFields().isEmpty()) {
             indent().append("private constructor() {\n");
             level(() -> {
-                indent().append("this.META = () => ({\n");
+                indent().append("this.webpbMeta = () => ({\n");
                 initializeMeta(descriptor, messageOpts);
             });
             closeBracket();
@@ -221,7 +230,7 @@ public final class Generator {
             level(() -> {
                 indent().append("Webpb.assign(p, this, ")
                     .append(generateOmitted(descriptor)).append(");\n");
-                indent().append("this.META = () => (p && {\n");
+                indent().append("this.webpbMeta = () => (p && {\n");
                 initializeMeta(descriptor, messageOpts);
             });
             closeBracket();
@@ -237,8 +246,10 @@ public final class Generator {
     private void initializeMeta(Descriptor descriptor, OptMessageOpts messageOpts) {
         level(() -> {
             generateMetaField("class", "'" + descriptor.getName() + "'");
-            generateMetaField("method", StringUtils.isEmpty(messageOpts.getMethod())
-                ? "''" : "'" + messageOpts.getMethod() + "'");
+            String method = messageOpts.getMethod();
+            generateMetaField("method", StringUtils.isEmpty(method) ? "''" : "'" + method + "'");
+            String context = messageOpts.getContext();
+            generateMetaField("context", StringUtils.isEmpty(context) ? "''" : "'" + context + "'");
             generateMetaPath(descriptor, messageOpts.getPath());
         });
         trimDuplicatedNewline();

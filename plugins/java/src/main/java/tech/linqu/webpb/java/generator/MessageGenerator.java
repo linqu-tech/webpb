@@ -23,12 +23,12 @@ import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
-import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.Name;
+import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
@@ -38,7 +38,11 @@ import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.PrimitiveType;
 import com.github.javaparser.ast.type.Type;
-import tech.linqu.webpb.commons.ParamGroup;
+import com.google.protobuf.Descriptors.Descriptor;
+import com.google.protobuf.Descriptors.FieldDescriptor;
+import com.google.protobuf.Descriptors.FileDescriptor;
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import tech.linqu.webpb.utilities.context.RequestContext;
 import tech.linqu.webpb.utilities.utils.Const;
 import tech.linqu.webpb.utilities.utils.DescriptorUtils;
@@ -51,16 +55,12 @@ import tech.linqu.webpb.utilities.utils.WebpbExtend.JavaMessageOpts;
 import tech.linqu.webpb.utilities.utils.WebpbExtend.MessageOpts;
 import tech.linqu.webpb.utilities.utils.WebpbExtend.OptFieldOpts;
 import tech.linqu.webpb.utilities.utils.WebpbExtend.OptMessageOpts;
-import com.google.protobuf.Descriptors.Descriptor;
-import com.google.protobuf.Descriptors.FieldDescriptor;
-import com.google.protobuf.Descriptors.FileDescriptor;
-import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor(staticName = "of")
@@ -99,7 +99,7 @@ public class MessageGenerator {
         declaration.setName(descriptor.getName());
         declaration.addModifier(Modifier.Keyword.PUBLIC);
 
-        addMessageMeta(descriptor, declaration);
+        addWebpbMeta(descriptor, declaration);
 
         JavaFileOpts webpbOpts = requestContext.getFileOpts().getJava();
         addAnnotations(declaration, webpbOpts.getAnnotationList());
@@ -108,74 +108,81 @@ public class MessageGenerator {
         JavaMessageOpts messageOpts = OptionUtils.getOpts(descriptor, MessageOpts::hasJava).getJava();
         addAnnotations(declaration, messageOpts.getAnnotationList());
 
-        generateMessageFields(descriptor, declaration);
+        generateMessageFields(declaration, descriptor);
+        generateNested(declaration, descriptor);
+        return declaration;
+    }
 
+    private void generateNested(ClassOrInterfaceDeclaration declaration, Descriptor descriptor) {
+        Set<String> mapFields = descriptor.getFields().stream()
+            .filter(FieldDescriptor::isMapField)
+            .map(fieldDescriptor -> StringUtils.capitalize(fieldDescriptor.getName()) + "Entry")
+            .collect(Collectors.toSet());
         for (Descriptor nestedDescriptor : descriptor.getNestedTypes()) {
+            if (mapFields.contains(nestedDescriptor.getName())) {
+                return;
+            }
             TypeDeclaration<?> typeDeclaration = generate(nestedDescriptor);
             typeDeclaration.addModifier(Modifier.Keyword.STATIC);
             declaration.addMember(typeDeclaration);
         }
-        return declaration;
     }
 
-    private void addMessageMeta(Descriptor descriptor, ClassOrInterfaceDeclaration declaration) {
+    private void addWebpbMeta(Descriptor descriptor, ClassOrInterfaceDeclaration declaration) {
         declaration.addImplementedType("WebpbMessage");
         JAVA_PARSER.parseName(Const.RUNTIME_PACKAGE + ".WebpbMessage")
             .ifSuccessful(imports::add);
 
-        ClassOrInterfaceType metaType = new ClassOrInterfaceType(null, "MessageMeta");
-        JAVA_PARSER.parseName(Const.RUNTIME_PACKAGE + ".MessageMeta")
-            .ifSuccessful(imports::add);
+        ClassOrInterfaceType metaType = new ClassOrInterfaceType(null, "WebpbMeta");
+        JAVA_PARSER.parseName(Const.RUNTIME_PACKAGE + ".WebpbMeta").ifSuccessful(imports::add);
 
-        addMessageMetaMethod(declaration);
+        OptMessageOpts messageOpts = OptionUtils.getOpts(descriptor, MessageOpts::hasOpt).getOpt();
+        addStaticOption(declaration, "WEBPB_METHOD", messageOpts.getMethod());
+        addStaticOption(declaration, "WEBPB_CONTEXT", messageOpts.getContext());
+        addStaticOption(declaration, "WEBPB_PATH", messageOpts.getPath());
 
         ObjectCreationExpr creationExpr = new ObjectCreationExpr(
             null, new ClassOrInterfaceType(metaType, "Builder"), new NodeList<>()
         );
 
-        MethodCallExpr callExpr = null;
-        OptMessageOpts messageOpts = OptionUtils.getOpts(descriptor, MessageOpts::hasOpt).getOpt();
-        if (StringUtils.isNotEmpty(messageOpts.getPath())) {
-            String path = messageOpts.getPath();
-            if (StringUtils.isNotEmpty(path)) {
-                DescriptorUtils.validation(ParamGroup.of(path), descriptor);
-            } else {
-                path = "";
-            }
-            callExpr = new MethodCallExpr(
-                creationExpr, "path",
-                new NodeList<>(new StringLiteralExpr(path))
-            );
-        }
-        if (StringUtils.isNotEmpty(messageOpts.getMethod())) {
-            callExpr = new MethodCallExpr(
-                callExpr == null ? creationExpr : callExpr, "method",
-                new NodeList<>(new StringLiteralExpr(messageOpts.getMethod()))
-            );
-        }
+        MethodCallExpr callExpr = new MethodCallExpr(
+            creationExpr, "method", new NodeList<>(new NameExpr("WEBPB_METHOD"))
+        );
+        callExpr = new MethodCallExpr(
+            callExpr, "context", new NodeList<>(new NameExpr("WEBPB_CONTEXT"))
+        );
+        callExpr = new MethodCallExpr(
+            callExpr, "path", new NodeList<>(new NameExpr("WEBPB_PATH"))
+        );
         if (!messageOpts.getTagList().isEmpty()) {
-            callExpr = new MethodCallExpr(
-                callExpr == null ? creationExpr : callExpr, "tags",
+            callExpr = new MethodCallExpr(callExpr, "tags",
                 new NodeList<>(messageOpts.getTagList().stream()
                     .map(StringLiteralExpr::new)
                     .collect(Collectors.toList()))
             );
         }
-        callExpr = new MethodCallExpr(callExpr == null ? creationExpr : callExpr, "build");
+        callExpr = new MethodCallExpr(callExpr, "build");
 
-        FieldDeclaration field = new FieldDeclaration();
+        FieldDeclaration field = declaration.addFieldWithInitializer(metaType, "WEBPB_META", callExpr);
         field.setModifiers(Modifier.Keyword.PUBLIC, Modifier.Keyword.STATIC, Modifier.Keyword.FINAL);
-        field.addVariable(new VariableDeclarator(metaType, "MESSAGE_META", callExpr));
-
-        declaration.getMembers().addFirst(field);
+        addWebpbMetaMethod(declaration);
     }
 
-    private void addMessageMetaMethod(ClassOrInterfaceDeclaration declaration) {
-        declaration.addMethod("messageMeta")
+    private void addStaticOption(ClassOrInterfaceDeclaration declaration, String key, String value) {
+        value = StringUtils.isEmpty(value) ? "" : value;
+        declaration.addFieldWithInitializer(String.class, key, new StringLiteralExpr(value),
+            Modifier.Keyword.PUBLIC,
+            Modifier.Keyword.STATIC,
+            Modifier.Keyword.FINAL
+        );
+    }
+
+    private void addWebpbMetaMethod(ClassOrInterfaceDeclaration declaration) {
+        declaration.addMethod("webpbMeta")
             .addAnnotation(new MarkerAnnotationExpr("Override"))
             .setModifiers(Modifier.Keyword.PUBLIC)
-            .setType("MessageMeta")
-            .setBody(new BlockStmt(NodeList.nodeList(new ReturnStmt("MESSAGE_META"))));
+            .setType("WebpbMeta")
+            .setBody(new BlockStmt(NodeList.nodeList(new ReturnStmt("WEBPB_META"))));
     }
 
     private void addAnnotations(BodyDeclaration<?> declaration, List<String> annotations) {
@@ -205,7 +212,7 @@ public class MessageGenerator {
         }
     }
 
-    private void generateMessageFields(Descriptor descriptor, ClassOrInterfaceDeclaration declaration) {
+    private void generateMessageFields(ClassOrInterfaceDeclaration declaration, Descriptor descriptor) {
         for (FieldDescriptor fieldDescriptor : descriptor.getFields()) {
             OptFieldOpts fieldOpts = OptionUtils.getOpts(fieldDescriptor, FieldOpts::hasOpt).getOpt();
             if (fieldOpts.getOmitted()) {
@@ -227,7 +234,7 @@ public class MessageGenerator {
     }
 
     private Type getType(FieldDescriptor fieldDescriptor) {
-        if (fieldDescriptor.isRepeated()) {
+        if (fieldDescriptor.isRepeated() && !fieldDescriptor.isMapField()) {
             return new ClassOrInterfaceType(null,
                 new SimpleName(List.class.getSimpleName()),
                 NodeList.nodeList(toType(fieldDescriptor))

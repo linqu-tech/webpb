@@ -55,6 +55,8 @@ message OptMessageOpts {
     optional string method = 1002;
 
     optional string path = 1003;
+
+    optional string context = 1004;
 }
 
 message JavaMessageOpts {
