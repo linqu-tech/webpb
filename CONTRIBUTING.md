@@ -43,8 +43,8 @@ Any line of the commit message cannot be longer than 100 characters.
   │       │             │
   │       │             └─⫸ Summary in present tense. Not capitalized. No period at the end.
   │       │
-  │       └─⫸ Commit Scope: webpb|libs|libs.commons|libs.utilities|plugins|plugins.capture|
-  |                          plugins.ts|proto|runtime|sample
+  │       └─⫸ Commit Scope: webpb|libs|libs.commons|libs.utilities|plugins|plugins.java|
+  |                          plugins.ts|proto|runtime.java|runtime.ts|sample
   │
   └─⫸ Commit Type: build|ci|docs|feat|fix|perf|refactor|test
 ```
@@ -78,7 +78,8 @@ The following is the list of supported scopes:
 * `plugins.java`
 * `plugins.ts`
 * `proto`
-* `runtime`
+* `runtime.java`
+* `runtime.ts`
 * `sample`
 
 There are currently a few exceptions to the "use package name" rule:

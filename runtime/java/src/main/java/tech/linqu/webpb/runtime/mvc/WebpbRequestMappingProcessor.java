@@ -23,12 +23,14 @@ import com.sun.tools.javac.code.Symbol.TypeSymbol;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.processing.JavacProcessingEnvironment;
 import com.sun.tools.javac.tree.JCTree;
+import com.sun.tools.javac.tree.JCTree.JCAnnotation;
 import com.sun.tools.javac.tree.JCTree.JCCompilationUnit;
 import com.sun.tools.javac.tree.JCTree.JCMethodDecl;
 import com.sun.tools.javac.tree.TreeMaker;
 import com.sun.tools.javac.tree.TreeScanner;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.Names;
+import tech.linqu.webpb.runtime.WebpbMessage;
 import tech.linqu.webpb.runtime.utils.JvmOpens;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -109,44 +111,65 @@ public class WebpbRequestMappingProcessor extends AbstractProcessor {
         new TreeScanner() {
             @Override
             public void visitMethodDef(JCMethodDecl tree) {
-                tree.mods.annotations = List.from(tree.mods.annotations.stream().map(annotation -> {
-                    String annotationName = WebpbRequestMapping.class.getSimpleName();
-                    if (!annotation.annotationType.toString().endsWith(annotationName)) {
-                        return annotation;
-                    }
-                    ArrayList<JCTree.JCExpression> args = new ArrayList<>();
-                    for (JCTree.JCExpression arg : annotation.args) {
-                        if (!arg.getKind().equals(ASSIGNMENT)) {
-                            continue;
-                        }
-                        JCTree.JCAssign assign = (JCTree.JCAssign) arg;
-                        if (!assign.lhs.getKind().equals(IDENTIFIER)) {
-                            continue;
-                        }
-                        String argName = (((JCTree.JCIdent) assign.lhs).name).toString();
-                        if (!argName.equals("message")) {
-                            args.add(treeMaker.Assign(treeMaker.Ident(names.fromString(argName)), assign.rhs));
-                            continue;
-                        }
-                        unit.defs = addImport(unit.defs, "org.springframework.web.bind.annotation", "RequestMapping");
-                        Type type = assign.rhs.type.allparams().stream().findFirst().orElse(null);
-                        if (type == null) {
-                            continue;
-                        }
-                        TypeSymbol symbol = type.tsym;
-                        if (symbol == null) {
-                            processingEnv.getMessager().printMessage(ERROR, "Cannot find class symbol: " + type);
-                            continue;
-                        }
-                        processSymbolUnit(unit, symbol, args);
-                    }
-                    return treeMaker.Annotation(
-                        treeMaker.Ident(names.fromString("RequestMapping")), List.from(args)
-                    );
-                }).collect(Collectors.toList()));
+                tree.mods.annotations = List.from(tree.mods.annotations.stream()
+                    .map(annotation -> transformAnnotation(unit, tree, annotation))
+                    .collect(Collectors.toList())
+                );
                 super.visitMethodDef(tree);
             }
         }.scan(unit);
+    }
+
+    private JCAnnotation transformAnnotation(JCCompilationUnit unit, JCMethodDecl method, JCAnnotation annotation) {
+        String annotationName = WebpbRequestMapping.class.getSimpleName();
+        if (!annotation.annotationType.toString().endsWith(annotationName)) {
+            return annotation;
+        }
+        ArrayList<JCTree.JCExpression> args = new ArrayList<>();
+        unit.defs = addImport(unit.defs, "org.springframework.web.bind.annotation", "RequestMapping");
+        ClassSymbol messageSymbol = null;
+        for (JCTree.JCExpression arg : annotation.args) {
+            if (!arg.getKind().equals(ASSIGNMENT)) {
+                continue;
+            }
+            JCTree.JCAssign assign = (JCTree.JCAssign) arg;
+            if (!assign.lhs.getKind().equals(IDENTIFIER)) {
+                continue;
+            }
+            String argName = (((JCTree.JCIdent) assign.lhs).name).toString();
+            if (argName.equals("message")) {
+                messageSymbol = assign.rhs.type.allparams().stream()
+                    .filter(type -> type.tsym instanceof ClassSymbol)
+                    .findFirst().map(type -> (ClassSymbol) type.tsym).orElse(null);
+            } else {
+                args.add(treeMaker.Assign(treeMaker.Ident(names.fromString(argName)), assign.rhs));
+            }
+        }
+        for (JCTree.JCVariableDecl parameter : method.getParameters()) {
+            if (messageSymbol != null) {
+                break;
+            }
+            if (!parameter.hasTag(JCTree.Tag.VARDEF)) {
+                continue;
+            }
+            TypeSymbol typeSymbol = parameter.sym.type.tsym;
+            if (!(typeSymbol instanceof ClassSymbol)) {
+                continue;
+            }
+            for (Type type : ((ClassSymbol) typeSymbol).getInterfaces()) {
+                if (WebpbMessage.class.getName().equals(type.tsym.getQualifiedName().toString())) {
+                    messageSymbol = ((ClassSymbol) typeSymbol);
+                    break;
+                }
+            }
+        }
+        if (messageSymbol == null) {
+            processingEnv.getMessager()
+                .printMessage(ERROR, "Should specify a message for WebpbRequestMapping");
+            return annotation;
+        }
+        processSymbolUnit(unit, messageSymbol, args);
+        return treeMaker.Annotation(treeMaker.Ident(names.fromString("RequestMapping")), List.from(args));
     }
 
     private void processSymbolUnit(JCCompilationUnit unit, TypeSymbol symbol, ArrayList<JCTree.JCExpression> args) {
