@@ -18,14 +18,14 @@ package tech.linqu.webpb.runtime.reactive;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import tech.linqu.webpb.commons.PathParam;
-import tech.linqu.webpb.runtime.WebpbMeta;
-import tech.linqu.webpb.runtime.WebpbMessage;
-import tech.linqu.webpb.runtime.WebpbUtils;
-import tech.linqu.webpb.commons.ParamGroup;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import tech.linqu.webpb.runtime.WebpbMessage;
+import tech.linqu.webpb.runtime.WebpbMeta;
+import tech.linqu.webpb.runtime.WebpbUtils;
+import tech.linqu.webpb.runtime.utils.ParamGroup;
+import tech.linqu.webpb.runtime.utils.PathParam;
 
 import java.net.URL;
 import java.util.Iterator;
@@ -133,7 +133,7 @@ public class WebpbClient {
         }
         JsonNode data = objectMapper.convertValue(message, JsonNode.class);
         String path = formatPath(data, context, baseUrl.getQuery());
-        String file = baseUrl.getPath() + path;
+        String file = baseUrl.getPath() + context.context + path;
         URL url = uncheckedCall(() ->
             new URL(baseUrl.getProtocol(), baseUrl.getHost(), baseUrl.getPort(), file, null)
         );

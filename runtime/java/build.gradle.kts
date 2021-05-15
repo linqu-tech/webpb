@@ -28,8 +28,6 @@ dependencies {
     compileOnly("org.springframework:spring-webflux:${springVersion}")
     compileOnly("org.springframework:spring-webmvc:${springVersion}")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.12.3")
-    implementation("org.eclipse.jdt:core:3.3.0-v_771")
-    implementation(project(":libs:commons"))
     compileOnly(files(org.gradle.internal.jvm.Jvm.current().toolsJar))
 }
 
@@ -57,15 +55,6 @@ publishing {
                     fromResolutionResult()
                 }
             }
-        }
-    }
-    repositories {
-        maven {
-            name = "oss"
-            val releasesRepoUrl = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
-            val snapshotsRepoUrl = uri("https://s01.oss.sonatype.org/content/repositories/snapshots")
-            url = if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl
-            credentials(PasswordCredentials::class)
         }
     }
 }

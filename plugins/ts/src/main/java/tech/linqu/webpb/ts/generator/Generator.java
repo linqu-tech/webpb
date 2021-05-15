@@ -15,9 +15,17 @@
  */
 package tech.linqu.webpb.ts.generator;
 
+import com.google.protobuf.Descriptors.Descriptor;
+import com.google.protobuf.Descriptors.FieldDescriptor;
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import tech.linqu.webpb.commons.ParamGroup;
 import tech.linqu.webpb.commons.PathParam;
 import tech.linqu.webpb.utilities.context.RequestContext;
+import tech.linqu.webpb.utilities.utils.Const;
+import tech.linqu.webpb.utilities.utils.DescriptorUtils;
+import tech.linqu.webpb.utilities.utils.OptionUtils;
+import tech.linqu.webpb.utilities.utils.Utils;
 import tech.linqu.webpb.utilities.utils.WebpbExtend;
 import tech.linqu.webpb.utilities.utils.WebpbExtend.EnumOpts;
 import tech.linqu.webpb.utilities.utils.WebpbExtend.FieldOpts;
@@ -27,13 +35,6 @@ import tech.linqu.webpb.utilities.utils.WebpbExtend.OptEnumOpts;
 import tech.linqu.webpb.utilities.utils.WebpbExtend.OptFieldOpts;
 import tech.linqu.webpb.utilities.utils.WebpbExtend.OptMessageOpts;
 import tech.linqu.webpb.utilities.utils.WebpbExtend.TsFieldOpts;
-import tech.linqu.webpb.utilities.utils.Const;
-import tech.linqu.webpb.utilities.utils.DescriptorUtils;
-import tech.linqu.webpb.utilities.utils.OptionUtils;
-import com.google.protobuf.Descriptors.Descriptor;
-import com.google.protobuf.Descriptors.FieldDescriptor;
-import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,11 +44,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static tech.linqu.webpb.utilities.utils.OptionUtils.getOpts;
 import static com.google.protobuf.Descriptors.EnumDescriptor;
 import static com.google.protobuf.Descriptors.EnumValueDescriptor;
 import static com.google.protobuf.Descriptors.FieldDescriptor.JavaType.LONG;
 import static com.google.protobuf.Descriptors.FileDescriptor;
+import static tech.linqu.webpb.utilities.utils.OptionUtils.getOpts;
 
 @RequiredArgsConstructor(staticName = "of")
 public final class Generator {
@@ -248,9 +249,9 @@ public final class Generator {
             generateMetaField("class", "'" + descriptor.getName() + "'");
             String method = messageOpts.getMethod();
             generateMetaField("method", StringUtils.isEmpty(method) ? "''" : "'" + method + "'");
-            String context = messageOpts.getContext();
+            String context = Utils.normalize(messageOpts.getContext());
             generateMetaField("context", StringUtils.isEmpty(context) ? "''" : "'" + context + "'");
-            generateMetaPath(descriptor, messageOpts.getPath());
+            generateMetaPath(descriptor, Utils.normalize(messageOpts.getPath()));
         });
         trimDuplicatedNewline();
         indent().append("}) as Webpb.WebpbMeta;\n\n");

@@ -13,26 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package tech.linqu.webpb.runtime;
+package tech.linqu.webpb.runtime.utils;
 
-import java.lang.reflect.Field;
+public class PathParam {
 
-/**
- * WebpbUtils
- */
-public class WebpbUtils {
+    private final String prefix;
 
-    /**
-     * readWebpbMeta
-     * @param type Class
-     * @return WebpbMeta
-     */
-    public static WebpbMeta readWebpbMeta(Class<?> type) {
-        try {
-            Field field = type.getDeclaredField("WEBPB_META");
-            return (WebpbMeta) field.get(null);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            return null;
-        }
+    private final String key;
+
+    private final String accessor;
+
+    public PathParam(String prefix, String key, String accessor) {
+        this.prefix = prefix;
+        this.key = key;
+        this.accessor = accessor;
+    }
+
+    public String getPrefix() {
+        return prefix;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public String getAccessor() {
+        return accessor;
     }
 }
