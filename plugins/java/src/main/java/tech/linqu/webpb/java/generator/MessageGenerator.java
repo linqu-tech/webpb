@@ -47,6 +47,7 @@ import tech.linqu.webpb.utilities.context.RequestContext;
 import tech.linqu.webpb.utilities.utils.Const;
 import tech.linqu.webpb.utilities.utils.DescriptorUtils;
 import tech.linqu.webpb.utilities.utils.OptionUtils;
+import tech.linqu.webpb.utilities.utils.Utils;
 import tech.linqu.webpb.utilities.utils.WebpbExtend.FieldOpts;
 import tech.linqu.webpb.utilities.utils.WebpbExtend.FileOpts;
 import tech.linqu.webpb.utilities.utils.WebpbExtend.JavaFieldOpts;
@@ -138,8 +139,8 @@ public class MessageGenerator {
 
         OptMessageOpts messageOpts = OptionUtils.getOpts(descriptor, MessageOpts::hasOpt).getOpt();
         addStaticOption(declaration, "WEBPB_METHOD", messageOpts.getMethod());
-        addStaticOption(declaration, "WEBPB_CONTEXT", messageOpts.getContext());
-        addStaticOption(declaration, "WEBPB_PATH", messageOpts.getPath());
+        addStaticOption(declaration, "WEBPB_CONTEXT", Utils.normalize(messageOpts.getContext()));
+        addStaticOption(declaration, "WEBPB_PATH", Utils.normalize(messageOpts.getPath()));
 
         ObjectCreationExpr creationExpr = new ObjectCreationExpr(
             null, new ClassOrInterfaceType(metaType, "Builder"), new NodeList<>()
