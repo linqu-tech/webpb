@@ -228,7 +228,7 @@ public class MessageGenerator {
             JavaFieldOpts javaFieldOpts = OptionUtils.getOpts(fieldDescriptor, FieldOpts::hasJava).getJava();
             List<String> annotations = new ArrayList<>(javaFieldOpts.getAnnotationList());
             if (fieldOpts.getInQuery()) {
-                annotations.add(Const.RUNTIME_PACKAGE + ".mvc.InQuery");
+                annotations.add(Const.RUNTIME_PACKAGE + ".common.InQuery");
             }
             addAnnotations(fieldDeclaration, annotations);
         }

@@ -34,6 +34,9 @@ public class ParamGroup {
 
     public static ParamGroup of(String path) {
         ParamGroup group = new ParamGroup();
+        if (path == null || path.isEmpty()) {
+            return group;
+        }
         Pattern pattern = Pattern.compile(QUERY_PATTERN);
         Matcher matcher = pattern.matcher(path);
 

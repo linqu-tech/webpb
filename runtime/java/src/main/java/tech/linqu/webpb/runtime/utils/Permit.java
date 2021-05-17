@@ -356,6 +356,5 @@ public class Permit {
     private static <T extends Throwable> T sneakyThrow0(Throwable t) throws T {
         throw (T) t;
     }
-
 }
 

@@ -42,6 +42,15 @@ allprojects {
         mavenLocal()
         mavenCentral()
     }
+
+    dependencies {
+        implementation("org.junit.jupiter:junit-jupiter-api:5.8.0-M1")
+        testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+    }
+
+    tasks.test {
+        useJUnitPlatform()
+    }
 }
 
 configure(subprojects.filter { it.parent?.name == "plugins" }) {
