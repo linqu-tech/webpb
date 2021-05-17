@@ -21,11 +21,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import tech.linqu.webpb.commons.ParamGroup;
+import tech.linqu.webpb.commons.PathParam;
 import tech.linqu.webpb.runtime.WebpbMessage;
 import tech.linqu.webpb.runtime.WebpbMeta;
 import tech.linqu.webpb.runtime.WebpbUtils;
-import tech.linqu.webpb.runtime.utils.ParamGroup;
-import tech.linqu.webpb.runtime.utils.PathParam;
 
 import java.net.URL;
 import java.util.Iterator;
@@ -69,8 +69,9 @@ public class WebpbClient {
 
     /**
      * WebpbClient
+     *
      * @param webClient WebClient
-     * @param baseUrl URL
+     * @param baseUrl   URL
      */
     public WebpbClient(WebClient webClient, URL baseUrl) {
         this(webClient, baseUrl, map -> {
@@ -79,8 +80,9 @@ public class WebpbClient {
 
     /**
      * WebpbClient
-     * @param webClient WebClient
-     * @param baseUrl URL
+     *
+     * @param webClient  WebClient
+     * @param baseUrl    URL
      * @param attributes attributes
      */
     public WebpbClient(WebClient webClient, URL baseUrl, Consumer<Map<String, Object>> attributes) {
@@ -91,9 +93,10 @@ public class WebpbClient {
 
     /**
      * request
-     * @param message WebpbMessage
+     *
+     * @param message      WebpbMessage
      * @param responseType Class
-     * @param <T> type
+     * @param <T>          type
      * @return Response
      */
     public <T extends WebpbMessage> Mono<T> request(WebpbMessage message, Class<T> responseType) {
@@ -118,9 +121,10 @@ public class WebpbClient {
 
     /**
      * formatUrl
-     * @param baseUrl URL
+     *
+     * @param baseUrl      URL
      * @param objectMapper ObjectMapper
-     * @param message WebpbMessage
+     * @param message      WebpbMessage
      * @return String
      */
     public static String formatUrl(URL baseUrl, ObjectMapper objectMapper, WebpbMessage message) {
@@ -140,7 +144,7 @@ public class WebpbClient {
         return url.toString();
     }
 
-    private static MessageContext getContext(Class<?> clazz) {
+    private static MessageContext getContext(Class<? extends WebpbMessage> clazz) {
         MessageContext context = contextMap.computeIfAbsent(clazz, k -> {
             WebpbMeta meta = WebpbUtils.readWebpbMeta(clazz);
             if (meta == null) {

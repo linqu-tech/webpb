@@ -15,6 +15,7 @@
  */
 package tech.linqu.webpb.ts;
 
+import org.apache.commons.lang3.StringUtils;
 import tech.linqu.webpb.ts.generator.Generator;
 import tech.linqu.webpb.utilities.context.RequestContext;
 import tech.linqu.webpb.utilities.utils.WebpbExtend;
@@ -29,6 +30,9 @@ public class Main {
         RequestContext context = new RequestContext(WebpbExtend.FileOpts::hasTs);
 
         for (FileDescriptor fileDescriptor : context.getTargetDescriptors()) {
+            if (StringUtils.isEmpty(fileDescriptor.getPackage())) {
+                continue;
+            }
             StringBuilder sb = Generator
                 .of(context, fileDescriptor, new ArrayList<>())
                 .generate();

@@ -24,10 +24,11 @@ public class WebpbUtils {
 
     /**
      * readWebpbMeta
+     *
      * @param type Class
      * @return WebpbMeta
      */
-    public static WebpbMeta readWebpbMeta(Class<?> type) {
+    public static WebpbMeta readWebpbMeta(Class<? extends WebpbMessage> type) {
         try {
             Field field = type.getDeclaredField("WEBPB_META");
             return (WebpbMeta) field.get(null);

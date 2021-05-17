@@ -27,8 +27,9 @@ dependencies {
     compileOnly("org.springframework:spring-messaging:${springVersion}")
     compileOnly("org.springframework:spring-webflux:${springVersion}")
     compileOnly("org.springframework:spring-webmvc:${springVersion}")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.12.3")
     compileOnly(files(org.gradle.internal.jvm.Jvm.current().toolsJar))
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.12.3")
+    implementation(project(":libs:commons"))
 }
 
 tasks.jar {
@@ -58,7 +59,6 @@ publishing {
         }
     }
 }
-
 val updatePublishing: (publishing: PublishingExtension, publication: String, filename: String, desc: String) -> Void by rootProject.extra
 updatePublishing(publishing, "webpbRuntime", filename, "The webpb runtime library for java")
 
