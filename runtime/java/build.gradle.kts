@@ -23,17 +23,13 @@ val lombokVersion: String by rootProject.extra
 val springVersion by extra { "5.3.6" }
 
 dependencies {
+    api(project(":libs:commons"))
     compileOnly("javax.servlet:javax.servlet-api:4.0.1")
     compileOnly("org.springframework:spring-messaging:${springVersion}")
     compileOnly("org.springframework:spring-webflux:${springVersion}")
     compileOnly("org.springframework:spring-webmvc:${springVersion}")
     compileOnly(files(org.gradle.internal.jvm.Jvm.current().toolsJar))
     implementation("com.fasterxml.jackson.core:jackson-databind:2.12.3")
-    implementation(project(":libs:commons"))
-}
-
-tasks.jar {
-    enabled = true
 }
 
 java {
@@ -47,15 +43,7 @@ publishing {
     publications {
         create<MavenPublication>("webpbRuntime") {
             artifactId = filename
-            artifact(tasks.jar.get())
-            versionMapping {
-                usage("java-api") {
-                    fromResolutionOf("runtimeClasspath")
-                }
-                usage("java-runtime") {
-                    fromResolutionResult()
-                }
-            }
+            from(components["java"])
         }
     }
 }

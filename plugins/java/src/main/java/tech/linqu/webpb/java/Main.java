@@ -16,6 +16,7 @@
 package tech.linqu.webpb.java;
 
 import com.github.javaparser.ast.CompilationUnit;
+import org.apache.commons.lang3.StringUtils;
 import tech.linqu.webpb.java.generator.Generator;
 import tech.linqu.webpb.java.generator.NameMap;
 import tech.linqu.webpb.utilities.context.RequestContext;
@@ -34,6 +35,9 @@ public class Main {
 
         for (FileDescriptor fileDescriptor : context.getTargetDescriptors()) {
             String javaPackage = fileDescriptor.getOptions().getJavaPackage();
+            if (shouldIgnore(javaPackage)) {
+                continue;
+            }
             for (Descriptors.Descriptor descriptor : fileDescriptor.getMessageTypes()) {
                 CompilationUnit compilationUnit = Generator
                     .of(context, fileDescriptor, nameMap, Collections.emptyList())
@@ -47,6 +51,10 @@ public class Main {
                 writeCompilationUnit(compilationUnit, filename(javaPackage, enumDescriptor.getName()));
             }
         }
+    }
+
+    private static boolean shouldIgnore(String packageName) {
+        return StringUtils.isEmpty(packageName) || "com.google.protobuf".equals(packageName);
     }
 
     private static String filename(String javaPackage, String className) {

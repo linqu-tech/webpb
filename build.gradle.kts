@@ -44,7 +44,7 @@ allprojects {
     }
 
     dependencies {
-        implementation("org.junit.jupiter:junit-jupiter-api:5.8.0-M1")
+        testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.0-M1")
         testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
     }
 

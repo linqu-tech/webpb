@@ -35,14 +35,6 @@ publishing {
         create<MavenPublication>("webpbTs") {
             artifactId = filename
             artifact(tasks.bootJar.get()) { classifier = "all" }
-            versionMapping {
-                usage("java-api") {
-                    fromResolutionOf("runtimeClasspath")
-                }
-                usage("java-runtime") {
-                    fromResolutionResult()
-                }
-            }
         }
     }
 }

@@ -15,9 +15,6 @@
  */
 package tech.linqu.webpb.runtime.utils;
 
-import sun.misc.Unsafe;
-
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 public class JvmOpens {
@@ -30,10 +27,6 @@ public class JvmOpens {
             return; //jdk8-; this is not needed.
         }
 
-        Unsafe unsafe = getUnsafe();
-        if (unsafe == null) {
-            return;
-        }
         Object jdkCompilerModule = getJdkCompilerModule();
         Object ownModule = getOwnModule(type);
         String[] packages = {
@@ -51,8 +44,8 @@ public class JvmOpens {
 
         try {
             Method m = cModule.getDeclaredMethod("implAddOpens", String.class, cModule);
-            long firstFieldOffset = getFirstFieldOffset(unsafe);
-            unsafe.putBooleanVolatile(m, firstFieldOffset, true);
+            long firstFieldOffset = getFirstFieldOffset();
+            Unsafe.putBooleanVolatile(m, firstFieldOffset, true);
             for (String p : packages) {
                 m.invoke(jdkCompilerModule, p, ownModule);
             }
@@ -60,22 +53,12 @@ public class JvmOpens {
         }
     }
 
-    private static long getFirstFieldOffset(Unsafe unsafe) {
+    private static long getFirstFieldOffset() {
         try {
-            return unsafe.objectFieldOffset(Parent.class.getDeclaredField("first"));
+            return Unsafe.objectFieldOffset(Parent.class.getDeclaredField("first"));
         } catch (NoSuchFieldException | SecurityException e) {
             // can't happen.
             throw new RuntimeException(e);
-        }
-    }
-
-    private static Unsafe getUnsafe() {
-        try {
-            Field theUnsafe = Unsafe.class.getDeclaredField("theUnsafe");
-            theUnsafe.setAccessible(true);
-            return (Unsafe) theUnsafe.get(null);
-        } catch (Exception e) {
-            return null;
         }
     }
 

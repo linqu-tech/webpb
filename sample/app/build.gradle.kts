@@ -27,10 +27,6 @@ repositories {
     maven { url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots") }
 }
 
-tasks.jar {
-    enabled = true
-}
-
 val lombokVersion: String by rootProject.extra
 val webpbVersion = project.version
 
@@ -46,6 +42,7 @@ dependencies {
     implementation(project(":sample:proto"))
     testAnnotationProcessor("org.projectlombok:lombok:${lombokVersion}")
     testCompileOnly("org.projectlombok:lombok:${lombokVersion}")
+    testImplementation("org.springframework:spring-web:5.3.6")
 }
 
 sourceSets {
