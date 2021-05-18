@@ -23,8 +23,9 @@ plugins {
 dependencies {
 }
 
-tasks.jar {
-    enabled = true
+java {
+    withJavadocJar()
+    withSourcesJar()
 }
 
 val filename = "webpb-commons"
@@ -33,15 +34,7 @@ publishing {
     publications {
         create<MavenPublication>("webpbCommons") {
             artifactId = filename
-            artifact(tasks.jar.get())
-            versionMapping {
-                usage("java-api") {
-                    fromResolutionOf("runtimeClasspath")
-                }
-                usage("java-runtime") {
-                    fromResolutionResult()
-                }
-            }
+            from(components["java"])
         }
     }
 }

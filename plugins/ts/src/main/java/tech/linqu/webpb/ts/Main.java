@@ -30,7 +30,7 @@ public class Main {
         RequestContext context = new RequestContext(WebpbExtend.FileOpts::hasTs);
 
         for (FileDescriptor fileDescriptor : context.getTargetDescriptors()) {
-            if (StringUtils.isEmpty(fileDescriptor.getPackage())) {
+            if (shouldIgnore(fileDescriptor.getPackage())) {
                 continue;
             }
             StringBuilder sb = Generator
@@ -47,5 +47,9 @@ public class Main {
             CodeGeneratorResponse response = builder.build();
             response.writeTo(System.out);
         }
+    }
+
+    private static boolean shouldIgnore(String packageName) {
+        return StringUtils.isEmpty(packageName) || "google.protobuf".equals(packageName);
     }
 }
