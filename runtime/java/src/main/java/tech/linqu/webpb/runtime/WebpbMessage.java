@@ -22,6 +22,7 @@ public interface WebpbMessage {
 
     /**
      * webpbMeta
+     *
      * @return WebpbMeta
      */
     WebpbMeta webpbMeta();

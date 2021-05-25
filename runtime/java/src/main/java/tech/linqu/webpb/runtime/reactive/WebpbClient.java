@@ -19,6 +19,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import tech.linqu.webpb.commons.ParamGroup;
@@ -56,16 +58,14 @@ public class WebpbClient {
 
     private final static Map<Class<?>, MessageContext> contextMap = new ConcurrentHashMap<>();
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
-    private final ObjectMapper bodyMapper = new ObjectMapper()
-        .configure(MapperFeature.PROPAGATE_TRANSIENT_MARKER, true);
-
     private final WebClient webClient;
 
     private final URL baseUrl;
 
     private final Consumer<Map<String, Object>> attributes;
+
+    protected final ObjectMapper objectMapper = new ObjectMapper()
+        .configure(MapperFeature.PROPAGATE_TRANSIENT_MARKER, true);
 
     /**
      * WebpbClient
@@ -99,13 +99,25 @@ public class WebpbClient {
      * @param <T>          type
      * @return Response
      */
-    public <T extends WebpbMessage> Mono<T> request(WebpbMessage message, Class<T> responseType) {
+    public <T extends WebpbMessage> T request(WebpbMessage message, Class<T> responseType) {
+        return requestAsync(message, responseType).block();
+    }
+
+    /**
+     * requestAsync
+     *
+     * @param message      WebpbMessage
+     * @param responseType Class
+     * @param <T>          type
+     * @return Response
+     */
+    public <T extends WebpbMessage> Mono<T> requestAsync(WebpbMessage message, Class<T> responseType) {
         MessageContext context = getContext(message.getClass());
         if (context == null) {
             throw new RuntimeException("Request method and path is required");
         }
         return Mono
-            .just(uncheckedCall(() -> bodyMapper.writeValueAsString(message)))
+            .just(uncheckedCall(() -> objectMapper.writeValueAsString(message)))
             .flatMap(body -> {
                 String url = formatUrl(baseUrl, objectMapper, message);
                 return webClient
@@ -114,9 +126,17 @@ public class WebpbClient {
                     .bodyValue(body)
                     .attributes(attributes)
                     .retrieve()
-                    .bodyToMono(String.class)
+                    .onStatus(
+                        httpStatus -> httpStatus.series() != HttpStatus.Series.SUCCESSFUL,
+                        this::createException
+                    )
+                    .bodyToMono(byte[].class)
                     .map(data -> uncheckedCall(() -> objectMapper.readValue(data, responseType)));
             });
+    }
+
+    protected Mono<? extends Throwable> createException(ClientResponse clientResponse) {
+        return clientResponse.createException();
     }
 
     /**
@@ -136,7 +156,7 @@ public class WebpbClient {
             return context.path;
         }
         JsonNode data = objectMapper.convertValue(message, JsonNode.class);
-        String path = formatPath(data, context, baseUrl.getQuery());
+        String path = formatPath(data, context.paramGroup, baseUrl.getQuery());
         String file = baseUrl.getPath() + context.context + path;
         URL url = uncheckedCall(() ->
             new URL(baseUrl.getProtocol(), baseUrl.getHost(), baseUrl.getPort(), file, null)
@@ -164,10 +184,10 @@ public class WebpbClient {
         return context == MessageContext.NULL_CONTEXT ? null : context;
     }
 
-    private static String formatPath(JsonNode data, MessageContext context, String query) {
-        ParamGroup group = context.paramGroup;
+    private static String formatPath(JsonNode data, ParamGroup paramGroup, String query) {
         StringBuilder builder = new StringBuilder();
-        Iterator<PathParam> iterator = group.getParams().iterator();
+        Iterator<PathParam> iterator = paramGroup.getParams().iterator();
+        String link = "";
         while (iterator.hasNext()) {
             PathParam param = iterator.next();
             builder.append(param.getPrefix());
@@ -178,25 +198,25 @@ public class WebpbClient {
                 builder.deleteCharAt(builder.length() - 1);
             }
             if (hasLength(param.getKey())) {
-                char link = '?';
+                link = "?";
                 do {
                     param = param == null ? iterator.next() : param;
                     String value = resolve(data, param.getAccessor());
-                    if (hasLength(value)) {
+                    if (hasLength(value) && !"null".equals(value)) {
                         builder.append(link).append(param.getKey()).append("=").append(value);
-                        link = '&';
+                        link = "&";
                     }
                     param = null;
                 } while (iterator.hasNext());
-                if (hasLength(group.getSuffix())) {
-                    builder.append('&').append(group.getSuffix());
+                if (hasLength(paramGroup.getSuffix())) {
+                    builder.append('&').append(paramGroup.getSuffix());
                 }
                 return builder.toString();
             }
             builder.append(resolve(data, param.getAccessor()));
         }
-        if (hasLength(group.getSuffix())) {
-            builder.append('&').append(group.getSuffix());
+        if (hasLength(paramGroup.getSuffix())) {
+            builder.append(link).append(paramGroup.getSuffix());
         }
         return builder.toString();
     }
@@ -211,7 +231,7 @@ public class WebpbClient {
         return jsonNode.asText();
     }
 
-    private static <T> T uncheckedCall(Callable<T> callable) {
+    protected static <T> T uncheckedCall(Callable<T> callable) {
         try {
             return callable.call();
         } catch (RuntimeException e) {

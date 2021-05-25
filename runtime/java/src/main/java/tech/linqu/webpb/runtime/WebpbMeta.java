@@ -34,6 +34,7 @@ public class WebpbMeta {
 
     /**
      * get method
+     *
      * @return String
      */
     public String getMethod() {
@@ -42,6 +43,7 @@ public class WebpbMeta {
 
     /**
      * get context
+     *
      * @return String
      */
     public String getContext() {
@@ -50,6 +52,7 @@ public class WebpbMeta {
 
     /**
      * get path
+     *
      * @return String
      */
     public String getPath() {
@@ -58,6 +61,7 @@ public class WebpbMeta {
 
     /**
      * get tags
+     *
      * @return List
      */
     public List<String> getTags() {
@@ -79,6 +83,7 @@ public class WebpbMeta {
 
         /**
          * method
+         *
          * @param method String
          * @return Builder
          */
@@ -89,6 +94,7 @@ public class WebpbMeta {
 
         /**
          * context
+         *
          * @param context String
          * @return Builder
          */
@@ -99,6 +105,7 @@ public class WebpbMeta {
 
         /**
          * path
+         *
          * @param path String
          * @return Builder
          */
@@ -109,6 +116,7 @@ public class WebpbMeta {
 
         /**
          * tags
+         *
          * @param tags array of String
          * @return Builder
          */
@@ -119,6 +127,7 @@ public class WebpbMeta {
 
         /**
          * build
+         *
          * @return WebpbMeta
          */
         public WebpbMeta build() {

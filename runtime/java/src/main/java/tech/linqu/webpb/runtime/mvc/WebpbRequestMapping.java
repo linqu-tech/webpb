@@ -36,6 +36,7 @@ public @interface WebpbRequestMapping {
 
     /**
      * name
+     *
      * @return String
      */
     @AliasFor(annotation = RequestMapping.class)
@@ -43,6 +44,7 @@ public @interface WebpbRequestMapping {
 
     /**
      * value
+     *
      * @return String[]
      */
     @AliasFor(annotation = RequestMapping.class)
@@ -50,6 +52,7 @@ public @interface WebpbRequestMapping {
 
     /**
      * params
+     *
      * @return String[]
      */
     @AliasFor(annotation = RequestMapping.class)
@@ -57,6 +60,7 @@ public @interface WebpbRequestMapping {
 
     /**
      * headers
+     *
      * @return String[]
      */
     @AliasFor(annotation = RequestMapping.class)
@@ -64,6 +68,7 @@ public @interface WebpbRequestMapping {
 
     /**
      * consumes
+     *
      * @return String[]
      */
     @AliasFor(annotation = RequestMapping.class)
@@ -71,6 +76,7 @@ public @interface WebpbRequestMapping {
 
     /**
      * produces
+     *
      * @return String[]
      */
     @AliasFor(annotation = RequestMapping.class)
@@ -78,6 +84,7 @@ public @interface WebpbRequestMapping {
 
     /**
      * message
+     *
      * @return Class
      */
     Class<? extends WebpbMessage> message() default WebpbMessage.class;

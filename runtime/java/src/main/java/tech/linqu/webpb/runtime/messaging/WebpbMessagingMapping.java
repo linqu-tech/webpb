@@ -35,6 +35,7 @@ public @interface WebpbMessagingMapping {
 
     /**
      * Message annotation
+     *
      * @return Class
      */
     Class<? extends WebpbMessage> message() default WebpbMessage.class;
