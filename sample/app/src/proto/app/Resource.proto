@@ -17,3 +17,8 @@ message PagingPb {
     required int32 totalCount = 3;
     required int32 totalPage = 4;
 }
+
+enum ResourceType {
+    IMAGE = 0;
+    TEXT = 2;
+}

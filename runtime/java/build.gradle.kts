@@ -30,6 +30,7 @@ dependencies {
     compileOnly("org.springframework:spring-webmvc:${springVersion}")
     compileOnly(files(org.gradle.internal.jvm.Jvm.current().toolsJar))
     implementation("com.fasterxml.jackson.core:jackson-databind:2.12.3")
+    testImplementation("org.springframework:spring-webflux:${springVersion}")
 }
 
 java {

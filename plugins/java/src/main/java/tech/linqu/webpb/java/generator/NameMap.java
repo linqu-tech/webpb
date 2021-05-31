@@ -17,6 +17,7 @@ package tech.linqu.webpb.java.generator;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.expr.Name;
+import com.google.protobuf.Descriptors;
 import tech.linqu.webpb.utilities.utils.OptionUtils;
 import tech.linqu.webpb.utilities.utils.WebpbExtend.FileOpts;
 import tech.linqu.webpb.utilities.utils.WebpbExtend.JavaFileOpts;
@@ -53,6 +54,10 @@ public class NameMap {
                     String identifier = descriptor.getName();
                     nameMap.put(identifier, new Name(new Name(null, javaPackage), identifier));
                 }
+                for (Descriptors.EnumDescriptor descriptor : fileDescriptor.getEnumTypes()) {
+                    String identifier = descriptor.getName();
+                    nameMap.put(identifier, new Name(new Name(null, javaPackage), identifier));
+                }
             }
 
             JavaFileOpts fileOpts = OptionUtils.getOpts(fileDescriptor, FileOpts::hasJava).getJava();
@@ -78,5 +83,17 @@ public class NameMap {
 
     public Optional<Name> getName(String identifier) {
         return Optional.ofNullable(nameMap.get(identifier));
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        for (Map.Entry<String, Name> entry : nameMap.entrySet()) {
+            builder.append(entry.getKey())
+                .append(" -> ")
+                .append(entry.getValue())
+                .append("\n");
+        }
+        return builder.toString();
     }
 }

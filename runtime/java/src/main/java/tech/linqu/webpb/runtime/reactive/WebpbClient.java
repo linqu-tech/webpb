@@ -18,6 +18,8 @@ package tech.linqu.webpb.runtime.reactive;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
+import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.client.ClientResponse;
@@ -27,7 +29,7 @@ import tech.linqu.webpb.commons.ParamGroup;
 import tech.linqu.webpb.commons.PathParam;
 import tech.linqu.webpb.runtime.WebpbMessage;
 import tech.linqu.webpb.runtime.WebpbMeta;
-import tech.linqu.webpb.runtime.WebpbUtils;
+import tech.linqu.webpb.runtime.common.InQuery;
 
 import java.net.URL;
 import java.util.Iterator;
@@ -64,8 +66,20 @@ public class WebpbClient {
 
     private final Consumer<Map<String, Object>> attributes;
 
-    protected final ObjectMapper objectMapper = new ObjectMapper()
-        .configure(MapperFeature.PROPAGATE_TRANSIENT_MARKER, true);
+    private final ObjectMapper formatMapper = new ObjectMapper();
+
+    protected final ObjectMapper objectMapper = createObjectMapper();
+
+    protected ObjectMapper createObjectMapper() {
+        return new ObjectMapper()
+            .configure(MapperFeature.PROPAGATE_TRANSIENT_MARKER, true)
+            .setAnnotationIntrospector(new JacksonAnnotationIntrospector() {
+                @Override
+                public boolean hasIgnoreMarker(AnnotatedMember m) {
+                    return super.hasIgnoreMarker(m) || m.hasAnnotation(InQuery.class);
+                }
+            });
+    }
 
     /**
      * WebpbClient
@@ -112,14 +126,14 @@ public class WebpbClient {
      * @return Response
      */
     public <T extends WebpbMessage> Mono<T> requestAsync(WebpbMessage message, Class<T> responseType) {
-        MessageContext context = getContext(message.getClass());
+        MessageContext context = getContext(message);
         if (context == null) {
             throw new RuntimeException("Request method and path is required");
         }
         return Mono
             .just(uncheckedCall(() -> objectMapper.writeValueAsString(message)))
             .flatMap(body -> {
-                String url = formatUrl(baseUrl, objectMapper, message);
+                String url = formatUrl(baseUrl, formatMapper, message);
                 return webClient
                     .method(context.method)
                     .uri(url)
@@ -135,6 +149,27 @@ public class WebpbClient {
             });
     }
 
+    /**
+     * formatUrl
+     *
+     * @param baseUrl URL
+     * @param message WebpbMessage
+     * @return String
+     */
+    public String formatUrl(URL baseUrl, WebpbMessage message) {
+        return formatUrl(baseUrl, this.formatMapper, message);
+    }
+
+    /**
+     * formatUrl
+     *
+     * @param message WebpbMessage
+     * @return String
+     */
+    public String formatUrl(WebpbMessage message) {
+        return formatUrl(null, this.formatMapper, message);
+    }
+
     protected Mono<? extends Throwable> createException(ClientResponse clientResponse) {
         return clientResponse.createException();
     }
@@ -148,7 +183,7 @@ public class WebpbClient {
      * @return String
      */
     public static String formatUrl(URL baseUrl, ObjectMapper objectMapper, WebpbMessage message) {
-        MessageContext context = getContext(message.getClass());
+        MessageContext context = getContext(message);
         if (context == null) {
             throw new RuntimeException("Request method and path is required");
         }
@@ -156,17 +191,25 @@ public class WebpbClient {
             return context.path;
         }
         JsonNode data = objectMapper.convertValue(message, JsonNode.class);
-        String path = formatPath(data, context.paramGroup, baseUrl.getQuery());
-        String file = baseUrl.getPath() + context.context + path;
+        String path = formatPath(data, context.paramGroup, baseUrl == null ? null : baseUrl.getQuery());
+        String file = (baseUrl == null ? "" : emptyOrDefault(baseUrl.getPath(), ""))
+            + emptyOrDefault(context.context, "") + path;
+        if (baseUrl == null) {
+            return file;
+        }
         URL url = uncheckedCall(() ->
             new URL(baseUrl.getProtocol(), baseUrl.getHost(), baseUrl.getPort(), file, null)
         );
         return url.toString();
     }
 
-    private static MessageContext getContext(Class<? extends WebpbMessage> clazz) {
-        MessageContext context = contextMap.computeIfAbsent(clazz, k -> {
-            WebpbMeta meta = WebpbUtils.readWebpbMeta(clazz);
+    private static String emptyOrDefault(String value, String orelse) {
+        return hasLength(value) ? value : orelse;
+    }
+
+    private static MessageContext getContext(WebpbMessage message) {
+        MessageContext context = contextMap.computeIfAbsent(message.getClass(), k -> {
+            WebpbMeta meta = message.webpbMeta();
             if (meta == null) {
                 return MessageContext.NULL_CONTEXT;
             }
@@ -213,7 +256,10 @@ public class WebpbClient {
                 }
                 return builder.toString();
             }
-            builder.append(resolve(data, param.getAccessor()));
+            String value = resolve(data, param.getAccessor());
+            if (hasLength(value) && !"null".equals(value)) {
+                builder.append(value);
+            }
         }
         if (hasLength(paramGroup.getSuffix())) {
             builder.append(link).append(paramGroup.getSuffix());

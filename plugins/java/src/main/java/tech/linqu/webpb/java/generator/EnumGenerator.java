@@ -69,7 +69,7 @@ public class EnumGenerator {
     }
 
     private void generateEnumOfMethod(EnumDeclaration declaration, Descriptors.EnumDescriptor descriptor) {
-        MethodDeclaration method = declaration.addMethod("of", Modifier.Keyword.PUBLIC, Modifier.Keyword.STATIC);
+        MethodDeclaration method = declaration.addMethod("fromValue", Modifier.Keyword.PUBLIC, Modifier.Keyword.STATIC);
         method.addParameter(new Parameter(PrimitiveType.intType(), ENUM_VALUE));
         method.setType(declaration.getName().asString());
         NodeList<SwitchEntry> entries = new NodeList<>();

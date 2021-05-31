@@ -4,9 +4,11 @@ package StoreProto;
 
 option java_package = "tech.linqu.webpb.sample.proto.store";
 
-import "Resource.proto";
 import "webpb/WebpbExtend.proto";
 import "WebpbOptions.proto";
+
+import "Resource.proto";
+import "google/protobuf/any.proto";
 
 message StorePb {
     option (m_opts).java = {
@@ -54,6 +56,7 @@ message StoreRequest {
         StoreType anyStore = 22;
     }
     required int64 stringField = 24 [(opts).ts = {as_string: true}];
+    required google.protobuf.Any unknown = 25;
 }
 
 message StoreResponse {
@@ -96,6 +99,7 @@ message StoresRequest {
 message StoresResponse {
     required StorePb stores = 1;
     required ResourceProto.PagingPb paging = 2;
+    required ResourceProto.ResourceType resourceType = 3;
 }
 
 message UserMpLoginRequest {

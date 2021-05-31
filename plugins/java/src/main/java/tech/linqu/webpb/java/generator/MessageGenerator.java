@@ -21,9 +21,11 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
+import com.github.javaparser.ast.expr.AssignExpr;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
@@ -32,6 +34,7 @@ import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
+import com.github.javaparser.ast.expr.ThisExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.type.ArrayType;
@@ -110,6 +113,7 @@ public class MessageGenerator {
         addAnnotations(declaration, messageOpts.getAnnotationList());
 
         generateMessageFields(declaration, descriptor);
+        generateConstructor(declaration, descriptor);
         generateNested(declaration, descriptor);
         return declaration;
     }
@@ -132,10 +136,11 @@ public class MessageGenerator {
     private void addWebpbMeta(Descriptor descriptor, ClassOrInterfaceDeclaration declaration) {
         declaration.addImplementedType("WebpbMessage");
         JAVA_PARSER.parseName(Const.RUNTIME_PACKAGE + ".WebpbMessage")
-            .ifSuccessful(imports::add);
+            .ifSuccessful(v -> addImports(imports, v));
 
         ClassOrInterfaceType metaType = new ClassOrInterfaceType(null, "WebpbMeta");
-        JAVA_PARSER.parseName(Const.RUNTIME_PACKAGE + ".WebpbMeta").ifSuccessful(imports::add);
+        JAVA_PARSER.parseName(Const.RUNTIME_PACKAGE + ".WebpbMeta")
+            .ifSuccessful(v -> addImports(imports, v));
 
         OptMessageOpts messageOpts = OptionUtils.getOpts(descriptor, MessageOpts::hasOpt).getOpt();
         addStaticOption(declaration, "WEBPB_METHOD", messageOpts.getMethod());
@@ -200,16 +205,43 @@ public class MessageGenerator {
 
     private void parseImports(Node node, List<Name> imports) {
         if (node instanceof FieldAccessExpr) {
-            imports.add(nameMap.getFullName(new Name(null, ((FieldAccessExpr) node).getScope().toString())));
+            addImports(imports, nameMap.getFullName(new Name(null, ((FieldAccessExpr) node).getScope().toString())));
         } else if (node instanceof AnnotationExpr) {
-            imports.add(nameMap.getFullName(((AnnotationExpr) node).getName()));
+            addImports(imports, nameMap.getFullName(((AnnotationExpr) node).getName()));
         } else if (node instanceof ClassOrInterfaceType) {
             addImports((ClassOrInterfaceType) node, imports);
         } else {
-            nameMap.getName(node.toString()).ifPresent(imports::add);
+            nameMap.getName(node.toString()).ifPresent(v -> addImports(imports, v));
         }
         for (Node childNode : node.getChildNodes()) {
             parseImports(childNode, imports);
+        }
+    }
+
+    private void generateConstructor(ClassOrInterfaceDeclaration declaration, Descriptor descriptor) {
+        declaration.addConstructor()
+            .setModifiers(Modifier.Keyword.PUBLIC)
+            .setBody(new BlockStmt());
+        List<FieldDescriptor> descriptors = descriptor.getFields().stream()
+            .filter(fieldDescriptor -> {
+                OptFieldOpts fieldOpts = OptionUtils.getOpts(fieldDescriptor, FieldOpts::hasOpt).getOpt();
+                return !fieldOpts.getOmitted();
+            })
+            .collect(Collectors.toList());
+        if (descriptors.isEmpty() || descriptors.size() > 5) {
+            return;
+        }
+        BlockStmt blockStmt = new BlockStmt();
+        ConstructorDeclaration constructor = declaration.addConstructor()
+            .setModifiers(Modifier.Keyword.PUBLIC)
+            .setBody(blockStmt);
+        for (FieldDescriptor fieldDescriptor : descriptors) {
+            constructor.addParameter(getType(fieldDescriptor), fieldDescriptor.getName());
+            blockStmt.addStatement(new AssignExpr(
+                new FieldAccessExpr(new ThisExpr(), fieldDescriptor.getName()),
+                new NameExpr(fieldDescriptor.getName()),
+                AssignExpr.Operator.ASSIGN
+            ));
         }
     }
 
@@ -228,7 +260,7 @@ public class MessageGenerator {
             JavaFieldOpts javaFieldOpts = OptionUtils.getOpts(fieldDescriptor, FieldOpts::hasJava).getJava();
             List<String> annotations = new ArrayList<>(javaFieldOpts.getAnnotationList());
             if (fieldOpts.getInQuery()) {
-                annotations.add(Const.RUNTIME_PACKAGE + ".common.InQuery");
+                annotations.add("@" + Const.RUNTIME_PACKAGE + ".common.InQuery");
             }
             addAnnotations(fieldDeclaration, annotations);
         }
@@ -261,7 +293,7 @@ public class MessageGenerator {
     }
 
     private void addImports(ClassOrInterfaceType type, List<Name> imports) {
-        nameMap.getName(type.getNameAsString()).ifPresent(imports::add);
+        nameMap.getName(type.getNameAsString()).ifPresent(v -> addImports(imports, v));
         type.getTypeArguments().ifPresent(list -> {
             for (Type t : list) {
                 if (t instanceof ClassOrInterfaceType) {
@@ -269,5 +301,14 @@ public class MessageGenerator {
                 }
             }
         });
+    }
+
+    private void addImports(List<Name> imports, Name name) {
+        if (StringUtils.equalsIgnoreCase(name.toString(), "com.google.protobuf.Any")) {
+            JAVA_PARSER.parseName(Const.RUNTIME_PACKAGE + ".Any")
+                .ifSuccessful(imports::add);
+        } else {
+            imports.add(name);
+        }
     }
 }

@@ -13,23 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package tech.linqu.webpb.utilities.utils;
+package tech.linqu.webpb.runtime.reactive;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import tech.linqu.webpb.runtime.model.FooRequest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class UtilsTest {
+class WebpbClientTest {
 
     @Test
-    void shouldNormalizeStringSuccess() {
-        assertEquals("", Utils.normalize(""));
-        assertEquals("", Utils.normalize("/"));
-        assertEquals("", Utils.normalize("//"));
-        assertEquals("/a", Utils.normalize("/a"));
-        assertEquals("/a", Utils.normalize("a/"));
-        assertEquals("/a", Utils.normalize("/a/"));
-        assertEquals("/ab.c", Utils.normalize("//ab.c"));
-        assertEquals("https://ab.c", Utils.normalize("https://ab.c"));
+    void shouldFormatUrlSuccess() {
+        FooRequest request = new FooRequest();
+        String url = WebpbClient.formatUrl(null, new ObjectMapper(), request);
+        assertEquals("https://domain/123/action?size=234&page=345", url);
     }
 }
