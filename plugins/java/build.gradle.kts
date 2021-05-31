@@ -1,48 +1,27 @@
-/*
- * Copyright (c) 2020 linqu.tech, All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import utils.Versions
+import utils.signAndPublish
+
 plugins {
-    `maven-publish`
-    signing
+    id("webpb.application")
 }
 
 dependencies {
-    implementation("com.github.javaparser:javaparser-core:3.20.2")
+    implementation("com.github.javaparser:javaparser-core:${Versions.javaparser}")
     implementation(project(":libs:commons"))
     implementation(project(":libs:utilities"))
 }
 
+val artifactId = "protoc-webpb-${project.name}"
+
 tasks.bootJar {
-    archiveBaseName.set(filename)
+    archiveBaseName.set(artifactId)
     launchScript()
 }
 
-val filename = "protoc-webpb-${project.name}"
-
-publishing {
-    publications {
-        create<MavenPublication>("webpbJava") {
-            artifactId = filename
-            artifact(tasks.bootJar.get()) { classifier = "all" }
-        }
+signAndPublish(artifactId) {
+    artifact(tasks.bootJar.get()) { classifier = "all" }
+    pom {
+        description.set("The webpb protoc plugin for JAVA")
     }
 }
 
-val updatePublishing: (publishing: PublishingExtension, publication: String, filename: String, desc: String) -> Void by rootProject.extra
-updatePublishing(publishing, "webpbJava", filename, "The webpb protoc plugin for java")
-
-signing {
-    sign(publishing.publications["webpbJava"])
-}

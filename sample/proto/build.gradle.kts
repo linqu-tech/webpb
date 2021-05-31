@@ -1,19 +1,5 @@
-/*
- * Copyright (c) 2020 linqu.tech, All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import com.google.protobuf.gradle.*
+import utils.Versions
 
 plugins {
     java
@@ -27,28 +13,27 @@ repositories {
     maven { url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots") }
 }
 
-val lombokVersion: String by rootProject.extra
-val webpbVersion = project.version
-
 dependencies {
-    annotationProcessor("org.projectlombok:lombok:${lombokVersion}")
-    compileOnly("org.projectlombok:lombok:${lombokVersion}")
-    implementation("tech.linqu.webpb:webpb-proto:${webpbVersion}")
-    implementation("tech.linqu.webpb:webpb-runtime:${webpbVersion}")
-    testAnnotationProcessor("org.projectlombok:lombok:${lombokVersion}")
-    testCompileOnly("org.projectlombok:lombok:${lombokVersion}")
+    annotationProcessor("org.projectlombok:lombok:${Versions.lombok}")
+    compileOnly("org.projectlombok:lombok:${Versions.lombok}")
+    implementation("tech.linqu.webpb:webpb-proto:${Versions.webpb}")
+    implementation("tech.linqu.webpb:webpb-runtime:${Versions.webpb}")
+    testAnnotationProcessor("org.projectlombok:lombok:${Versions.lombok}")
+    testCompileOnly("org.projectlombok:lombok:${Versions.lombok}")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:${Versions.jupiter}")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 }
 
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:3.15.8"
+        artifact = "com.google.protobuf:protoc:${Versions.protoc}"
     }
     plugins {
         id("webpb") {
-            artifact = "tech.linqu.webpb:protoc-webpb-java:${webpbVersion}:all@jar"
+            artifact = "tech.linqu.webpb:protoc-webpb-java:${Versions.webpb}:all@jar"
         }
         id("ts") {
-            artifact = "tech.linqu.webpb:protoc-webpb-ts:${webpbVersion}:all@jar"
+            artifact = "tech.linqu.webpb:protoc-webpb-ts:${Versions.webpb}:all@jar"
         }
     }
     generateProtoTasks {
