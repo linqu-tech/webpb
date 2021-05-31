@@ -20,7 +20,9 @@ fun Project.getGroupName(): String {
 
 fun Project.signAndPublish(artifactId: String, configuration: Action<MavenPublication>) {
     val extension = project.extensions.getByType(PublishingExtension::class.java)
-    val publicationName = "([a-zA-Z]*)".toRegex().replace(artifactId) { it.value.capitalize() }
+    val publicationName = "[_-]+[a-zA-Z]".toRegex().replace(artifactId) {
+        it.value.replace("_", "").replace("-", "").capitalize()
+    }
     val publication = extension.publications.create(publicationName, MavenPublication::class.java, configuration)
     publication.artifactId = artifactId
     publication.pom {
