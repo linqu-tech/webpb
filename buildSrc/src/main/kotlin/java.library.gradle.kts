@@ -1,7 +1,7 @@
 plugins {
     `java-library`
     `maven-publish`
-    id("webpb.common")
+    id("java.common")
     signing
 }
 

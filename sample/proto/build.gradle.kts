@@ -1,39 +1,33 @@
 import com.google.protobuf.gradle.*
-import utils.Versions
+import utils.Vers
 
 plugins {
-    java
     idea
-    id("com.google.protobuf") version ("0.8.16")
-}
-
-repositories {
-    mavenLocal()
-    mavenCentral()
-    maven { url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots") }
+    id("java.common")
+    id("com.google.protobuf")
 }
 
 dependencies {
-    annotationProcessor("org.projectlombok:lombok:${Versions.lombok}")
-    compileOnly("org.projectlombok:lombok:${Versions.lombok}")
-    implementation("tech.linqu.webpb:webpb-proto:${Versions.webpb}")
-    implementation("tech.linqu.webpb:webpb-runtime:${Versions.webpb}")
-    testAnnotationProcessor("org.projectlombok:lombok:${Versions.lombok}")
-    testCompileOnly("org.projectlombok:lombok:${Versions.lombok}")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:${Versions.jupiter}")
+    annotationProcessor("org.projectlombok:lombok:${Vers.lombok}")
+    compileOnly("org.projectlombok:lombok:${Vers.lombok}")
+    implementation("tech.linqu.webpb:webpb-proto:${Vers.webpb}")
+    implementation("tech.linqu.webpb:webpb-runtime:${Vers.webpb}")
+    testAnnotationProcessor("org.projectlombok:lombok:${Vers.lombok}")
+    testCompileOnly("org.projectlombok:lombok:${Vers.lombok}")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:${Vers.jupiter}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 }
 
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:${Versions.protoc}"
+        artifact = "com.google.protobuf:protoc:${Vers.protoc}"
     }
     plugins {
         id("webpb") {
-            artifact = "tech.linqu.webpb:protoc-webpb-java:${Versions.webpb}:all@jar"
+            artifact = "tech.linqu.webpb:protoc-webpb-java:${Vers.webpb}:all@jar"
         }
         id("ts") {
-            artifact = "tech.linqu.webpb:protoc-webpb-ts:${Versions.webpb}:all@jar"
+            artifact = "tech.linqu.webpb:protoc-webpb-ts:${Vers.webpb}:all@jar"
         }
     }
     generateProtoTasks {

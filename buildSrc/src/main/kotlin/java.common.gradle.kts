@@ -1,13 +1,11 @@
-import utils.Const
-import utils.Versions
+import utils.Vers
 
 plugins {
     java
-    id("webpb.versioning")
+    id("conventions.versioning")
 }
 
-group = Const.group
-version = Const.version
+Vers.initialize(project)
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -21,7 +19,7 @@ repositories {
 }
 
 dependencies {
-    testImplementation("org.junit.jupiter:junit-jupiter-api:${Versions.jupiter}")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:${Vers.jupiter}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 }
 

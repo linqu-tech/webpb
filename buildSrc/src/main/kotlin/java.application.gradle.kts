@@ -1,7 +1,12 @@
 import utils.Vers
 
 plugins {
-    id("java.library")
+    java
+    `maven-publish`
+    application
+    id("java.common")
+    id("org.springframework.boot")
+    signing
 }
 
 dependencies {
@@ -9,11 +14,6 @@ dependencies {
     compileOnly("org.projectlombok:lombok:${Vers.lombok}")
     implementation("com.google.protobuf:protobuf-java:${Vers.protobufJava}")
     implementation("org.apache.commons:commons-lang3:${Vers.commonsLang3}")
-    implementation(project(":libs:commons"))
     testAnnotationProcessor("org.projectlombok:lombok:${Vers.lombok}")
     testCompileOnly("org.projectlombok:lombok:${Vers.lombok}")
-}
-
-tasks.javadoc {
-    enabled = false
 }

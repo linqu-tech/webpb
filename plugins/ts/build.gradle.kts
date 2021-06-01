@@ -1,7 +1,7 @@
 import utils.signAndPublish
 
 plugins {
-    id("webpb.application")
+    id("java.application")
 }
 
 dependencies {

@@ -1,19 +1,19 @@
-import utils.Versions
+import utils.Vers
 import utils.signAndPublish
 
 plugins {
-    id("webpb.library")
+    id("java.library")
 }
 
 dependencies {
     api(project(":libs:commons"))
-    compileOnly("javax.servlet:javax.servlet-api:${Versions.servletApi}")
-    compileOnly("org.springframework:spring-messaging:${Versions.springFramework}")
-    compileOnly("org.springframework:spring-webflux:${Versions.springFramework}")
-    compileOnly("org.springframework:spring-webmvc:${Versions.springFramework}")
+    compileOnly("javax.servlet:javax.servlet-api:${Vers.servletApi}")
+    compileOnly("org.springframework:spring-messaging:${Vers.springFramework}")
+    compileOnly("org.springframework:spring-webflux:${Vers.springFramework}")
+    compileOnly("org.springframework:spring-webmvc:${Vers.springFramework}")
     compileOnly(files(org.gradle.internal.jvm.Jvm.current().toolsJar))
-    implementation("com.fasterxml.jackson.core:jackson-databind:${Versions.jackson}")
-    testImplementation("org.springframework:spring-webflux:${Versions.springFramework}")
+    implementation("com.fasterxml.jackson.core:jackson-databind:${Vers.jackson}")
+    testImplementation("org.springframework:spring-webflux:${Vers.springFramework}")
 }
 
 signAndPublish("webpb-runtime") {
@@ -24,6 +24,5 @@ signAndPublish("webpb-runtime") {
 }
 
 tasks.javadoc {
-    exclude("tech/linqu/webpb/runtime/mvc/WebpbRequestMappingProcessor.java")
-    exclude("tech/linqu/webpb/runtime/utils/**")
+    enabled = false
 }

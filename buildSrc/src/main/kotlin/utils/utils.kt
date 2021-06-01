@@ -6,20 +6,21 @@ import org.gradle.api.artifacts.repositories.PasswordCredentials
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.kotlin.dsl.credentials
+import org.gradle.kotlin.dsl.the
 import org.gradle.plugins.signing.SigningExtension
 
-fun Project.getGroupName(): String {
+fun Project.getGroupName(rootGroup: String): String {
     var suffix = ""
     var proj = project.parent
     while (rootProject != proj && proj != null) {
         suffix = "." + proj.name + suffix
         proj = proj.parent!!
     }
-    return project.group.toString() + suffix
+    return rootGroup + suffix
 }
 
 fun Project.signAndPublish(artifactId: String, configuration: Action<MavenPublication>) {
-    val extension = project.extensions.getByType(PublishingExtension::class.java)
+    val extension = project.the<PublishingExtension>()
     val publicationName = "[_-]+[a-zA-Z]".toRegex().replace(artifactId) {
         it.value.replace("_", "").replace("-", "").capitalize()
     }
@@ -31,7 +32,7 @@ fun Project.signAndPublish(artifactId: String, configuration: Action<MavenPublic
         licenses {
             license {
                 name.set("The Apache License, Version 2.0")
-                url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
             }
         }
         developers {
@@ -44,7 +45,7 @@ fun Project.signAndPublish(artifactId: String, configuration: Action<MavenPublic
         scm {
             connection.set("scm:git:git://github.com/linqu-tech/webpb.git")
             developerConnection.set("scm:git:ssh://github.com/linqu-tech/webpb.git")
-            url.set("http://github.com/linqu-tech/webpb")
+            url.set("https://github.com/linqu-tech/webpb")
         }
     }
     extension.repositories {
@@ -56,5 +57,5 @@ fun Project.signAndPublish(artifactId: String, configuration: Action<MavenPublic
             credentials(PasswordCredentials::class)
         }
     }
-    project.extensions.getByType(SigningExtension::class.java).sign(publication)
+    project.the<SigningExtension>().sign(publication)
 }

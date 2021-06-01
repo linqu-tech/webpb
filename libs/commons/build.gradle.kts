@@ -1,7 +1,7 @@
 import utils.signAndPublish
 
 plugins {
-    id("webpb.library")
+    id("java.library")
 }
 
 signAndPublish("webpb-commons") {

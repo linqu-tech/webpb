@@ -2,7 +2,7 @@ import utils.signAndPublish
 
 plugins {
     `maven-publish`
-    id("webpb.library")
+    id("java.library")
     signing
 }
 

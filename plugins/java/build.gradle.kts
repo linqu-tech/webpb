@@ -1,12 +1,12 @@
-import utils.Versions
+import utils.Vers
 import utils.signAndPublish
 
 plugins {
-    id("webpb.application")
+    id("java.application")
 }
 
 dependencies {
-    implementation("com.github.javaparser:javaparser-core:${Versions.javaparser}")
+    implementation("com.github.javaparser:javaparser-core:${Vers.javaparser}")
     implementation(project(":libs:commons"))
     implementation(project(":libs:utilities"))
 }
