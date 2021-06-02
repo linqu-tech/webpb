@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package tech.linqu.webpb.runtime.mvc;
+package tech.linqu.webpb.processor;
 
 import com.sun.source.util.TreePath;
 import com.sun.source.util.Trees;
@@ -31,6 +31,7 @@ import com.sun.tools.javac.tree.TreeScanner;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.Names;
 import tech.linqu.webpb.runtime.WebpbMessage;
+import tech.linqu.webpb.runtime.mvc.WebpbRequestMapping;
 import tech.linqu.webpb.runtime.utils.JvmOpens;
 
 import javax.annotation.processing.AbstractProcessor;
