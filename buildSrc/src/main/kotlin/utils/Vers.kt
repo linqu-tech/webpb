@@ -3,9 +3,10 @@ package utils
 import org.gradle.api.Project
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.full.memberProperties
-import kotlin.reflect.jvm.javaField
 
 object Vers {
+    private var initialized = false
+
     lateinit var commonsLang3: String
     lateinit var hibernateValidator: String
     lateinit var jackson: String
@@ -19,12 +20,12 @@ object Vers {
     lateinit var webpb: String
 
     fun initialize(project: Project) {
-        this::commonsLang3.isInitialized
+        if (initialized) {
+            return
+        }
+        this.webpb = project.version.toString()
         this::class.memberProperties.forEach {
-            if (it.isLateinit && it.javaField?.get(this) != null) {
-                return
-            }
-            val key = it.name + "Version"
+            val key = "version" + it.name.capitalize()
             if (project.hasProperty(key)) {
                 val value = project.property(key)
                 if (it is KMutableProperty<*>) {
@@ -32,5 +33,6 @@ object Vers {
                 }
             }
         }
+        initialized = true
     }
 }
