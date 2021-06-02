@@ -10,3 +10,7 @@ signAndPublish("webpb-commons") {
         description.set("The webpb commons library")
     }
 }
+
+tasks.javadoc {
+    enabled = false
+}
