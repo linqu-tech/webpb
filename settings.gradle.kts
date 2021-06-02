@@ -15,7 +15,7 @@
  */
 rootProject.name = "webpb"
 include(":libs:commons")
-//include(":libs:proto")
+include(":libs:proto")
 include(":libs:utilities")
 include(":plugins:java")
 include(":plugins:ts")
