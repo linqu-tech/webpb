@@ -1,6 +1,6 @@
 import com.google.protobuf.gradle.*
 import utils.Vers
-import utils.getGroupName
+import utils.hierarchicalGroup
 
 plugins {
     idea
@@ -8,7 +8,7 @@ plugins {
     id("com.google.protobuf")
 }
 
-group = getGroupName()
+group = hierarchicalGroup()
 
 dependencies {
     annotationProcessor("org.projectlombok:lombok:${Vers.lombok}")

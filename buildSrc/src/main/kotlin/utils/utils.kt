@@ -9,7 +9,7 @@ import org.gradle.kotlin.dsl.credentials
 import org.gradle.kotlin.dsl.the
 import org.gradle.plugins.signing.SigningExtension
 
-fun Project.getGroupName(): String {
+fun Project.hierarchicalGroup(): String {
     var suffix = ""
     var proj = project.parent
     while (rootProject != proj && proj != null) {
@@ -24,8 +24,7 @@ fun Project.signAndPublish(artifactId: String, configuration: Action<MavenPublic
     val publicationName = "[_-]+[a-zA-Z]".toRegex().replace(artifactId) {
         it.value.replace("_", "").replace("-", "").capitalize()
     }
-    val publication =
-        extension.publications.create(publicationName, MavenPublication::class.java, configuration)
+    val publication = extension.publications.create(publicationName, MavenPublication::class.java)
     publication.artifactId = artifactId
     publication.pom {
         name.set(publicationName)
@@ -52,13 +51,12 @@ fun Project.signAndPublish(artifactId: String, configuration: Action<MavenPublic
     extension.repositories {
         maven {
             name = "oss"
-            val releasesRepoUrl =
-                uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
-            val snapshotsRepoUrl =
-                uri("https://s01.oss.sonatype.org/content/repositories/snapshots")
-            url = if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl
+            val release = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+            val snapshot = uri("https://s01.oss.sonatype.org/content/repositories/snapshots")
+            url = if (version.toString().endsWith("SNAPSHOT")) snapshot else release
             credentials(PasswordCredentials::class)
         }
     }
+    configuration.execute(publication)
     project.the<SigningExtension>().sign(publication)
 }
