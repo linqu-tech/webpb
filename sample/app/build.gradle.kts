@@ -1,5 +1,6 @@
 import com.google.protobuf.gradle.*
 import utils.Vers
+import utils.getGroupName
 
 plugins {
     idea
@@ -7,15 +8,17 @@ plugins {
     id("com.google.protobuf")
 }
 
+group = getGroupName()
+
 dependencies {
     annotationProcessor("org.projectlombok:lombok:${Vers.lombok}")
-    annotationProcessor("tech.linqu.webpb:webpb-runtime:${Vers.webpb}")
+    annotationProcessor(project(":runtime:java"))
     compileOnly("org.projectlombok:lombok:${Vers.lombok}")
     compileOnly("org.springframework:spring-web:${Vers.springFramework}")
     implementation("com.fasterxml.jackson.core:jackson-annotations:${Vers.jackson}")
     implementation("org.hibernate.validator:hibernate-validator:${Vers.hibernateValidator}")
-    implementation("tech.linqu.webpb:webpb-proto:${Vers.webpb}")
-    implementation("tech.linqu.webpb:webpb-runtime:${Vers.webpb}")
+    implementation(project(":libs:proto"))
+    implementation(project(":runtime:java"))
     implementation(project(":sample:proto"))
     testAnnotationProcessor("org.projectlombok:lombok:${Vers.lombok}")
     testCompileOnly("org.projectlombok:lombok:${Vers.lombok}")

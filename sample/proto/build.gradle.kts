@@ -1,5 +1,6 @@
 import com.google.protobuf.gradle.*
 import utils.Vers
+import utils.getGroupName
 
 plugins {
     idea
@@ -7,11 +8,13 @@ plugins {
     id("com.google.protobuf")
 }
 
+group = getGroupName()
+
 dependencies {
     annotationProcessor("org.projectlombok:lombok:${Vers.lombok}")
     compileOnly("org.projectlombok:lombok:${Vers.lombok}")
-    implementation("tech.linqu.webpb:webpb-proto:${Vers.webpb}")
-    implementation("tech.linqu.webpb:webpb-runtime:${Vers.webpb}")
+    implementation(project(":libs:proto"))
+    implementation(project(":runtime:java"))
     testAnnotationProcessor("org.projectlombok:lombok:${Vers.lombok}")
     testCompileOnly("org.projectlombok:lombok:${Vers.lombok}")
     testImplementation("org.junit.jupiter:junit-jupiter-api:${Vers.jupiter}")
