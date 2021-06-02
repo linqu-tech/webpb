@@ -12,7 +12,7 @@ group = hierarchicalGroup()
 
 dependencies {
     annotationProcessor("org.projectlombok:lombok:${Vers.lombok}")
-    annotationProcessor(project(":runtime:java"))
+    annotationProcessor(project(":runtime:processor"))
     compileOnly("org.projectlombok:lombok:${Vers.lombok}")
     compileOnly("org.springframework:spring-web:${Vers.springFramework}")
     implementation("com.fasterxml.jackson.core:jackson-annotations:${Vers.jackson}")
