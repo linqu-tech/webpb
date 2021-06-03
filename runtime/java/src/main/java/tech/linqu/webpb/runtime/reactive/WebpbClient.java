@@ -68,8 +68,16 @@ public class WebpbClient {
 
     private final ObjectMapper formatMapper = new ObjectMapper();
 
+    /**
+     * {@link ObjectMapper} used when send request and receive response.
+     */
     protected final ObjectMapper objectMapper = createObjectMapper();
 
+    /**
+     * Create an {@link ObjectMapper}.
+     *
+     * @return {@link ObjectMapper}
+     */
     protected ObjectMapper createObjectMapper() {
         return new ObjectMapper()
             .configure(MapperFeature.PROPAGATE_TRANSIENT_MARKER, true)
@@ -150,6 +158,12 @@ public class WebpbClient {
             });
     }
 
+    /**
+     * Create an exception from {@link ClientResponse}.
+     *
+     * @param clientResponse {@link ClientResponse}
+     * @return mono of {@link Throwable}
+     */
     protected Mono<? extends Throwable> createException(ClientResponse clientResponse) {
         return clientResponse.createException();
     }
@@ -157,8 +171,8 @@ public class WebpbClient {
     /**
      * See also {@link #formatUrl(URL, ObjectMapper, WebpbMessage)}.
      *
-     * @param baseUrl      {@link URL}
-     * @param message      {@link WebpbMessage}
+     * @param baseUrl {@link URL}
+     * @param message {@link WebpbMessage}
      * @return formatted url
      */
     public String formatUrl(URL baseUrl, WebpbMessage message) {
@@ -168,7 +182,7 @@ public class WebpbClient {
     /**
      * See also {@link #formatUrl(URL, ObjectMapper, WebpbMessage)}.
      *
-     * @param message      {@link WebpbMessage}
+     * @param message {@link WebpbMessage}
      * @return formatted url
      */
     public String formatUrl(WebpbMessage message) {
@@ -279,6 +293,13 @@ public class WebpbClient {
         return jsonNode.asText();
     }
 
+    /**
+     * Sneaky exceptions.
+     *
+     * @param callable {@link Callable}
+     * @param <T>      T
+     * @return T
+     */
     protected static <T> T uncheckedCall(Callable<T> callable) {
         try {
             return callable.call();

@@ -30,8 +30,8 @@ public class PathParam {
     /**
      * Construct a {@link PathParam}.
      *
-     * @param prefix prefix string before this param
-     * @param key key of the param
+     * @param prefix   prefix string before this param
+     * @param key      key of the param
      * @param accessor accessor to resolve value
      */
     public PathParam(String prefix, String key, String accessor) {
@@ -40,14 +40,29 @@ public class PathParam {
         this.accessor = accessor;
     }
 
+    /**
+     * Get prefix.
+     *
+     * @return prefix
+     */
     public String getPrefix() {
         return prefix;
     }
 
+    /**
+     * Get key.
+     *
+     * @return key
+     */
     public String getKey() {
         return key;
     }
 
+    /**
+     * Get accessor.
+     *
+     * @return accessor
+     */
     public String getAccessor() {
         return accessor;
     }

@@ -21,5 +21,8 @@ package tech.linqu.webpb.sample;
  */
 public interface Const {
 
+    /**
+     * Regular expression to match email.
+     */
     String EMAIL_REGEX = "^[^@\\s]+@[^@\\s\\.]+\\.[^@\\.\\s]+$";
 }

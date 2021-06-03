@@ -15,3 +15,7 @@ signAndPublish("webpb-processor") {
         description.set("The webpb annotation processor for JAVA")
     }
 }
+
+tasks.javadoc {
+    enabled = false
+}

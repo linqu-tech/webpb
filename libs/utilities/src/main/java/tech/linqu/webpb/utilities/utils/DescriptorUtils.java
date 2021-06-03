@@ -31,14 +31,22 @@ import tech.linqu.webpb.commons.PathParam;
  */
 public class DescriptorUtils {
 
-    public static boolean isScalar(FieldDescriptor fieldDescriptor) {
-        return !(isEnum(fieldDescriptor) || isMessage(fieldDescriptor));
-    }
-
+    /**
+     * Filed type is enum.
+     *
+     * @param fieldDescriptor {@link FieldDescriptor}
+     * @return is enum
+     */
     public static boolean isEnum(FieldDescriptor fieldDescriptor) {
         return fieldDescriptor.getJavaType() == FieldDescriptor.JavaType.ENUM;
     }
 
+    /**
+     * Field type is message.
+     *
+     * @param fieldDescriptor {@link FieldDescriptor}
+     * @return is message
+     */
     public static boolean isMessage(FieldDescriptor fieldDescriptor) {
         return fieldDescriptor.getJavaType() == MESSAGE;
     }
@@ -106,11 +114,23 @@ public class DescriptorUtils {
         }
     }
 
+    /**
+     * Get key descriptor of a map field.
+     *
+     * @param fieldDescriptor {@link FieldDescriptor}
+     * @return {@link FileDescriptor}
+     */
     public static FieldDescriptor getKeyDescriptor(FieldDescriptor fieldDescriptor) {
         List<FieldDescriptor> fieldDescriptors = fieldDescriptor.getMessageType().getFields();
         return fieldDescriptors.get(0);
     }
 
+    /**
+     * Get value descriptor of a map field.
+     *
+     * @param fieldDescriptor {@link FieldDescriptor}
+     * @return {@link FileDescriptor}
+     */
     public static FieldDescriptor getValueDescriptor(FieldDescriptor fieldDescriptor) {
         List<FieldDescriptor> fieldDescriptors = fieldDescriptor.getMessageType().getFields();
         return fieldDescriptors.get(1);

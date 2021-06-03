@@ -26,11 +26,11 @@ import java.util.regex.Pattern;
  */
 public class ParamGroup {
 
-    public static final String QUERY_KEY = "key";
+    private static final String QUERY_KEY = "key";
 
-    public static final String QUERY_ACCESSOR = "accessor";
+    private static final String QUERY_ACCESSOR = "accessor";
 
-    public static final String QUERY_PATTERN = "((?<key>\\w+)=)?\\{(?<accessor>[\\w.]+)}&?";
+    private static final String QUERY_PATTERN = "((?<key>\\w+)=)?\\{(?<accessor>[\\w.]+)}&?";
 
     private final List<PathParam> params = new ArrayList<>();
 
@@ -64,10 +64,20 @@ public class ParamGroup {
         return group;
     }
 
+    /**
+     * Get path params.
+     *
+     * @return list of {@link PathParam}
+     */
     public List<PathParam> getParams() {
         return params;
     }
 
+    /**
+     * Get suffix.
+     *
+     * @return suffix
+     */
     public String getSuffix() {
         return suffix;
     }

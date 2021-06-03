@@ -30,6 +30,9 @@ public class WepbRequestBodyAdvice extends RequestBodyAdviceAdapter {
 
     private final ObjectMapper objectMapper;
 
+    /**
+     * Constructor.
+     */
     public WepbRequestBodyAdvice() {
         this.objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
