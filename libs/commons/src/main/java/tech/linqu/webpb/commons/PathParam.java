@@ -13,8 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package tech.linqu.webpb.commons;
 
+/**
+ * Path param captured from url.
+ */
 public class PathParam {
 
     private final String prefix;
@@ -23,6 +27,13 @@ public class PathParam {
 
     private final String accessor;
 
+    /**
+     * Construct a {@link PathParam}.
+     *
+     * @param prefix prefix string before this param
+     * @param key key of the param
+     * @param accessor accessor to resolve value
+     */
     public PathParam(String prefix, String key, String accessor) {
         this.prefix = prefix;
         this.key = key;

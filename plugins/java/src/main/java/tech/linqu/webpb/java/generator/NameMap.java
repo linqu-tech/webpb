@@ -13,29 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package tech.linqu.webpb.java.generator;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.expr.Name;
 import com.google.protobuf.Descriptors;
-import tech.linqu.webpb.utilities.utils.OptionUtils;
-import tech.linqu.webpb.utilities.utils.WebpbExtend.FileOpts;
-import tech.linqu.webpb.utilities.utils.WebpbExtend.JavaFileOpts;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Descriptors.FileDescriptor;
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.commons.lang3.StringUtils;
+import tech.linqu.webpb.utilities.descriptor.WebpbExtend.FileOpts;
+import tech.linqu.webpb.utilities.descriptor.WebpbExtend.JavaFileOpts;
+import tech.linqu.webpb.utilities.utils.OptionUtils;
 
+/**
+ * Store names for importing.
+ */
 public class NameMap {
 
     private static final JavaParser JAVA_PARSER = new JavaParser();
 
     private final Map<String, Name> nameMap = new HashMap<>();
 
+    /**
+     * Parse imports from file descriptors.
+     *
+     * @param descriptors {@link FileDescriptor} array.
+     */
     public NameMap(List<FileDescriptor> descriptors) {
         JAVA_PARSER.parseName(List.class.getName())
             .ifSuccessful(name -> nameMap.put(name.getIdentifier(), name));
@@ -60,7 +68,8 @@ public class NameMap {
                 }
             }
 
-            JavaFileOpts fileOpts = OptionUtils.getOpts(fileDescriptor, FileOpts::hasJava).getJava();
+            JavaFileOpts fileOpts =
+                OptionUtils.getOpts(fileDescriptor, FileOpts::hasJava).getJava();
             for (String str : fileOpts.getImportList()) {
                 JAVA_PARSER.parseName(str).ifSuccessful(name ->
                     nameMap.put(name.getIdentifier(), name)
@@ -70,13 +79,20 @@ public class NameMap {
         }
     }
 
+    /**
+     * Get full name of a name or simple name.
+     *
+     * @param name name or simple name.
+     * @return full name or {@link RuntimeException}
+     */
     public Name getFullName(Name name) {
         if (name.getQualifier().isPresent()) {
             return new Name(name.getQualifier().orElse(null), name.getIdentifier());
         }
         Name full = nameMap.get(name.getIdentifier());
         if (full == null) {
-            throw new RuntimeException(String.format("Unknown identifier %s is not imported", name.getIdentifier()));
+            throw new RuntimeException(
+                String.format("Unknown identifier %s is not imported", name.getIdentifier()));
         }
         return new Name(full.getQualifier().orElse(null), full.getIdentifier());
     }

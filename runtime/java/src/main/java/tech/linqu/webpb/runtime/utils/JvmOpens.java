@@ -13,16 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package tech.linqu.webpb.runtime.utils;
 
 import java.lang.reflect.Method;
 
+/**
+ * Utilities to open JVM modules.
+ */
 public class JvmOpens {
 
+    /**
+     * Add opens for specified class.
+     *
+     * @param type target class type.
+     */
     public static void addOpens(Class<?> type) {
-        Class<?> cModule;
+        Class<?> classModule;
         try {
-            cModule = Class.forName("java.lang.Module");
+            classModule = Class.forName("java.lang.Module");
         } catch (ClassNotFoundException e) {
             return; //jdk8-; this is not needed.
         }
@@ -43,13 +52,14 @@ public class JvmOpens {
         };
 
         try {
-            Method m = cModule.getDeclaredMethod("implAddOpens", String.class, cModule);
+            Method m = classModule.getDeclaredMethod("implAddOpens", String.class, classModule);
             long firstFieldOffset = getFirstFieldOffset();
             Unsafe.putBooleanVolatile(m, firstFieldOffset, true);
             for (String p : packages) {
                 m.invoke(jdkCompilerModule, p, ownModule);
             }
-        } catch (Exception ignore) {
+        } catch (Exception ignored) {
+            // ignored
         }
     }
 
@@ -63,20 +73,20 @@ public class JvmOpens {
     }
 
     private static Object getJdkCompilerModule() {
-		/* call public api: ModuleLayer.boot().findModule("jdk.compiler").get();
-		   but use reflection because we don't want this code to crash on jdk1.7 and below.
-		   In that case, none of this stuff was needed in the first place, so we just exit via
-		   the catch block and do nothing.
-		 */
+        /* call public api: ModuleLayer.boot().findModule("jdk.compiler").get();
+           but use reflection because we don't want this code to crash on jdk1.7 and below.
+           In that case, none of this stuff was needed in the first place, so we just exit via
+           the catch block and do nothing.
+         */
 
         try {
-            Class<?> cModuleLayer = Class.forName("java.lang.ModuleLayer");
-            Method mBoot = cModuleLayer.getDeclaredMethod("boot");
-            Object bootLayer = mBoot.invoke(null);
-            Class<?> cOptional = Class.forName("java.util.Optional");
-            Method mFindModule = cModuleLayer.getDeclaredMethod("findModule", String.class);
-            Object oCompilerO = mFindModule.invoke(bootLayer, "jdk.compiler");
-            return cOptional.getDeclaredMethod("get").invoke(oCompilerO);
+            Class<?> classModuleLayer = Class.forName("java.lang.ModuleLayer");
+            Method methodBoot = classModuleLayer.getDeclaredMethod("boot");
+            Object bootLayer = methodBoot.invoke(null);
+            Class<?> classOptional = Class.forName("java.util.Optional");
+            Method findModule = classModuleLayer.getDeclaredMethod("findModule", String.class);
+            Object compiler = findModule.invoke(bootLayer, "jdk.compiler");
+            return classOptional.getDeclaredMethod("get").invoke(compiler);
         } catch (Exception e) {
             return null;
         }

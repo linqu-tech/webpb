@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package tech.linqu.webpb.runtime;
 
 /**
- * WebpbMessage
+ * WebpbMessage interface.
  */
 public interface WebpbMessage {
 
     /**
-     * webpbMeta
+     * Return {@link WebpbMeta} of the message.
      *
-     * @return WebpbMeta
+     * @return {@link WebpbMeta}
      */
     WebpbMeta webpbMeta();
 }

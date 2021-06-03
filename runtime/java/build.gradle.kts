@@ -15,10 +15,6 @@ dependencies {
     testImplementation("org.springframework:spring-webflux:${Vers.springFramework}")
 }
 
-tasks.javadoc {
-    enabled = false
-}
-
 signAndPublish("webpb-runtime") {
     from(components["java"])
     pom {

@@ -13,7 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package tech.linqu.webpb.processor;
+
+import static com.sun.source.tree.Tree.Kind.ASSIGNMENT;
+import static com.sun.source.tree.Tree.Kind.IDENTIFIER;
+import static javax.tools.Diagnostic.Kind.ERROR;
 
 import com.sun.source.util.TreePath;
 import com.sun.source.util.Trees;
@@ -30,10 +35,9 @@ import com.sun.tools.javac.tree.TreeMaker;
 import com.sun.tools.javac.tree.TreeScanner;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.Names;
-import tech.linqu.webpb.runtime.WebpbMessage;
-import tech.linqu.webpb.runtime.mvc.WebpbRequestMapping;
-import tech.linqu.webpb.runtime.utils.JvmOpens;
-
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
@@ -42,14 +46,13 @@ import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.stream.Collectors;
+import tech.linqu.webpb.runtime.WebpbMessage;
+import tech.linqu.webpb.runtime.mvc.WebpbRequestMapping;
+import tech.linqu.webpb.runtime.utils.JvmOpens;
 
-import static com.sun.source.tree.Tree.Kind.ASSIGNMENT;
-import static com.sun.source.tree.Tree.Kind.IDENTIFIER;
-import static javax.tools.Diagnostic.Kind.ERROR;
-
+/**
+ * Process the {@link WebpbRequestMapping} and transform it to Spring RequestMapping.
+ */
 @SupportedAnnotationTypes("tech.linqu.webpb.runtime.mvc.WebpbRequestMapping")
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class WebpbRequestMappingProcessor extends AbstractProcessor {
@@ -69,7 +72,7 @@ public class WebpbRequestMappingProcessor extends AbstractProcessor {
         this.names = Names.instance(env.getContext());
     }
 
-    public JavacProcessingEnvironment getJavacProcessingEnvironment(Object procEnv) {
+    private JavacProcessingEnvironment getJavacProcessingEnvironment(Object procEnv) {
         JvmOpens.addOpens(this.getClass());
         if (procEnv instanceof JavacProcessingEnvironment) {
             return (JavacProcessingEnvironment) procEnv;
@@ -86,6 +89,7 @@ public class WebpbRequestMappingProcessor extends AbstractProcessor {
             try {
                 path = trees.getPath(element);
             } catch (NullPointerException ignore) {
+                // ignored
             }
         }
         if (path == null) {
@@ -121,13 +125,15 @@ public class WebpbRequestMappingProcessor extends AbstractProcessor {
         }.scan(unit);
     }
 
-    private JCAnnotation transformAnnotation(JCCompilationUnit unit, JCMethodDecl method, JCAnnotation annotation) {
+    private JCAnnotation transformAnnotation(JCCompilationUnit unit, JCMethodDecl method,
+                                             JCAnnotation annotation) {
         String annotationName = WebpbRequestMapping.class.getSimpleName();
         if (!annotation.annotationType.toString().endsWith(annotationName)) {
             return annotation;
         }
         ArrayList<JCTree.JCExpression> args = new ArrayList<>();
-        unit.defs = addImport(unit.defs, "org.springframework.web.bind.annotation", "RequestMapping");
+        unit.defs =
+            addImport(unit.defs, "org.springframework.web.bind.annotation", "RequestMapping");
         ClassSymbol messageSymbol = null;
         for (JCTree.JCExpression arg : annotation.args) {
             if (!arg.getKind().equals(ASSIGNMENT)) {
@@ -170,10 +176,12 @@ public class WebpbRequestMappingProcessor extends AbstractProcessor {
             return annotation;
         }
         processSymbolUnit(unit, messageSymbol, args);
-        return treeMaker.Annotation(treeMaker.Ident(names.fromString("RequestMapping")), List.from(args));
+        return treeMaker
+            .Annotation(treeMaker.Ident(names.fromString("RequestMapping")), List.from(args));
     }
 
-    private void processSymbolUnit(JCCompilationUnit unit, TypeSymbol symbol, ArrayList<JCTree.JCExpression> args) {
+    private void processSymbolUnit(JCCompilationUnit unit, TypeSymbol symbol,
+                                   ArrayList<JCTree.JCExpression> args) {
         for (Symbol element : symbol.getEnclosedElements()) {
             if (!(element instanceof Symbol.VarSymbol)) {
                 continue;
@@ -187,7 +195,8 @@ public class WebpbRequestMappingProcessor extends AbstractProcessor {
                         names.fromString(varSymbol.getConstValue().toString())
                     )
                 ));
-                unit.defs = addImport(unit.defs, "org.springframework.web.bind.annotation", "RequestMethod");
+                unit.defs = addImport(unit.defs, "org.springframework.web.bind.annotation",
+                    "RequestMethod");
             }
             if ("WEBPB_PATH".equals(varSymbol.getSimpleName().toString())) {
                 String path = varSymbol.getConstValue().toString();

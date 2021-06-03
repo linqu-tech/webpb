@@ -13,19 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package tech.linqu.webpb.ts;
 
+import com.google.protobuf.Descriptors.FileDescriptor;
+import com.google.protobuf.compiler.PluginProtos.CodeGeneratorResponse;
+import java.util.ArrayList;
 import org.apache.commons.lang3.StringUtils;
 import tech.linqu.webpb.ts.generator.Generator;
 import tech.linqu.webpb.utilities.context.RequestContext;
-import tech.linqu.webpb.utilities.utils.WebpbExtend;
-import com.google.protobuf.Descriptors.FileDescriptor;
-import com.google.protobuf.compiler.PluginProtos.CodeGeneratorResponse;
+import tech.linqu.webpb.utilities.descriptor.WebpbExtend;
 
-import java.util.ArrayList;
-
+/**
+ * The main class.
+ */
 public class Main {
 
+    /**
+     * The main method.
+     */
     public static void main(String[] args) throws Exception {
         RequestContext context = new RequestContext(WebpbExtend.FileOpts::hasTs);
 

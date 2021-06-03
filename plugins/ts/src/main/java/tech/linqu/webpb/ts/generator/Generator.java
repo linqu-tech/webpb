@@ -13,36 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package tech.linqu.webpb.ts.generator;
-
-import com.google.protobuf.Descriptors.Descriptor;
-import com.google.protobuf.Descriptors.FieldDescriptor;
-import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
-import tech.linqu.webpb.commons.ParamGroup;
-import tech.linqu.webpb.commons.PathParam;
-import tech.linqu.webpb.utilities.context.RequestContext;
-import tech.linqu.webpb.utilities.utils.Const;
-import tech.linqu.webpb.utilities.utils.DescriptorUtils;
-import tech.linqu.webpb.utilities.utils.OptionUtils;
-import tech.linqu.webpb.utilities.utils.Utils;
-import tech.linqu.webpb.utilities.utils.WebpbExtend;
-import tech.linqu.webpb.utilities.utils.WebpbExtend.EnumOpts;
-import tech.linqu.webpb.utilities.utils.WebpbExtend.FieldOpts;
-import tech.linqu.webpb.utilities.utils.WebpbExtend.FileOpts;
-import tech.linqu.webpb.utilities.utils.WebpbExtend.MessageOpts;
-import tech.linqu.webpb.utilities.utils.WebpbExtend.OptEnumOpts;
-import tech.linqu.webpb.utilities.utils.WebpbExtend.OptFieldOpts;
-import tech.linqu.webpb.utilities.utils.WebpbExtend.OptMessageOpts;
-import tech.linqu.webpb.utilities.utils.WebpbExtend.TsFieldOpts;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static com.google.protobuf.Descriptors.EnumDescriptor;
 import static com.google.protobuf.Descriptors.EnumValueDescriptor;
@@ -50,26 +22,61 @@ import static com.google.protobuf.Descriptors.FieldDescriptor.JavaType.LONG;
 import static com.google.protobuf.Descriptors.FileDescriptor;
 import static tech.linqu.webpb.utilities.utils.OptionUtils.getOpts;
 
+import com.google.protobuf.Descriptors.Descriptor;
+import com.google.protobuf.Descriptors.FieldDescriptor;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
+import tech.linqu.webpb.commons.ParamGroup;
+import tech.linqu.webpb.commons.PathParam;
+import tech.linqu.webpb.utilities.context.RequestContext;
+import tech.linqu.webpb.utilities.descriptor.WebpbExtend;
+import tech.linqu.webpb.utilities.descriptor.WebpbExtend.EnumOpts;
+import tech.linqu.webpb.utilities.descriptor.WebpbExtend.FieldOpts;
+import tech.linqu.webpb.utilities.descriptor.WebpbExtend.FileOpts;
+import tech.linqu.webpb.utilities.descriptor.WebpbExtend.MessageOpts;
+import tech.linqu.webpb.utilities.descriptor.WebpbExtend.OptEnumOpts;
+import tech.linqu.webpb.utilities.descriptor.WebpbExtend.OptFieldOpts;
+import tech.linqu.webpb.utilities.descriptor.WebpbExtend.OptMessageOpts;
+import tech.linqu.webpb.utilities.descriptor.WebpbExtend.TsFieldOpts;
+import tech.linqu.webpb.utilities.utils.Const;
+import tech.linqu.webpb.utilities.utils.DescriptorUtils;
+import tech.linqu.webpb.utilities.utils.OptionUtils;
+import tech.linqu.webpb.utilities.utils.Utils;
+
+/**
+ * Generator to process {@link Descriptor}.
+ */
 @RequiredArgsConstructor(staticName = "of")
 public final class Generator {
 
-    private static final Map<FieldDescriptor.Type, String> TYPES = new HashMap<FieldDescriptor.Type, String>() {{
-        put(FieldDescriptor.Type.BOOL, "boolean");
-        put(FieldDescriptor.Type.BYTES, "Uint8Array");
-        put(FieldDescriptor.Type.DOUBLE, "number");
-        put(FieldDescriptor.Type.FLOAT, "number");
-        put(FieldDescriptor.Type.FIXED32, "number");
-        put(FieldDescriptor.Type.FIXED64, "number");
-        put(FieldDescriptor.Type.INT32, "number");
-        put(FieldDescriptor.Type.INT64, "number");
-        put(FieldDescriptor.Type.SFIXED32, "number");
-        put(FieldDescriptor.Type.SFIXED64, "number");
-        put(FieldDescriptor.Type.SINT32, "number");
-        put(FieldDescriptor.Type.SINT64, "number");
-        put(FieldDescriptor.Type.STRING, "string");
-        put(FieldDescriptor.Type.UINT32, "number");
-        put(FieldDescriptor.Type.UINT64, "number");
-    }};
+    private static final Map<FieldDescriptor.Type, String> TYPES;
+
+    static {
+        Map<FieldDescriptor.Type, String> map = new HashMap<>();
+        map.put(FieldDescriptor.Type.BOOL, "boolean");
+        map.put(FieldDescriptor.Type.BYTES, "Uint8Array");
+        map.put(FieldDescriptor.Type.DOUBLE, "number");
+        map.put(FieldDescriptor.Type.FLOAT, "number");
+        map.put(FieldDescriptor.Type.FIXED32, "number");
+        map.put(FieldDescriptor.Type.FIXED64, "number");
+        map.put(FieldDescriptor.Type.INT32, "number");
+        map.put(FieldDescriptor.Type.INT64, "number");
+        map.put(FieldDescriptor.Type.SFIXED32, "number");
+        map.put(FieldDescriptor.Type.SFIXED64, "number");
+        map.put(FieldDescriptor.Type.SINT32, "number");
+        map.put(FieldDescriptor.Type.SINT64, "number");
+        map.put(FieldDescriptor.Type.STRING, "string");
+        map.put(FieldDescriptor.Type.UINT32, "number");
+        map.put(FieldDescriptor.Type.UINT64, "number");
+        TYPES = map;
+    }
 
     private static final String INDENT = "  ";
 
@@ -85,6 +92,11 @@ public final class Generator {
 
     private int level = 0;
 
+    /**
+     * Entrance of the generator.
+     *
+     * @return {@link StringBuilder}
+     */
     public StringBuilder generate() {
         String packageName = fileDescriptor.getName();
         if (generateTypes()) {
@@ -192,7 +204,8 @@ public final class Generator {
                 builder.append('!');
             }
             if (fieldDescriptor.isMapField()) {
-                List<FieldDescriptor> fieldDescriptors = fieldDescriptor.getMessageType().getFields();
+                List<FieldDescriptor> fieldDescriptors =
+                    fieldDescriptor.getMessageType().getFields();
                 FieldDescriptor valueDescriptor = fieldDescriptors.get(1);
                 builder.append(": ").append("{ [k: string]: ")
                     .append(getTypeName(valueDescriptor)).append(" }");
@@ -215,7 +228,8 @@ public final class Generator {
         }
     }
 
-    private void generateConstructor(Descriptor descriptor, OptMessageOpts messageOpts, String className) {
+    private void generateConstructor(Descriptor descriptor, OptMessageOpts messageOpts,
+                                     String className) {
         if (descriptor.getFields().isEmpty()) {
             indent().append("private constructor() {\n");
             level(() -> {
@@ -385,7 +399,8 @@ public final class Generator {
     }
 
     private void addImport(String typeOrPackage) {
-        if (StringUtils.isNotEmpty(typeOrPackage) && !StringUtils.startsWith(typeOrPackage, fileDescriptor.getPackage())) {
+        if (StringUtils.isNotEmpty(typeOrPackage)
+            && !StringUtils.startsWith(typeOrPackage, fileDescriptor.getPackage())) {
             imports.add(typeOrPackage);
         }
     }

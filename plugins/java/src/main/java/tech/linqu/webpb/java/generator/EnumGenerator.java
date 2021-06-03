@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package tech.linqu.webpb.java.generator;
 
 import com.github.javaparser.ast.Modifier;
@@ -36,19 +37,30 @@ import com.google.protobuf.Descriptors;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
+/**
+ * Generator for enum definition.
+ */
 @RequiredArgsConstructor(staticName = "create")
 public class EnumGenerator {
 
     private static final String ENUM_VALUE = "value";
 
+    /**
+     * Generate enum declaration.
+     *
+     * @param descriptor @see com.google.protobuf.Descriptors.EnumDescriptor.
+     * @return @see com.github.javaparser.ast.body
+     */
     public EnumDeclaration generate(Descriptors.EnumDescriptor descriptor) {
         EnumDeclaration declaration = new EnumDeclaration();
         declaration.setName(descriptor.getName());
         declaration.addModifier(Modifier.Keyword.PUBLIC);
 
         for (Descriptors.EnumValueDescriptor valueDescriptor : descriptor.getValues()) {
-            EnumConstantDeclaration enumConstant = declaration.addEnumConstant(valueDescriptor.getName());
-            enumConstant.addArgument(new IntegerLiteralExpr(String.valueOf(valueDescriptor.getIndex())));
+            EnumConstantDeclaration enumConstant =
+                declaration.addEnumConstant(valueDescriptor.getName());
+            enumConstant
+                .addArgument(new IntegerLiteralExpr(String.valueOf(valueDescriptor.getIndex())));
         }
 
         declaration.addField(PrimitiveType.intType(), ENUM_VALUE, Modifier.Keyword.PRIVATE);
@@ -68,24 +80,29 @@ public class EnumGenerator {
         ));
     }
 
-    private void generateEnumOfMethod(EnumDeclaration declaration, Descriptors.EnumDescriptor descriptor) {
-        MethodDeclaration method = declaration.addMethod("fromValue", Modifier.Keyword.PUBLIC, Modifier.Keyword.STATIC);
+    private void generateEnumOfMethod(EnumDeclaration declaration,
+                                      Descriptors.EnumDescriptor descriptor) {
+        MethodDeclaration method =
+            declaration.addMethod("fromValue", Modifier.Keyword.PUBLIC, Modifier.Keyword.STATIC);
         method.addParameter(new Parameter(PrimitiveType.intType(), ENUM_VALUE));
         method.setType(declaration.getName().asString());
         NodeList<SwitchEntry> entries = new NodeList<>();
         for (Descriptors.EnumValueDescriptor valueDescriptor : descriptor.getValues()) {
             entries.add(new SwitchEntry(
-                NodeList.nodeList(new IntegerLiteralExpr(String.valueOf(valueDescriptor.getIndex()))),
+                NodeList
+                    .nodeList(new IntegerLiteralExpr(String.valueOf(valueDescriptor.getIndex()))),
                 SwitchEntry.Type.STATEMENT_GROUP,
                 NodeList.nodeList(new ReturnStmt(new NameExpr(valueDescriptor.getName())))
             ));
         }
         entries.add(new SwitchEntry().addStatement(new ReturnStmt("null")));
-        method.setBody(new BlockStmt().addStatement(new SwitchStmt(new NameExpr(ENUM_VALUE), entries)));
+        method.setBody(
+            new BlockStmt().addStatement(new SwitchStmt(new NameExpr(ENUM_VALUE), entries)));
     }
 
     private void generateEnumValueGetter(EnumDeclaration declaration) {
-        MethodDeclaration method = declaration.addMethod("get" + StringUtils.capitalize(ENUM_VALUE), Modifier.Keyword.PUBLIC);
+        MethodDeclaration method = declaration
+            .addMethod("get" + StringUtils.capitalize(ENUM_VALUE), Modifier.Keyword.PUBLIC);
         method.setType(PrimitiveType.intType());
         method.setBody(new BlockStmt().addStatement(new ReturnStmt(
             new FieldAccessExpr(new ThisExpr(), ENUM_VALUE)

@@ -13,22 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package tech.linqu.webpb.java;
 
 import com.github.javaparser.ast.CompilationUnit;
+import com.google.protobuf.Descriptors;
+import com.google.protobuf.Descriptors.FileDescriptor;
+import com.google.protobuf.compiler.PluginProtos.CodeGeneratorResponse;
+import java.util.Collections;
 import org.apache.commons.lang3.StringUtils;
 import tech.linqu.webpb.java.generator.Generator;
 import tech.linqu.webpb.java.generator.NameMap;
 import tech.linqu.webpb.utilities.context.RequestContext;
-import tech.linqu.webpb.utilities.utils.WebpbExtend.FileOpts;
-import com.google.protobuf.Descriptors;
-import com.google.protobuf.Descriptors.FileDescriptor;
-import com.google.protobuf.compiler.PluginProtos.CodeGeneratorResponse;
+import tech.linqu.webpb.utilities.descriptor.WebpbExtend.FileOpts;
 
-import java.util.Collections;
-
+/**
+ * The main class.
+ */
 public class Main {
 
+    /**
+     * The main method.
+     */
     public static void main(String[] args) throws Exception {
         RequestContext context = new RequestContext(FileOpts::hasJava);
         NameMap nameMap = new NameMap(context.getDescriptors());
@@ -48,7 +54,8 @@ public class Main {
                 CompilationUnit compilationUnit = Generator
                     .of(context, fileDescriptor, nameMap, Collections.emptyList())
                     .generateEnum(enumDescriptor);
-                writeCompilationUnit(compilationUnit, filename(javaPackage, enumDescriptor.getName()));
+                writeCompilationUnit(compilationUnit,
+                    filename(javaPackage, enumDescriptor.getName()));
             }
         }
     }
@@ -61,7 +68,8 @@ public class Main {
         return javaPackage.replaceAll("\\.", "/") + "/" + className + ".java";
     }
 
-    private static void writeCompilationUnit(CompilationUnit compilationUnit, String filename) throws Exception {
+    private static void writeCompilationUnit(CompilationUnit compilationUnit, String filename)
+        throws Exception {
         if (compilationUnit == null) {
             return;
         }

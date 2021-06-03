@@ -13,13 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package tech.linqu.webpb.runtime.reactive;
+
+import static org.springframework.util.StringUtils.hasLength;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import java.net.URL;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.client.ClientResponse;
@@ -31,17 +40,8 @@ import tech.linqu.webpb.runtime.WebpbMessage;
 import tech.linqu.webpb.runtime.WebpbMeta;
 import tech.linqu.webpb.runtime.common.InQuery;
 
-import java.net.URL;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
-
-import static org.springframework.util.StringUtils.hasLength;
-
 /**
- * WebpbClient
+ * Webpb http client to send a {@link WebpbMessage} and receive a response.
  */
 public class WebpbClient {
 
@@ -58,7 +58,7 @@ public class WebpbClient {
         ParamGroup paramGroup;
     }
 
-    private final static Map<Class<?>, MessageContext> contextMap = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, MessageContext> contextMap = new ConcurrentHashMap<>();
 
     private final WebClient webClient;
 
@@ -82,10 +82,10 @@ public class WebpbClient {
     }
 
     /**
-     * WebpbClient
+     * WebpbClient constructor.
      *
-     * @param webClient WebClient
-     * @param baseUrl   URL
+     * @param webClient {@link WebpbClient}
+     * @param baseUrl   {@link URL}
      */
     public WebpbClient(WebClient webClient, URL baseUrl) {
         this(webClient, baseUrl, map -> {
@@ -93,11 +93,11 @@ public class WebpbClient {
     }
 
     /**
-     * WebpbClient
+     * WebpbClient constructor.
      *
-     * @param webClient  WebClient
-     * @param baseUrl    URL
-     * @param attributes attributes
+     * @param webClient  {@link WebpbClient}
+     * @param baseUrl    {@link URL}
+     * @param attributes attributes for the client
      */
     public WebpbClient(WebClient webClient, URL baseUrl, Consumer<Map<String, Object>> attributes) {
         this.webClient = webClient;
@@ -106,26 +106,27 @@ public class WebpbClient {
     }
 
     /**
-     * request
+     * Send request and receive an expected type of response.
      *
-     * @param message      WebpbMessage
-     * @param responseType Class
-     * @param <T>          type
-     * @return Response
+     * @param message      {@link WebpbMessage}
+     * @param responseType class of response
+     * @param <T>          typing of response message
+     * @return expected response with type T
      */
     public <T extends WebpbMessage> T request(WebpbMessage message, Class<T> responseType) {
         return requestAsync(message, responseType).block();
     }
 
     /**
-     * requestAsync
+     * Async request, see also {@link #request}.
      *
-     * @param message      WebpbMessage
-     * @param responseType Class
-     * @param <T>          type
-     * @return Response
+     * @param message      {@link WebpbMessage}
+     * @param responseType class of response
+     * @param <T>          typing of response message
+     * @return expected response with type T
      */
-    public <T extends WebpbMessage> Mono<T> requestAsync(WebpbMessage message, Class<T> responseType) {
+    public <T extends WebpbMessage> Mono<T> requestAsync(WebpbMessage message,
+                                                         Class<T> responseType) {
         MessageContext context = getContext(message);
         if (context == null) {
             throw new RuntimeException("Request method and path is required");
@@ -149,38 +150,38 @@ public class WebpbClient {
             });
     }
 
+    protected Mono<? extends Throwable> createException(ClientResponse clientResponse) {
+        return clientResponse.createException();
+    }
+
     /**
-     * formatUrl
+     * See also {@link #formatUrl(URL, ObjectMapper, WebpbMessage)}.
      *
-     * @param baseUrl URL
-     * @param message WebpbMessage
-     * @return String
+     * @param baseUrl      {@link URL}
+     * @param message      {@link WebpbMessage}
+     * @return formatted url
      */
     public String formatUrl(URL baseUrl, WebpbMessage message) {
         return formatUrl(baseUrl, this.formatMapper, message);
     }
 
     /**
-     * formatUrl
+     * See also {@link #formatUrl(URL, ObjectMapper, WebpbMessage)}.
      *
-     * @param message WebpbMessage
-     * @return String
+     * @param message      {@link WebpbMessage}
+     * @return formatted url
      */
     public String formatUrl(WebpbMessage message) {
         return formatUrl(null, this.formatMapper, message);
     }
 
-    protected Mono<? extends Throwable> createException(ClientResponse clientResponse) {
-        return clientResponse.createException();
-    }
-
     /**
-     * formatUrl
+     * Format request url from API base url and {@link WebpbMeta}.
      *
-     * @param baseUrl      URL
-     * @param objectMapper ObjectMapper
-     * @param message      WebpbMessage
-     * @return String
+     * @param baseUrl      {@link URL}
+     * @param objectMapper objectMapper to extract message properties
+     * @param message      {@link WebpbMessage}
+     * @return formatted url
      */
     public static String formatUrl(URL baseUrl, ObjectMapper objectMapper, WebpbMessage message) {
         MessageContext context = getContext(message);
@@ -191,7 +192,8 @@ public class WebpbClient {
             return context.path;
         }
         JsonNode data = objectMapper.convertValue(message, JsonNode.class);
-        String path = formatPath(data, context.paramGroup, baseUrl == null ? null : baseUrl.getQuery());
+        String path =
+            formatPath(data, context.paramGroup, baseUrl == null ? null : baseUrl.getQuery());
         String file = (baseUrl == null ? "" : emptyOrDefault(baseUrl.getPath(), ""))
             + emptyOrDefault(context.context, "") + path;
         if (baseUrl == null) {

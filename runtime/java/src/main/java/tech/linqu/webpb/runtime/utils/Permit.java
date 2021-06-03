@@ -13,12 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package tech.linqu.webpb.runtime.utils;
 
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
+/**
+ * Utility to grant reflection permit.
+ */
 public class Permit {
 
     private Permit() {
@@ -51,7 +55,7 @@ public class Permit {
         }
     }
 
-    public static <T extends AccessibleObject> T setAccessible(T accessor) {
+    private static <T extends AccessibleObject> T setAccessible(T accessor) {
         if (INIT_ERROR == null) {
             Unsafe.putBoolean(accessor, ACCESSIBLE_OVERRIDE_FIELD_OFFSET, true);
         } else {
@@ -73,7 +77,6 @@ public class Permit {
         if (f != null) {
             return Unsafe.objectFieldOffset(f);
         }
-        // The below seems very risky, but for all AccessibleObjects in java today it does work, and starting with JDK12, making the field accessible is no longer possible.
         try {
             return Unsafe.objectFieldOffset(Fake.class.getDeclaredField("override"));
         } catch (Throwable t) {
@@ -86,20 +89,32 @@ public class Permit {
         boolean override;
     }
 
-    public static Method getMethod(Class<?> c, String mName, Class<?>... parameterTypes) throws NoSuchMethodException {
+    /**
+     * Return a method by reflection.
+     *
+     * @param c              target class type
+     * @param moduleName     module name
+     * @param parameterTypes type array of the method
+     * @return the Method object
+     * @throws NoSuchMethodException if method not found
+     */
+    public static Method getMethod(Class<?> c, String moduleName, Class<?>... parameterTypes)
+        throws NoSuchMethodException {
         Method m = null;
         Class<?> oc = c;
         while (c != null) {
             try {
-                m = c.getDeclaredMethod(mName, parameterTypes);
+                m = c.getDeclaredMethod(moduleName, parameterTypes);
                 break;
             } catch (NoSuchMethodException ignored) {
+                // ignored
             }
             c = c.getSuperclass();
         }
 
         if (m == null) {
-            throw new NoSuchMethodException(oc == null ? "" : oc.getName() + " :: " + mName + "(args)");
+            throw new NoSuchMethodException(
+                oc == null ? "" : oc.getName() + " :: " + moduleName + "(args)");
         }
         return setAccessible(m);
     }

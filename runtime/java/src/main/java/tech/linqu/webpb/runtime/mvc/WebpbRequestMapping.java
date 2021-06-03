@@ -13,20 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package tech.linqu.webpb.runtime.mvc;
 
-import tech.linqu.webpb.runtime.WebpbMessage;
-import org.springframework.core.annotation.AliasFor;
-import org.springframework.web.bind.annotation.RequestMapping;
+package tech.linqu.webpb.runtime.mvc;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import org.springframework.core.annotation.AliasFor;
+import org.springframework.web.bind.annotation.RequestMapping;
+import tech.linqu.webpb.runtime.WebpbMessage;
 
 /**
- * WebpbRequestMapping
+ * See also {@link RequestMapping @RequestMapping}.
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
@@ -35,57 +35,57 @@ import java.lang.annotation.Target;
 public @interface WebpbRequestMapping {
 
     /**
-     * name
+     * {@link RequestMapping#name()}.
      *
-     * @return String
+     * @return name
      */
     @AliasFor(annotation = RequestMapping.class)
     String name() default "";
 
     /**
-     * value
+     * {@link RequestMapping#value()}.
      *
-     * @return String[]
+     * @return value
      */
     @AliasFor(annotation = RequestMapping.class)
     String[] value() default {};
 
     /**
-     * params
+     * {@link RequestMapping#params()}.
      *
-     * @return String[]
+     * @return params
      */
     @AliasFor(annotation = RequestMapping.class)
     String[] params() default {};
 
     /**
-     * headers
+     * {@link RequestMapping#headers()}.
      *
-     * @return String[]
+     * @return headers
      */
     @AliasFor(annotation = RequestMapping.class)
     String[] headers() default {};
 
     /**
-     * consumes
+     * {@link RequestMapping#consumes()}.
      *
-     * @return String[]
+     * @return consumes
      */
     @AliasFor(annotation = RequestMapping.class)
     String[] consumes() default {};
 
     /**
-     * produces
+     * {@link RequestMapping#produces()}.
      *
-     * @return String[]
+     * @return produces
      */
     @AliasFor(annotation = RequestMapping.class)
     String[] produces() default {};
 
     /**
-     * message
+     * Specify {@link WebpbMessage} for this annotation.
      *
-     * @return Class
+     * @return message
      */
     Class<? extends WebpbMessage> message() default WebpbMessage.class;
 }

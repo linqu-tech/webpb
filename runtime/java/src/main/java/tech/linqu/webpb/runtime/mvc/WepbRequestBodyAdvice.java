@@ -3,6 +3,9 @@ package tech.linqu.webpb.runtime.mvc;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.lang.reflect.Type;
+import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -19,12 +22,8 @@ import tech.linqu.webpb.runtime.WebpbMessage;
 import tech.linqu.webpb.runtime.WebpbMeta;
 import tech.linqu.webpb.runtime.WebpbUtils;
 
-import javax.servlet.http.HttpServletRequest;
-import java.lang.reflect.Type;
-import java.util.Map;
-
 /**
- * WepbRequestBodyAdvice
+ * Autowire request body properties from url path an query.
  */
 @RestControllerAdvice
 public class WepbRequestBodyAdvice extends RequestBodyAdviceAdapter {
@@ -43,21 +42,19 @@ public class WepbRequestBodyAdvice extends RequestBodyAdviceAdapter {
     }
 
     @Override
-    public Object afterBodyRead(Object body,
-                                HttpInputMessage inputMessage,
-                                MethodParameter parameter,
-                                Type targetType,
+    public Object afterBodyRead(Object body, HttpInputMessage inputMessage,
+                                MethodParameter parameter, Type targetType,
                                 Class<? extends HttpMessageConverter<?>> converterType) {
-
-        Object object = super.afterBodyRead(body, inputMessage, parameter, targetType, converterType);
+        Object object =
+            super.afterBodyRead(body, inputMessage, parameter, targetType, converterType);
         HttpServletRequest request = getHttpServletRequest();
         if (request == null) {
             return object;
         }
 
         @SuppressWarnings("unchecked")
-        Map<String, String> variablesMap =
-            (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+        Map<String, String> variablesMap = (Map<String, String>) request
+            .getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
 
         Map<String, String[]> parameterMap = request.getParameterMap();
         for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
@@ -91,7 +88,7 @@ public class WepbRequestBodyAdvice extends RequestBodyAdviceAdapter {
         }
     }
 
-    public static HttpServletRequest getHttpServletRequest() {
+    private static HttpServletRequest getHttpServletRequest() {
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         if (requestAttributes instanceof ServletRequestAttributes) {
             return ((ServletRequestAttributes) requestAttributes).getRequest();
