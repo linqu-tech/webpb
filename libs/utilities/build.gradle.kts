@@ -15,5 +15,9 @@ dependencies {
 }
 
 tasks.javadoc {
-    enabled = false
+    exclude("tech/linqu/webpb/utilities/descriptor/**")
+}
+
+tasks.withType<Checkstyle> {
+    exclude("tech/linqu/webpb/utilities/descriptor/**")
 }

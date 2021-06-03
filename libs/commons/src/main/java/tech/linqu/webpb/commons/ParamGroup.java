@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package tech.linqu.webpb.commons;
 
 import java.util.ArrayList;
@@ -20,18 +21,27 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Group of {@link PathParam} captured from url.
+ */
 public class ParamGroup {
 
-    public static final String QUERY_KEY = "key";
+    private static final String QUERY_KEY = "key";
 
-    public static final String QUERY_ACCESSOR = "accessor";
+    private static final String QUERY_ACCESSOR = "accessor";
 
-    public static final String QUERY_PATTERN = "((?<key>\\w+)=)?\\{(?<accessor>[\\w.]+)}&?";
+    private static final String QUERY_PATTERN = "((?<key>\\w+)=)?\\{(?<accessor>[\\w.]+)}&?";
 
     private final List<PathParam> params = new ArrayList<>();
 
     private String suffix = "";
 
+    /**
+     * Static creator.
+     *
+     * @param path request path
+     * @return Params group
+     */
     public static ParamGroup of(String path) {
         ParamGroup group = new ParamGroup();
         if (path == null || path.isEmpty()) {
@@ -54,10 +64,20 @@ public class ParamGroup {
         return group;
     }
 
+    /**
+     * Get path params.
+     *
+     * @return list of {@link PathParam}
+     */
     public List<PathParam> getParams() {
         return params;
     }
 
+    /**
+     * Get suffix.
+     *
+     * @return suffix
+     */
     public String getSuffix() {
         return suffix;
     }

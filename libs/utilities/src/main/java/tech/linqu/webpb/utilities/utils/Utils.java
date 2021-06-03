@@ -1,14 +1,22 @@
 package tech.linqu.webpb.utilities.utils;
 
-import org.apache.commons.lang3.StringUtils;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import org.apache.commons.lang3.StringUtils;
 
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-
+/**
+ * Utilities.
+ */
 public class Utils {
 
+    /**
+     * Normalize a path.
+     *
+     * @param path target path
+     * @return normalized path
+     */
     public static String normalize(String path) {
         if (StringUtils.isEmpty(path)) {
             return path;
@@ -19,6 +27,7 @@ public class Utils {
                 return StringUtils.stripEnd(path, "/");
             }
         } catch (MalformedURLException ignored) {
+            // ignored
         }
         String tmp = StringUtils.stripStart(path, "/");
         if (StringUtils.isEmpty(tmp)) {

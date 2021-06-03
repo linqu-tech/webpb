@@ -13,19 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package tech.linqu.webpb.runtime.messaging;
 
-import tech.linqu.webpb.runtime.WebpbMessage;
-import org.springframework.messaging.handler.annotation.MessageMapping;
+package tech.linqu.webpb.runtime.messaging;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import tech.linqu.webpb.runtime.WebpbMessage;
 
 /**
- * WebpbMessagingMapping
+ * See also {@link MessageMapping @MessageMapping}.
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
@@ -34,9 +34,16 @@ import java.lang.annotation.Target;
 public @interface WebpbMessagingMapping {
 
     /**
-     * Message annotation
+     * {@link MessageMapping#value()}.
      *
-     * @return Class
+     * @return string array
+     */
+    String[] value() default {};
+
+    /**
+     * Specify {@link WebpbMessage} for this annotation.
+     *
+     * @return class of {@link WebpbMessage}
      */
     Class<? extends WebpbMessage> message() default WebpbMessage.class;
 }

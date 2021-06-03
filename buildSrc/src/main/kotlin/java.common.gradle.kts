@@ -1,10 +1,15 @@
+import utils.Props
 import utils.Vers
 
 plugins {
-    java
+    checkstyle
     id("conventions.versioning")
+    idea
+    jacoco
+    java
 }
 
+Props.initialize(project)
 Vers.initialize(project)
 
 java {
@@ -25,4 +30,27 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+checkstyle {
+    toolVersion = Vers.checkstyle
+    configFile = file("${rootDir}/buildSrc/config/checkstyle.xml")
+    isIgnoreFailures = false
+    maxErrors = Props.checkstyleMaxErrors
+    maxWarnings = Props.checkstyleMaxWarnings
+}
+
+jacoco {
+    toolVersion = Vers.jacoco
+}
+
+tasks {
+    jacocoTestCoverageVerification {
+        violationRules {
+            rule { limit { minimum = BigDecimal.valueOf(Props.jacocoMinCoverage) } }
+        }
+    }
+    check {
+        dependsOn(jacocoTestCoverageVerification)
+    }
 }

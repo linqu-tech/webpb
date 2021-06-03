@@ -13,7 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package tech.linqu.webpb.java.generator;
+
+import static com.google.protobuf.Descriptors.FieldDescriptor.Type.BOOL;
+import static com.google.protobuf.Descriptors.FieldDescriptor.Type.BYTES;
+import static com.google.protobuf.Descriptors.FieldDescriptor.Type.DOUBLE;
+import static com.google.protobuf.Descriptors.FieldDescriptor.Type.FIXED32;
+import static com.google.protobuf.Descriptors.FieldDescriptor.Type.FIXED64;
+import static com.google.protobuf.Descriptors.FieldDescriptor.Type.FLOAT;
+import static com.google.protobuf.Descriptors.FieldDescriptor.Type.INT32;
+import static com.google.protobuf.Descriptors.FieldDescriptor.Type.INT64;
+import static com.google.protobuf.Descriptors.FieldDescriptor.Type.SFIXED32;
+import static com.google.protobuf.Descriptors.FieldDescriptor.Type.SFIXED64;
+import static com.google.protobuf.Descriptors.FieldDescriptor.Type.SINT32;
+import static com.google.protobuf.Descriptors.FieldDescriptor.Type.SINT64;
+import static com.google.protobuf.Descriptors.FieldDescriptor.Type.STRING;
+import static com.google.protobuf.Descriptors.FieldDescriptor.Type.UINT32;
+import static com.google.protobuf.Descriptors.FieldDescriptor.Type.UINT64;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.Modifier;
@@ -44,49 +61,55 @@ import com.github.javaparser.ast.type.Type;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Descriptors.FileDescriptor;
-import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
-import tech.linqu.webpb.utilities.context.RequestContext;
-import tech.linqu.webpb.utilities.utils.Const;
-import tech.linqu.webpb.utilities.utils.DescriptorUtils;
-import tech.linqu.webpb.utilities.utils.OptionUtils;
-import tech.linqu.webpb.utilities.utils.Utils;
-import tech.linqu.webpb.utilities.utils.WebpbExtend.FieldOpts;
-import tech.linqu.webpb.utilities.utils.WebpbExtend.FileOpts;
-import tech.linqu.webpb.utilities.utils.WebpbExtend.JavaFieldOpts;
-import tech.linqu.webpb.utilities.utils.WebpbExtend.JavaFileOpts;
-import tech.linqu.webpb.utilities.utils.WebpbExtend.JavaMessageOpts;
-import tech.linqu.webpb.utilities.utils.WebpbExtend.MessageOpts;
-import tech.linqu.webpb.utilities.utils.WebpbExtend.OptFieldOpts;
-import tech.linqu.webpb.utilities.utils.WebpbExtend.OptMessageOpts;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
+import tech.linqu.webpb.utilities.context.RequestContext;
+import tech.linqu.webpb.utilities.descriptor.WebpbExtend.FieldOpts;
+import tech.linqu.webpb.utilities.descriptor.WebpbExtend.FileOpts;
+import tech.linqu.webpb.utilities.descriptor.WebpbExtend.JavaFieldOpts;
+import tech.linqu.webpb.utilities.descriptor.WebpbExtend.JavaFileOpts;
+import tech.linqu.webpb.utilities.descriptor.WebpbExtend.JavaMessageOpts;
+import tech.linqu.webpb.utilities.descriptor.WebpbExtend.MessageOpts;
+import tech.linqu.webpb.utilities.descriptor.WebpbExtend.OptFieldOpts;
+import tech.linqu.webpb.utilities.descriptor.WebpbExtend.OptMessageOpts;
+import tech.linqu.webpb.utilities.utils.Const;
+import tech.linqu.webpb.utilities.utils.DescriptorUtils;
+import tech.linqu.webpb.utilities.utils.OptionUtils;
+import tech.linqu.webpb.utilities.utils.Utils;
 
+/**
+ * Generator for {@link Descriptor}.
+ */
 @RequiredArgsConstructor(staticName = "of")
 public class MessageGenerator {
 
-    private static final Map<FieldDescriptor.Type, Type> TYPES = new HashMap<FieldDescriptor.Type, Type>() {{
-        put(FieldDescriptor.Type.BOOL, new ClassOrInterfaceType(null, Boolean.class.getSimpleName()));
-        put(FieldDescriptor.Type.BYTES, new ArrayType(PrimitiveType.byteType()));
-        put(FieldDescriptor.Type.DOUBLE, new ClassOrInterfaceType(null, Double.class.getSimpleName()));
-        put(FieldDescriptor.Type.FLOAT, new ClassOrInterfaceType(null, Float.class.getSimpleName()));
-        put(FieldDescriptor.Type.FIXED32, new ClassOrInterfaceType(null, Integer.class.getSimpleName()));
-        put(FieldDescriptor.Type.FIXED64, new ClassOrInterfaceType(null, Long.class.getSimpleName()));
-        put(FieldDescriptor.Type.INT32, new ClassOrInterfaceType(null, Integer.class.getSimpleName()));
-        put(FieldDescriptor.Type.INT64, new ClassOrInterfaceType(null, Long.class.getSimpleName()));
-        put(FieldDescriptor.Type.SFIXED32, new ClassOrInterfaceType(null, Integer.class.getSimpleName()));
-        put(FieldDescriptor.Type.SFIXED64, new ClassOrInterfaceType(null, Long.class.getSimpleName()));
-        put(FieldDescriptor.Type.SINT32, new ClassOrInterfaceType(null, Integer.class.getSimpleName()));
-        put(FieldDescriptor.Type.SINT64, new ClassOrInterfaceType(null, Long.class.getSimpleName()));
-        put(FieldDescriptor.Type.STRING, new ClassOrInterfaceType(null, String.class.getSimpleName()));
-        put(FieldDescriptor.Type.UINT32, new ClassOrInterfaceType(null, Integer.class.getSimpleName()));
-        put(FieldDescriptor.Type.UINT64, new ClassOrInterfaceType(null, Long.class.getSimpleName()));
-    }};
+    private static final Map<FieldDescriptor.Type, Type> TYPES;
+
+    static {
+        Map<FieldDescriptor.Type, Type> map = new HashMap<>();
+        map.put(BOOL, new ClassOrInterfaceType(null, Boolean.class.getSimpleName()));
+        map.put(BYTES, new ArrayType(PrimitiveType.byteType()));
+        map.put(DOUBLE, new ClassOrInterfaceType(null, Double.class.getSimpleName()));
+        map.put(FLOAT, new ClassOrInterfaceType(null, Float.class.getSimpleName()));
+        map.put(FIXED32, new ClassOrInterfaceType(null, Integer.class.getSimpleName()));
+        map.put(FIXED64, new ClassOrInterfaceType(null, Long.class.getSimpleName()));
+        map.put(INT32, new ClassOrInterfaceType(null, Integer.class.getSimpleName()));
+        map.put(INT64, new ClassOrInterfaceType(null, Long.class.getSimpleName()));
+        map.put(SFIXED32, new ClassOrInterfaceType(null, Integer.class.getSimpleName()));
+        map.put(SFIXED64, new ClassOrInterfaceType(null, Long.class.getSimpleName()));
+        map.put(SINT32, new ClassOrInterfaceType(null, Integer.class.getSimpleName()));
+        map.put(SINT64, new ClassOrInterfaceType(null, Long.class.getSimpleName()));
+        map.put(STRING, new ClassOrInterfaceType(null, String.class.getSimpleName()));
+        map.put(UINT32, new ClassOrInterfaceType(null, Integer.class.getSimpleName()));
+        map.put(UINT64, new ClassOrInterfaceType(null, Long.class.getSimpleName()));
+        TYPES = map;
+    }
 
     private static final JavaParser JAVA_PARSER = new JavaParser();
 
@@ -98,6 +121,12 @@ public class MessageGenerator {
 
     private final NameMap nameMap;
 
+    /**
+     * Entrance of the generator.
+     *
+     * @param descriptor {@link Descriptor}.
+     * @return {@link ClassOrInterfaceDeclaration}
+     */
     public ClassOrInterfaceDeclaration generate(Descriptor descriptor) {
         ClassOrInterfaceDeclaration declaration = new ClassOrInterfaceDeclaration();
         declaration.setName(descriptor.getName());
@@ -109,7 +138,8 @@ public class MessageGenerator {
         addAnnotations(declaration, webpbOpts.getAnnotationList());
         JavaFileOpts fileOpts = OptionUtils.getOpts(fileDescriptor, FileOpts::hasJava).getJava();
         addAnnotations(declaration, fileOpts.getAnnotationList());
-        JavaMessageOpts messageOpts = OptionUtils.getOpts(descriptor, MessageOpts::hasJava).getJava();
+        JavaMessageOpts messageOpts =
+            OptionUtils.getOpts(descriptor, MessageOpts::hasJava).getJava();
         addAnnotations(declaration, messageOpts.getAnnotationList());
 
         generateMessageFields(declaration, descriptor);
@@ -138,7 +168,6 @@ public class MessageGenerator {
         JAVA_PARSER.parseName(Const.RUNTIME_PACKAGE + ".WebpbMessage")
             .ifSuccessful(v -> addImports(imports, v));
 
-        ClassOrInterfaceType metaType = new ClassOrInterfaceType(null, "WebpbMeta");
         JAVA_PARSER.parseName(Const.RUNTIME_PACKAGE + ".WebpbMeta")
             .ifSuccessful(v -> addImports(imports, v));
 
@@ -147,6 +176,7 @@ public class MessageGenerator {
         addStaticOption(declaration, "WEBPB_CONTEXT", Utils.normalize(messageOpts.getContext()));
         addStaticOption(declaration, "WEBPB_PATH", Utils.normalize(messageOpts.getPath()));
 
+        ClassOrInterfaceType metaType = new ClassOrInterfaceType(null, "WebpbMeta");
         ObjectCreationExpr creationExpr = new ObjectCreationExpr(
             null, new ClassOrInterfaceType(metaType, "Builder"), new NodeList<>()
         );
@@ -169,12 +199,15 @@ public class MessageGenerator {
         }
         callExpr = new MethodCallExpr(callExpr, "build");
 
-        FieldDeclaration field = declaration.addFieldWithInitializer(metaType, "WEBPB_META", callExpr);
-        field.setModifiers(Modifier.Keyword.PUBLIC, Modifier.Keyword.STATIC, Modifier.Keyword.FINAL);
+        FieldDeclaration field =
+            declaration.addFieldWithInitializer(metaType, "WEBPB_META", callExpr);
+        field
+            .setModifiers(Modifier.Keyword.PUBLIC, Modifier.Keyword.STATIC, Modifier.Keyword.FINAL);
         addWebpbMetaMethod(declaration);
     }
 
-    private void addStaticOption(ClassOrInterfaceDeclaration declaration, String key, String value) {
+    private void addStaticOption(ClassOrInterfaceDeclaration declaration, String key,
+                                 String value) {
         value = StringUtils.isEmpty(value) ? "" : value;
         declaration.addFieldWithInitializer(String.class, key, new StringLiteralExpr(value),
             Modifier.Keyword.PUBLIC,
@@ -205,7 +238,8 @@ public class MessageGenerator {
 
     private void parseImports(Node node, List<Name> imports) {
         if (node instanceof FieldAccessExpr) {
-            addImports(imports, nameMap.getFullName(new Name(null, ((FieldAccessExpr) node).getScope().toString())));
+            addImports(imports, nameMap
+                .getFullName(new Name(null, ((FieldAccessExpr) node).getScope().toString())));
         } else if (node instanceof AnnotationExpr) {
             addImports(imports, nameMap.getFullName(((AnnotationExpr) node).getName()));
         } else if (node instanceof ClassOrInterfaceType) {
@@ -218,13 +252,15 @@ public class MessageGenerator {
         }
     }
 
-    private void generateConstructor(ClassOrInterfaceDeclaration declaration, Descriptor descriptor) {
+    private void generateConstructor(ClassOrInterfaceDeclaration declaration,
+                                     Descriptor descriptor) {
         declaration.addConstructor()
             .setModifiers(Modifier.Keyword.PUBLIC)
             .setBody(new BlockStmt());
         List<FieldDescriptor> descriptors = descriptor.getFields().stream()
             .filter(fieldDescriptor -> {
-                OptFieldOpts fieldOpts = OptionUtils.getOpts(fieldDescriptor, FieldOpts::hasOpt).getOpt();
+                OptFieldOpts fieldOpts =
+                    OptionUtils.getOpts(fieldDescriptor, FieldOpts::hasOpt).getOpt();
                 return !fieldOpts.getOmitted();
             })
             .collect(Collectors.toList());
@@ -245,9 +281,11 @@ public class MessageGenerator {
         }
     }
 
-    private void generateMessageFields(ClassOrInterfaceDeclaration declaration, Descriptor descriptor) {
+    private void generateMessageFields(ClassOrInterfaceDeclaration declaration,
+                                       Descriptor descriptor) {
         for (FieldDescriptor fieldDescriptor : descriptor.getFields()) {
-            OptFieldOpts fieldOpts = OptionUtils.getOpts(fieldDescriptor, FieldOpts::hasOpt).getOpt();
+            OptFieldOpts fieldOpts =
+                OptionUtils.getOpts(fieldDescriptor, FieldOpts::hasOpt).getOpt();
             if (fieldOpts.getOmitted()) {
                 continue;
             }
@@ -257,7 +295,8 @@ public class MessageGenerator {
             FieldDeclaration fieldDeclaration = declaration.addField(
                 fieldType, fieldDescriptor.getName(), Modifier.Keyword.PRIVATE
             );
-            JavaFieldOpts javaFieldOpts = OptionUtils.getOpts(fieldDescriptor, FieldOpts::hasJava).getJava();
+            JavaFieldOpts javaFieldOpts =
+                OptionUtils.getOpts(fieldDescriptor, FieldOpts::hasJava).getJava();
             List<String> annotations = new ArrayList<>(javaFieldOpts.getAnnotationList());
             if (fieldOpts.getInQuery()) {
                 annotations.add("@" + Const.RUNTIME_PACKAGE + ".common.InQuery");
@@ -289,7 +328,8 @@ public class MessageGenerator {
         if (type != null) {
             return type.clone();
         }
-        return new ClassOrInterfaceType(null, DescriptorUtils.getFieldTypeSimpleName(fieldDescriptor));
+        return new ClassOrInterfaceType(null,
+            DescriptorUtils.getFieldTypeSimpleName(fieldDescriptor));
     }
 
     private void addImports(ClassOrInterfaceType type, List<Name> imports) {

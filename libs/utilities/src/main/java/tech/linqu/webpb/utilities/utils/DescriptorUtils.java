@@ -13,33 +13,50 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package tech.linqu.webpb.utilities.utils;
+
+import static com.google.protobuf.Descriptors.FieldDescriptor.JavaType.MESSAGE;
 
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Descriptors.FileDescriptor;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import tech.linqu.webpb.commons.ParamGroup;
 import tech.linqu.webpb.commons.PathParam;
 
-import java.util.List;
-
-import static com.google.protobuf.Descriptors.FieldDescriptor.JavaType.MESSAGE;
-
+/**
+ * Utilities to handle protobuf descriptors.
+ */
 public class DescriptorUtils {
 
-    public static boolean isScalar(FieldDescriptor fieldDescriptor) {
-        return !(isEnum(fieldDescriptor) || isMessage(fieldDescriptor));
-    }
-
+    /**
+     * Filed type is enum.
+     *
+     * @param fieldDescriptor {@link FieldDescriptor}
+     * @return is enum
+     */
     public static boolean isEnum(FieldDescriptor fieldDescriptor) {
         return fieldDescriptor.getJavaType() == FieldDescriptor.JavaType.ENUM;
     }
 
+    /**
+     * Field type is message.
+     *
+     * @param fieldDescriptor {@link FieldDescriptor}
+     * @return is message
+     */
     public static boolean isMessage(FieldDescriptor fieldDescriptor) {
         return fieldDescriptor.getJavaType() == MESSAGE;
     }
 
+    /**
+     * Resolve file package from type of the field.
+     *
+     * @param fieldDescriptor {@link FileDescriptor}.
+     * @return file package name
+     */
     public static String getFieldTypeFilePackage(FieldDescriptor fieldDescriptor) {
         if (isMessage(fieldDescriptor)) {
             return fieldDescriptor.getMessageType().getFile().getPackage();
@@ -50,6 +67,12 @@ public class DescriptorUtils {
         }
     }
 
+    /**
+     * Resolve package from type of the field.
+     *
+     * @param fieldDescriptor {@link FileDescriptor}.
+     * @return package name
+     */
     public static String getFieldTypePackage(FieldDescriptor fieldDescriptor) {
         String fullName = getFieldTypeFullName(fieldDescriptor);
         if (StringUtils.isNotEmpty(fullName)) {
@@ -59,6 +82,12 @@ public class DescriptorUtils {
         return null;
     }
 
+    /**
+     * Resolve simple name from type of the field.
+     *
+     * @param fieldDescriptor {@link FileDescriptor}.
+     * @return simple type name
+     */
     public static String getFieldTypeSimpleName(FieldDescriptor fieldDescriptor) {
         if (isMessage(fieldDescriptor)) {
             return fieldDescriptor.getMessageType().getName();
@@ -69,6 +98,12 @@ public class DescriptorUtils {
         }
     }
 
+    /**
+     * Resolve full name from type of the field.
+     *
+     * @param fieldDescriptor {@link FileDescriptor}.
+     * @return full type name
+     */
     public static String getFieldTypeFullName(FieldDescriptor fieldDescriptor) {
         if (isMessage(fieldDescriptor)) {
             return fieldDescriptor.getMessageType().getFullName();
@@ -79,22 +114,43 @@ public class DescriptorUtils {
         }
     }
 
+    /**
+     * Get key descriptor of a map field.
+     *
+     * @param fieldDescriptor {@link FieldDescriptor}
+     * @return {@link FileDescriptor}
+     */
     public static FieldDescriptor getKeyDescriptor(FieldDescriptor fieldDescriptor) {
         List<FieldDescriptor> fieldDescriptors = fieldDescriptor.getMessageType().getFields();
         return fieldDescriptors.get(0);
     }
 
+    /**
+     * Get value descriptor of a map field.
+     *
+     * @param fieldDescriptor {@link FieldDescriptor}
+     * @return {@link FileDescriptor}
+     */
     public static FieldDescriptor getValueDescriptor(FieldDescriptor fieldDescriptor) {
         List<FieldDescriptor> fieldDescriptors = fieldDescriptor.getMessageType().getFields();
         return fieldDescriptors.get(1);
     }
 
-    public static FileDescriptor resolveDescriptor(List<FileDescriptor> descriptors, String dependency) {
+    /**
+     * Resolve a file descriptor by name recursively.
+     *
+     * @param descriptors from descriptors
+     * @param dependency  dependency name
+     * @return {@link FileDescriptor} or null
+     */
+    public static FileDescriptor resolveDescriptor(List<FileDescriptor> descriptors,
+                                                   String dependency) {
         for (FileDescriptor descriptor : descriptors) {
             if (StringUtils.equalsIgnoreCase(descriptor.getName(), dependency)) {
                 return descriptor;
             }
-            FileDescriptor fileDescriptor = resolveDescriptor(descriptor.getDependencies(), dependency);
+            FileDescriptor fileDescriptor =
+                resolveDescriptor(descriptor.getDependencies(), dependency);
             if (fileDescriptor != null) {
                 return fileDescriptor;
             }
@@ -102,6 +158,12 @@ public class DescriptorUtils {
         return null;
     }
 
+    /**
+     * Validate the descriptor contains required path variables.
+     *
+     * @param group      {@link ParamGroup}
+     * @param descriptor {@link Descriptor}
+     */
     public static void validation(ParamGroup group, Descriptor descriptor) {
         for (PathParam param : group.getParams()) {
             if (!validate(param.getAccessor(), descriptor)) {

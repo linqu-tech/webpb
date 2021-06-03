@@ -4,6 +4,9 @@ import tech.linqu.webpb.runtime.WebpbMessage;
 import tech.linqu.webpb.runtime.WebpbMeta;
 import tech.linqu.webpb.runtime.common.InQuery;
 
+/**
+ * Test class implements {@link WebpbMessage}.
+ */
 public class FooRequest implements WebpbMessage {
 
     @Override

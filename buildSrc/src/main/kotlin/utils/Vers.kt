@@ -7,9 +7,11 @@ import kotlin.reflect.full.memberProperties
 object Vers {
     private var initialized = false
 
+    lateinit var checkstyle: String
     lateinit var commonsLang3: String
     lateinit var hibernateValidator: String
     lateinit var jackson: String
+    lateinit var jacoco: String
     lateinit var javaparser: String
     lateinit var jupiter: String
     lateinit var lombok: String

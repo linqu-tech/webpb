@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package tech.linqu.webpb.runtime;
 
 import java.util.Arrays;
@@ -20,7 +21,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * WebpbMeta
+ * Meta data for a {@link WebpbMessage}.
  */
 public class WebpbMeta {
 
@@ -33,43 +34,43 @@ public class WebpbMeta {
     private List<String> tags;
 
     /**
-     * get method
+     * Http method name.
      *
-     * @return String
+     * @return http method
      */
     public String getMethod() {
         return method;
     }
 
     /**
-     * get context
+     * Server context.
      *
-     * @return String
+     * @return server context
      */
     public String getContext() {
         return context;
     }
 
     /**
-     * get path
+     * Request path.
      *
-     * @return String
+     * @return request path
      */
     public String getPath() {
         return path;
     }
 
     /**
-     * get tags
+     * Message tags.
      *
-     * @return List
+     * @return message tag list
      */
     public List<String> getTags() {
         return tags;
     }
 
     /**
-     * Builder
+     * Builder for {@link WebpbMeta}.
      */
     public static class Builder {
 
@@ -82,10 +83,10 @@ public class WebpbMeta {
         private List<String> tags = Collections.emptyList();
 
         /**
-         * method
+         * Set http method name.
          *
-         * @param method String
-         * @return Builder
+         * @param method http method
+         * @return {@link Builder}
          */
         public Builder method(String method) {
             this.method = method;
@@ -93,10 +94,10 @@ public class WebpbMeta {
         }
 
         /**
-         * context
+         * Set server context.
          *
-         * @param context String
-         * @return Builder
+         * @param context server context
+         * @return {@link Builder}
          */
         public Builder context(String context) {
             this.context = context;
@@ -104,10 +105,10 @@ public class WebpbMeta {
         }
 
         /**
-         * path
+         * Set request path.
          *
-         * @param path String
-         * @return Builder
+         * @param path request path
+         * @return {@link Builder}
          */
         public Builder path(String path) {
             this.path = path;
@@ -115,10 +116,10 @@ public class WebpbMeta {
         }
 
         /**
-         * tags
+         * Set message tags.
          *
-         * @param tags array of String
-         * @return Builder
+         * @param tags tag array
+         * @return {@link Builder}
          */
         public Builder tags(String... tags) {
             this.tags = Arrays.asList(tags);
@@ -126,9 +127,9 @@ public class WebpbMeta {
         }
 
         /**
-         * build
+         * Build the {@link WebpbMeta}.
          *
-         * @return WebpbMeta
+         * @return {@link WebpbMeta}
          */
         public WebpbMeta build() {
             WebpbMeta meta = new WebpbMeta();

@@ -13,7 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package tech.linqu.webpb.utilities.utils;
+
+import static com.google.protobuf.UnknownFieldSet.Field;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Descriptors.Descriptor;
@@ -22,14 +25,22 @@ import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Descriptors.FileDescriptor;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.UnknownFieldSet;
-
 import java.util.List;
 import java.util.function.Predicate;
+import tech.linqu.webpb.utilities.descriptor.WebpbExtend;
 
-import static com.google.protobuf.UnknownFieldSet.Field;
-
+/**
+ * Utilities to handle options.
+ */
 public class OptionUtils {
 
+    /**
+     * Determine if should skip by tags.
+     *
+     * @param optionTags list of wanted tags
+     * @param tags       tags to test
+     * @return should skip
+     */
     public static boolean shouldSkip(List<String> optionTags, List<String> tags) {
         if (tags.isEmpty()) {
             return false;
@@ -42,7 +53,15 @@ public class OptionUtils {
         return true;
     }
 
-    public static WebpbExtend.FileOpts getOpts(FileDescriptor fileDescriptor, Predicate<WebpbExtend.FileOpts> predicate) {
+    /**
+     * Resolve {@link WebpbExtend.FieldOpts} from {@link FileDescriptor} with a filter.
+     *
+     * @param fileDescriptor {@link FileDescriptor}
+     * @param predicate      option filter
+     * @return {@link WebpbExtend.FieldOpts}
+     */
+    public static WebpbExtend.FileOpts getOpts(FileDescriptor fileDescriptor,
+                                               Predicate<WebpbExtend.FileOpts> predicate) {
         if (fileDescriptor == null) {
             return WebpbExtend.FileOpts.getDefaultInstance();
         }
@@ -63,7 +82,15 @@ public class OptionUtils {
         return WebpbExtend.FileOpts.getDefaultInstance();
     }
 
-    public static WebpbExtend.MessageOpts getOpts(Descriptor descriptor, Predicate<WebpbExtend.MessageOpts> predicate) {
+    /**
+     * Resolve {@link WebpbExtend.MessageOpts} from {@link FileDescriptor} with a filter.
+     *
+     * @param descriptor {@link Descriptor}
+     * @param predicate  option filter
+     * @return {@link WebpbExtend.MessageOpts}
+     */
+    public static WebpbExtend.MessageOpts getOpts(Descriptor descriptor,
+                                                  Predicate<WebpbExtend.MessageOpts> predicate) {
         if (descriptor == null) {
             return WebpbExtend.MessageOpts.getDefaultInstance();
         }
@@ -84,7 +111,15 @@ public class OptionUtils {
         return WebpbExtend.MessageOpts.getDefaultInstance();
     }
 
-    public static WebpbExtend.EnumOpts getOpts(EnumDescriptor descriptor, Predicate<WebpbExtend.EnumOpts> predicate) {
+    /**
+     * Resolve {@link WebpbExtend.EnumOpts} from {@link FileDescriptor} with a filter.
+     *
+     * @param descriptor {@link EnumDescriptor}
+     * @param predicate  option filter
+     * @return {@link WebpbExtend.EnumOpts}
+     */
+    public static WebpbExtend.EnumOpts getOpts(EnumDescriptor descriptor,
+                                               Predicate<WebpbExtend.EnumOpts> predicate) {
         if (descriptor == null) {
             return WebpbExtend.EnumOpts.getDefaultInstance();
         }
@@ -105,7 +140,15 @@ public class OptionUtils {
         return WebpbExtend.EnumOpts.getDefaultInstance();
     }
 
-    public static WebpbExtend.FieldOpts getOpts(FieldDescriptor descriptor, Predicate<WebpbExtend.FieldOpts> predicate) {
+    /**
+     * Resolve {@link WebpbExtend.FieldOpts} from {@link FileDescriptor} with a filter.
+     *
+     * @param descriptor {@link FileDescriptor}
+     * @param predicate      option filter
+     * @return {@link WebpbExtend.FieldOpts}
+     */
+    public static WebpbExtend.FieldOpts getOpts(FieldDescriptor descriptor,
+                                                Predicate<WebpbExtend.FieldOpts> predicate) {
         if (descriptor == null) {
             return WebpbExtend.FieldOpts.getDefaultInstance();
         }

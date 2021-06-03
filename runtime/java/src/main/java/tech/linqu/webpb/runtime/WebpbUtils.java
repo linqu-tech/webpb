@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package tech.linqu.webpb.runtime;
 
 import java.lang.reflect.Field;
 
 /**
- * WebpbUtils
+ * Utilities for webpb java runtime.
  */
 public class WebpbUtils {
 
     /**
-     * readWebpbMeta
+     * Read WebpbMeta from a webpb message.
      *
      * @param type Class
      * @return WebpbMeta

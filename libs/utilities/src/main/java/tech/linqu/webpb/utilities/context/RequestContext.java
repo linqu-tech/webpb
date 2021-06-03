@@ -13,19 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package tech.linqu.webpb.utilities.context;
 
-import tech.linqu.webpb.utilities.utils.WebpbExtend;
-import tech.linqu.webpb.utilities.utils.Const;
-import tech.linqu.webpb.utilities.utils.OptionUtils;
+
 import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.Descriptors.DescriptorValidationException;
 import com.google.protobuf.Descriptors.FileDescriptor;
 import com.google.protobuf.compiler.PluginProtos.CodeGeneratorRequest;
-import lombok.Getter;
-import org.apache.commons.lang3.StringUtils;
-import tech.linqu.webpb.utilities.utils.DescriptorUtils;
-
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -38,7 +33,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
+import tech.linqu.webpb.utilities.descriptor.WebpbExtend;
+import tech.linqu.webpb.utilities.utils.Const;
+import tech.linqu.webpb.utilities.utils.DescriptorUtils;
+import tech.linqu.webpb.utilities.utils.OptionUtils;
 
+/**
+ * Context wrapper for generator.
+ */
 @Getter
 public class RequestContext {
 
@@ -48,6 +52,12 @@ public class RequestContext {
 
     private WebpbExtend.FileOpts fileOpts;
 
+    /**
+     * Create context with a file option filter.
+     *
+     * @param predicate predicates for file option.
+     * @throws Exception if eny exceptions
+     */
     public RequestContext(Predicate<WebpbExtend.FileOpts> predicate) throws Exception {
         CodeGeneratorRequest request = createRequest();
         initDescriptors(request);
@@ -70,7 +80,8 @@ public class RequestContext {
         return request;
     }
 
-    private void initDescriptors(CodeGeneratorRequest request) throws DescriptorValidationException {
+    private void initDescriptors(CodeGeneratorRequest request)
+        throws DescriptorValidationException {
         Map<String, FileDescriptor> filesMap = new HashMap<>();
         for (DescriptorProtos.FileDescriptorProto proto : request.getProtoFileList()) {
             FileDescriptor[] dependencies = proto.getDependencyList().stream()
@@ -87,7 +98,8 @@ public class RequestContext {
     }
 
     private void initWebpbOptions(Predicate<WebpbExtend.FileOpts> predicate) {
-        FileDescriptor webpbDescriptor = DescriptorUtils.resolveDescriptor(descriptors, Const.WEBPB_OPTIONS);
+        FileDescriptor webpbDescriptor =
+            DescriptorUtils.resolveDescriptor(descriptors, Const.WEBPB_OPTIONS);
         this.fileOpts = OptionUtils.getOpts(webpbDescriptor, predicate);
     }
 }
