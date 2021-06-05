@@ -48,8 +48,8 @@ public class EnumGenerator {
     /**
      * Generate enum declaration.
      *
-     * @param descriptor @see com.google.protobuf.Descriptors.EnumDescriptor.
-     * @return @see com.github.javaparser.ast.body
+     * @param descriptor {@link com.google.protobuf.Descriptors.EnumDescriptor}.
+     * @return {@link EnumDeclaration}
      */
     public EnumDeclaration generate(Descriptors.EnumDescriptor descriptor) {
         EnumDeclaration declaration = new EnumDeclaration();

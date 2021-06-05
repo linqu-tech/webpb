@@ -15,8 +15,10 @@ object Vers {
     lateinit var javaparser: String
     lateinit var jupiter: String
     lateinit var lombok: String
+    lateinit var mockito: String
     lateinit var protobufJava: String
     lateinit var protoc: String
+    lateinit var reactorNetty: String
     lateinit var servletApi: String
     lateinit var springFramework: String
     lateinit var webpb: String

@@ -19,10 +19,14 @@ package tech.linqu.webpb.runtime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import lombok.Getter;
+import lombok.ToString;
 
 /**
  * Meta data for a {@link WebpbMessage}.
  */
+@Getter
+@ToString
 public class WebpbMeta {
 
     private String method;
@@ -32,42 +36,6 @@ public class WebpbMeta {
     private String path;
 
     private List<String> tags;
-
-    /**
-     * Http method name.
-     *
-     * @return http method
-     */
-    public String getMethod() {
-        return method;
-    }
-
-    /**
-     * Server context.
-     *
-     * @return server context
-     */
-    public String getContext() {
-        return context;
-    }
-
-    /**
-     * Request path.
-     *
-     * @return request path
-     */
-    public String getPath() {
-        return path;
-    }
-
-    /**
-     * Message tags.
-     *
-     * @return message tag list
-     */
-    public List<String> getTags() {
-        return tags;
-    }
 
     /**
      * Builder for {@link WebpbMeta}.

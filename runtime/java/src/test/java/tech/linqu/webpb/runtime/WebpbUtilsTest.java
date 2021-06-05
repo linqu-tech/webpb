@@ -16,25 +16,50 @@
 
 package tech.linqu.webpb.runtime;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.net.MalformedURLException;
+import java.net.URL;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import tech.linqu.webpb.runtime.model.BadRequest;
+import tech.linqu.webpb.runtime.model.FooRequest;
 
 class WebpbUtilsTest {
 
-    static class MockMessage implements WebpbMessage {
-
-        public static final WebpbMeta WEBPB_META = new WebpbMeta();
-
-        @Override
-        public WebpbMeta webpbMeta() {
-            return WEBPB_META;
-        }
-    }
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     void shouldReadWebpbMetaSuccess() {
-        WebpbMeta webpbMeta = WebpbUtils.readWebpbMeta(MockMessage.class);
-        assertNotNull(webpbMeta);
+        assertNotNull(WebpbUtils.readWebpbMeta(FooRequest.class));
+    }
+
+    @Test
+    void shouldReturnNullWhenWepbMetaNotExists() {
+        assertNull(WebpbUtils.readWebpbMeta(BadRequest.class));
+    }
+
+    @Test
+    void isValidPathTest() {
+        assertFalse(WebpbUtils.isValidPath(null));
+        assertFalse(WebpbUtils.isValidPath("//"));
+        assertFalse(WebpbUtils.isValidPath("abc"));
+        assertTrue(WebpbUtils.isValidPath(""));
+        assertTrue(WebpbUtils.isValidPath("/ /"));
+        assertTrue(WebpbUtils.isValidPath("/"));
+        assertTrue(WebpbUtils.isValidPath("/abc"));
+        assertTrue(WebpbUtils.isValidPath("https:/abc"));
+    }
+
+    @Test
+    void shouldFormatUrlSuccessWhenWithBaseUrl() throws MalformedURLException {
+        WebpbUtils.clearContextCache();
+        String url = WebpbUtils.formatUrl(new URL("https://abc"), objectMapper, new FooRequest());
+        assertEquals("https://abc/domain/123/action?pagination=true&size=20&page=10", url);
     }
 }

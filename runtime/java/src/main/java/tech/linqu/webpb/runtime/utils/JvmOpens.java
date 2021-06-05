@@ -17,6 +17,7 @@
 package tech.linqu.webpb.runtime.utils;
 
 import java.lang.reflect.Method;
+import tech.linqu.webpb.runtime.common.Unsafe;
 
 /**
  * Utilities to open JVM modules.

@@ -1,4 +1,4 @@
-package tech.linqu.webpb.runtime.utils;
+package tech.linqu.webpb.runtime.common;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;

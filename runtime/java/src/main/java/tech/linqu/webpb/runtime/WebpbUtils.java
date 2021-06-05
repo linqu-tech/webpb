@@ -16,12 +16,32 @@
 
 package tech.linqu.webpb.runtime;
 
+import static org.springframework.util.StringUtils.hasLength;
+import static tech.linqu.webpb.commons.Utils.emptyOrDefault;
+import static tech.linqu.webpb.commons.Utils.uncheckedCall;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.lang.reflect.Field;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import org.springframework.http.HttpMethod;
+import tech.linqu.webpb.commons.ParamGroup;
+import tech.linqu.webpb.commons.PathParam;
+import tech.linqu.webpb.runtime.common.MessageContext;
 
 /**
  * Utilities for webpb java runtime.
  */
 public class WebpbUtils {
+
+    private static final Map<Class<?>, MessageContext> contextCache = new ConcurrentHashMap<>();
+
+    private WebpbUtils() {
+    }
 
     /**
      * Read WebpbMeta from a webpb message.
@@ -36,5 +56,148 @@ public class WebpbUtils {
         } catch (NoSuchFieldException | IllegalAccessException e) {
             return null;
         }
+    }
+
+    /**
+     * Format request url from API base url and {@link WebpbMeta}.
+     *
+     * @param baseUrl      {@link URL}
+     * @param objectMapper objectMapper to extract message properties
+     * @param message      {@link WebpbMessage}
+     * @return formatted url
+     */
+    public static String formatUrl(URL baseUrl, ObjectMapper objectMapper, WebpbMessage message) {
+        MessageContext context = getContext(message);
+        if (!context.getPath().startsWith("/") && baseUrl != null) {
+            throw new RuntimeException(
+                String.format("Can not concat baseUrl: %s with path: %s", baseUrl,
+                    context.getPath()));
+        }
+        if (context.getParamGroup() == null) {
+            return context.getPath();
+        }
+        JsonNode data = objectMapper.convertValue(message, JsonNode.class);
+        String path =
+            formatPath(data, context.getParamGroup(), baseUrl == null ? null : baseUrl.getQuery());
+        String file = (baseUrl == null ? "" : emptyOrDefault(baseUrl.getPath(), ""))
+            + emptyOrDefault(context.getContext(), "") + path;
+        if (baseUrl == null) {
+            return file;
+        }
+        URL url = uncheckedCall(() ->
+            new URL(baseUrl.getProtocol(), baseUrl.getHost(), baseUrl.getPort(), file, null)
+        );
+        return url.toString();
+    }
+
+    /**
+     * Test if a path is valid for webpb.
+     *
+     * @param path path to test
+     * @return true if valid
+     */
+    public static boolean isValidPath(String path) {
+        if (path == null) {
+            return false;
+        }
+        if (!hasLength(path) || "/".equals(path)) {
+            return true;
+        }
+        if (path.contains("//")) {
+            return false;
+        }
+        try {
+            new URL(path.startsWith("/") ? "https://a" + path : path);
+        } catch (MalformedURLException e) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Clear context cache.
+     */
+    public static void clearContextCache() {
+        contextCache.clear();
+    }
+
+    /**
+     * Get or create context for {@link WebpbMessage}.
+     *
+     * @param message {@link WebpbMessage}
+     * @return {@link MessageContext}
+     */
+    public static MessageContext getContext(WebpbMessage message) {
+        MessageContext context = contextCache.computeIfAbsent(message.getClass(), k -> {
+            WebpbMeta meta = message.webpbMeta();
+            if (meta == null) {
+                return MessageContext.NULL_CONTEXT;
+            }
+            if (!hasLength(meta.getMethod())) {
+                return MessageContext.NULL_CONTEXT;
+            }
+            if (!isValidPath(meta.getPath())) {
+                return MessageContext.NULL_CONTEXT;
+            }
+            return new MessageContext()
+                .setMethod(HttpMethod.valueOf(meta.getMethod().toUpperCase()))
+                .setContext(meta.getContext())
+                .setPath(meta.getPath())
+                .setParamGroup(ParamGroup.of(meta.getPath()));
+        });
+        if (context == MessageContext.NULL_CONTEXT) {
+            throw new RuntimeException("Invalid meta method or meta path.");
+        }
+        return context;
+    }
+
+    private static String formatPath(JsonNode data, ParamGroup paramGroup, String query) {
+        StringBuilder builder = new StringBuilder();
+        Iterator<PathParam> iterator = paramGroup.getParams().iterator();
+        String link = "";
+        while (iterator.hasNext()) {
+            PathParam param = iterator.next();
+            builder.append(param.getPrefix());
+            if (hasLength(query)) {
+                builder.append("?").append(query);
+            }
+            if (builder.length() > 0 && builder.charAt(builder.length() - 1) == '?') {
+                builder.deleteCharAt(builder.length() - 1);
+            }
+            if (hasLength(param.getKey())) {
+                link = "?";
+                do {
+                    param = param == null ? iterator.next() : param;
+                    String value = resolve(data, param.getAccessor());
+                    if (hasLength(value) && !"null".equals(value)) {
+                        builder.append(link).append(param.getKey()).append("=").append(value);
+                        link = "&";
+                    }
+                    param = null;
+                } while (iterator.hasNext());
+                if (hasLength(paramGroup.getSuffix())) {
+                    builder.append('&').append(paramGroup.getSuffix());
+                }
+                return builder.toString();
+            }
+            String value = resolve(data, param.getAccessor());
+            if (hasLength(value) && !"null".equals(value)) {
+                builder.append(value);
+            }
+        }
+        if (hasLength(paramGroup.getSuffix())) {
+            builder.append(link).append(paramGroup.getSuffix());
+        }
+        return builder.toString();
+    }
+
+    private static String resolve(JsonNode jsonNode, String accessor) {
+        for (String part : accessor.split("\\.")) {
+            jsonNode = jsonNode.get(part);
+            if (jsonNode == null) {
+                return null;
+            }
+        }
+        return jsonNode.asText();
     }
 }

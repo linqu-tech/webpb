@@ -1,5 +1,9 @@
 package tech.linqu.webpb.runtime.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import tech.linqu.webpb.runtime.WebpbMessage;
 import tech.linqu.webpb.runtime.WebpbMeta;
 import tech.linqu.webpb.runtime.common.InQuery;
@@ -7,56 +11,33 @@ import tech.linqu.webpb.runtime.common.InQuery;
 /**
  * Test class implements {@link WebpbMessage}.
  */
+@Accessors(chain = true)
+@Getter
+@Setter
 public class FooRequest implements WebpbMessage {
+
+    public static final WebpbMeta WEBPB_META = new WebpbMeta.Builder()
+        .method("POST")
+        .path(
+            "/domain/{id}/action?pagination={pagination}&size={pageable.size}&page={pageable.page}")
+        .build();
 
     @Override
     public WebpbMeta webpbMeta() {
-        return new WebpbMeta.Builder()
-            .method("POST")
-            .path("https://domain/{id}/action?size={pageSize}&page={pageNo}")
-            .build();
+        return WEBPB_META;
     }
 
     @InQuery
     private int id = 123;
 
     @InQuery
-    private int pageSize = 234;
+    private boolean pagination = true;
 
     @InQuery
-    private int pageNo = 345;
+    private Pageable pageable = new Pageable().setPage(10).setSize(20);
+
+    @JsonIgnore
+    private String ignored = "IGNORED";
 
     private String data = "Hello, world!";
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public int getPageSize() {
-        return pageSize;
-    }
-
-    public void setPageSize(int pageSize) {
-        this.pageSize = pageSize;
-    }
-
-    public int getPageNo() {
-        return pageNo;
-    }
-
-    public void setPageNo(int pageNo) {
-        this.pageNo = pageNo;
-    }
-
-    public String getData() {
-        return data;
-    }
-
-    public void setData(String data) {
-        this.data = data;
-    }
 }
