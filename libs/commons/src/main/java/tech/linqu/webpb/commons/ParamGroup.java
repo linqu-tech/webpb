@@ -65,6 +65,15 @@ public class ParamGroup {
     }
 
     /**
+     * If params is empty.
+     *
+     * @return true if params is empty
+     */
+    public boolean isEmpty() {
+        return params.isEmpty();
+    }
+
+    /**
      * Get path params.
      *
      * @return list of {@link PathParam}

@@ -17,17 +17,100 @@
 package tech.linqu.webpb.runtime.reactive;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.net.MalformedURLException;
+import java.net.URL;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.reactive.function.client.ClientResponse;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.publisher.Mono;
+import tech.linqu.webpb.runtime.WebpbMeta;
+import tech.linqu.webpb.runtime.WebpbUtils;
+import tech.linqu.webpb.runtime.model.BadRequest;
 import tech.linqu.webpb.runtime.model.FooRequest;
+import tech.linqu.webpb.runtime.model.FooResponse;
 
 class WebpbClientTest {
 
     @Test
+    void shouldRequestSuccess() {
+        WebClient webClient = WebClient.builder()
+            .exchangeFunction(clientRequest ->
+                Mono.just(ClientResponse.create(HttpStatus.OK)
+                    .body("{\"id\": \"123\"}")
+                    .build())
+            )
+            .build();
+        WebpbUtils.clearContextCache();
+        WebpbClient client = new WebpbClient(webClient, null);
+        FooResponse response = client.request(new FooRequest(), FooResponse.class);
+        assertEquals(123, response.getId());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenResponseWithError() {
+        WebClient webClient = WebClient.builder()
+            .exchangeFunction(clientRequest ->
+                Mono.just(ClientResponse.create(HttpStatus.BAD_REQUEST).build())
+            )
+            .build();
+        WebpbUtils.clearContextCache();
+        WebpbClient client = new WebpbClient(webClient, null);
+        assertThrows(WebClientResponseException.class,
+            () -> client.request(new FooRequest(), FooResponse.class));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenRequestWithoutContext() {
+        WebpbUtils.clearContextCache();
+        WebpbClient client = new WebpbClient(mock(WebClient.class), null);
+        assertThrows(RuntimeException.class,
+            () -> client.request(new BadRequest(), FooResponse.class));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenRequestWithoutMethod() {
+        WebpbUtils.clearContextCache();
+        WebpbClient client = new WebpbClient(mock(WebClient.class), null);
+        FooRequest request = new FooRequest(WebpbMeta.builder().path("path").build());
+        assertThrows(RuntimeException.class, () -> client.request(request, FooResponse.class));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenRequestWithoutPath() {
+        WebpbUtils.clearContextCache();
+        WebpbClient client = new WebpbClient(mock(WebClient.class), null);
+        FooRequest request = new FooRequest(WebpbMeta.builder().method("method").build());
+        assertThrows(RuntimeException.class, () -> client.request(request, FooResponse.class));
+    }
+
+    @Test
     void shouldFormatUrlSuccess() {
-        FooRequest request = new FooRequest();
-        String url = WebpbClient.formatUrl(null, new ObjectMapper(), request);
-        assertEquals("https://domain/123/action?size=234&page=345", url);
+        WebpbUtils.clearContextCache();
+        WebpbClient webpbClient = new WebpbClient(WebClient.builder().build(), null);
+        String url = webpbClient.formatUrl(new FooRequest());
+        assertEquals("/domain/123/action?pagination=true&size=20&page=10", url);
+    }
+
+    @Test
+    void shouldFormatUrlSuccessWhenWithBaseUrl() throws MalformedURLException {
+        WebpbUtils.clearContextCache();
+        WebpbClient webpbClient = new WebpbClient(WebClient.builder().build(), null);
+        String url = webpbClient.formatUrl(new URL("https://abc"), new FooRequest());
+        assertEquals("https://abc/domain/123/action?pagination=true&size=20&page=10", url);
+    }
+
+    @Test
+    void shouldFormatUrlThrowExceptionGivenPathIsUrlWhenWithBaseUrl() {
+        WebpbUtils.clearContextCache();
+        WebpbClient webpbClient = new WebpbClient(WebClient.builder().build(), null);
+        FooRequest request =
+            new FooRequest(WebpbMeta.builder().method("GET").path("https://domain").build());
+        assertThrows(RuntimeException.class,
+            () -> webpbClient.formatUrl(new URL("https://abc"), request));
     }
 }

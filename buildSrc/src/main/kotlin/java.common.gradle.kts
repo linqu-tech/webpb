@@ -1,3 +1,7 @@
+import gradle.kotlin.dsl.accessors._b62b4054fca3097d153a801e2be568ce.annotationProcessor
+import gradle.kotlin.dsl.accessors._b62b4054fca3097d153a801e2be568ce.compileOnly
+import gradle.kotlin.dsl.accessors._b62b4054fca3097d153a801e2be568ce.testAnnotationProcessor
+import gradle.kotlin.dsl.accessors._b62b4054fca3097d153a801e2be568ce.testCompileOnly
 import utils.Props
 import utils.Vers
 
@@ -24,7 +28,13 @@ repositories {
 }
 
 dependencies {
+    annotationProcessor("org.projectlombok:lombok:${Vers.lombok}")
+    compileOnly("org.projectlombok:lombok:${Vers.lombok}")
+    testAnnotationProcessor("org.projectlombok:lombok:${Vers.lombok}")
+    testCompileOnly("org.projectlombok:lombok:${Vers.lombok}")
     testImplementation("org.junit.jupiter:junit-jupiter-api:${Vers.jupiter}")
+    testImplementation("org.mockito:mockito-core:${Vers.mockito}")
+    testImplementation("org.mockito:mockito-inline:${Vers.mockito}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 }
 
@@ -52,5 +62,11 @@ tasks {
     }
     check {
         dependsOn(jacocoTestCoverageVerification)
+    }
+    test {
+        finalizedBy(tasks.jacocoTestReport)
+    }
+    jacocoTestReport {
+        dependsOn(tasks.test)
     }
 }

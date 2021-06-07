@@ -9,14 +9,17 @@ object Vers {
 
     lateinit var checkstyle: String
     lateinit var commonsLang3: String
+    lateinit var compileTesting: String
     lateinit var hibernateValidator: String
     lateinit var jackson: String
     lateinit var jacoco: String
     lateinit var javaparser: String
     lateinit var jupiter: String
     lateinit var lombok: String
+    lateinit var mockito: String
     lateinit var protobufJava: String
     lateinit var protoc: String
+    lateinit var reactorNetty: String
     lateinit var servletApi: String
     lateinit var springFramework: String
     lateinit var webpb: String

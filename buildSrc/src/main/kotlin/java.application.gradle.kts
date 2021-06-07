@@ -10,10 +10,6 @@ plugins {
 }
 
 dependencies {
-    annotationProcessor("org.projectlombok:lombok:${Vers.lombok}")
-    compileOnly("org.projectlombok:lombok:${Vers.lombok}")
     implementation("com.google.protobuf:protobuf-java:${Vers.protobufJava}")
     implementation("org.apache.commons:commons-lang3:${Vers.commonsLang3}")
-    testAnnotationProcessor("org.projectlombok:lombok:${Vers.lombok}")
-    testCompileOnly("org.projectlombok:lombok:${Vers.lombok}")
 }

@@ -1,3 +1,4 @@
+import utils.Vers
 import utils.signAndPublish
 
 plugins {
@@ -7,6 +8,9 @@ plugins {
 dependencies {
     api(project(":runtime:java"))
     compileOnly(files(org.gradle.internal.jvm.Jvm.current().toolsJar))
+    testImplementation("com.google.testing.compile:compile-testing:${Vers.compileTesting}")
+    testImplementation("org.springframework:spring-web:${Vers.springFramework}")
+    testImplementation(files(org.gradle.internal.jvm.Jvm.current().toolsJar))
 }
 
 signAndPublish("webpb-processor") {

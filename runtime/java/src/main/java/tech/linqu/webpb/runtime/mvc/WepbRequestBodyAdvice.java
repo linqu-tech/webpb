@@ -4,11 +4,13 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.RequestAttributes;
@@ -20,7 +22,6 @@ import tech.linqu.webpb.commons.ParamGroup;
 import tech.linqu.webpb.commons.PathParam;
 import tech.linqu.webpb.runtime.WebpbMessage;
 import tech.linqu.webpb.runtime.WebpbMeta;
-import tech.linqu.webpb.runtime.WebpbUtils;
 
 /**
  * Autowire request body properties from url path an query.
@@ -31,11 +32,20 @@ public class WepbRequestBodyAdvice extends RequestBodyAdviceAdapter {
     private final ObjectMapper objectMapper;
 
     /**
-     * Constructor.
+     * Construct an instance of {@link WepbRequestBodyAdvice}.
      */
     public WepbRequestBodyAdvice() {
         this.objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
+
+    /**
+     * Construct an instance of {@link WepbRequestBodyAdvice}.
+     *
+     * @param objectMapper {@link ObjectMapper}
+     */
+    public WepbRequestBodyAdvice(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -56,19 +66,22 @@ public class WepbRequestBodyAdvice extends RequestBodyAdviceAdapter {
         }
 
         @SuppressWarnings("unchecked")
-        Map<String, String> variablesMap = (Map<String, String>) request
+        Map<String, String> attributes = (Map<String, String>) request
             .getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
-
         Map<String, String[]> parameterMap = request.getParameterMap();
+        if (CollectionUtils.isEmpty(attributes) && CollectionUtils.isEmpty(parameterMap)) {
+            return body;
+        }
+
+        Map<String, String> variablesMap =
+            attributes == null ? new HashMap<>() : new HashMap<>(attributes);
         for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
             if (entry.getValue() != null && entry.getValue().length > 0) {
                 variablesMap.put(entry.getKey(), entry.getValue()[0]);
             }
         }
 
-        @SuppressWarnings("unchecked")
-        Class<? extends WebpbMessage> clazz = (Class<? extends WebpbMessage>) object.getClass();
-        WebpbMeta meta = WebpbUtils.readWebpbMeta(clazz);
+        WebpbMeta meta = ((WebpbMessage) object).webpbMeta();
         if (meta == null) {
             return object;
         }
