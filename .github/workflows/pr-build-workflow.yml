@@ -22,3 +22,14 @@ jobs:
           java-version: ${{ matrix.jdk }}
       - name: Build with Gradle
         run: ./gradlew clean build
+      - name: Generate Jacoco Badge
+        id: jacoco
+        uses: cicirello/jacoco-badge-generator@v2
+        with:
+          generate-branches-badge: true
+          jacoco-csv-file: >
+            runtime/processor/build/reports/jacoco/test/jacocoTestReport.csv
+            runtime/java/build/reports/jacoco/test/jacocoTestReport.csv
+            libs/commons/build/reports/jacoco/test/jacocoTestReport.csv
+            libs/utilities/build/reports/jacoco/test/jacocoTestReport.csv
+            sample/app/build/reports/jacoco/test/jacocoTestReport.csv

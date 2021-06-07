@@ -24,7 +24,7 @@ jobs:
           java-version: ${{ matrix.jdk }}
       - name: Build with Gradle
         run: ./gradlew clean build
-      - name: Generate JaCoCo Badge
+      - name: Generate Jacoco Badge
         id: jacoco
         uses: cicirello/jacoco-badge-generator@v2
         with:
