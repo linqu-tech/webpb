@@ -10,10 +10,12 @@ import static org.mockito.Mockito.when;
 import com.google.testing.compile.Compilation;
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class WebpbRequestMappingProcessorTest {
 
+    @Disabled
     @Test
     void shouldProcessSampleSuccess() {
         Compilation compilation = javac().withProcessors(new WebpbRequestMappingProcessor())
@@ -21,6 +23,7 @@ class WebpbRequestMappingProcessorTest {
         assertThat(compilation).succeededWithoutWarnings();
     }
 
+    @Disabled
     @Test
     void shouldProcessSampleFailed() {
         Compilation compilation = javac().withProcessors(new WebpbRequestMappingProcessor())

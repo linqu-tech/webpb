@@ -100,7 +100,7 @@ public class WebpbRequestMappingProcessor extends AbstractProcessor {
                 processUnit(unit);
             }
         }
-        return true;
+        return false;
     }
 
     private JCCompilationUnit toUnit(Element element) {
