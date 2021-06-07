@@ -14,6 +14,9 @@ import tech.linqu.webpb.commons.ParamGroup;
 @Setter
 public class MessageContext {
 
+    /**
+     * To test if a context is null, and use for cache.
+     */
     public static final MessageContext NULL_CONTEXT = new MessageContext();
 
     HttpMethod method;

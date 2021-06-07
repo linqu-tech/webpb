@@ -133,4 +133,10 @@ class ParamGroupTest {
         assertEquals("e", group.getParams().get(1).getKey());
         assertEquals("f", group.getParams().get(1).getAccessor());
     }
+
+    @Test
+    void shouldGroupIsEmpty() {
+        ParamGroup group = ParamGroup.of("/");
+        assertTrue(group.isEmpty());
+    }
 }

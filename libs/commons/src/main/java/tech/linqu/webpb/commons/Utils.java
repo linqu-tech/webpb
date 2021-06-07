@@ -7,6 +7,9 @@ import java.util.concurrent.Callable;
  */
 public class Utils {
 
+    private Utils() {
+    }
+
     /**
      * Sneaky exceptions.
      *

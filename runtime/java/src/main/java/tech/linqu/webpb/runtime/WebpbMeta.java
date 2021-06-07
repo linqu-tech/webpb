@@ -37,6 +37,11 @@ public class WebpbMeta {
 
     private List<String> tags;
 
+    /**
+     * Create a builder.
+     *
+     * @return {@link Builder}
+     */
     public static Builder builder() {
         return new Builder();
     }
