@@ -16,8 +16,6 @@
 
 package tech.linqu.webpb.processor;
 
-import static com.sun.source.tree.Tree.Kind.ASSIGNMENT;
-import static com.sun.source.tree.Tree.Kind.IDENTIFIER;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 import com.sun.source.util.TreePath;
@@ -57,6 +55,8 @@ import tech.linqu.webpb.runtime.mvc.WebpbRequestMapping;
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class WebpbRequestMappingProcessor extends AbstractProcessor {
 
+    private static final String SPRING_ANNOTATION = "org.springframework.web.bind.annotation";
+
     private Trees trees;
 
     private TreeMaker treeMaker;
@@ -84,37 +84,20 @@ public class WebpbRequestMappingProcessor extends AbstractProcessor {
             return (JavacProcessingEnvironment) procEnv;
         }
 
-        processingEnv.getMessager().printMessage(ERROR,
-            "Can't get the delegate of the gradle IncrementalProcessingEnvironment.");
+        logError("Can't get the delegate of the gradle IncrementalProcessingEnvironment.");
         return null;
     }
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         for (Element element : roundEnv.getRootElements()) {
-            if (element instanceof ClassSymbol) {
-                JCCompilationUnit unit = toUnit(element);
-                if (unit == null) {
-                    continue;
-                }
-                processUnit(unit);
-            }
+            processUnit(toUnit(element));
         }
         return false;
     }
 
     private JCCompilationUnit toUnit(Element element) {
-        TreePath path = null;
-        if (trees != null) {
-            try {
-                path = trees.getPath(element);
-            } catch (NullPointerException ignore) {
-                // ignored
-            }
-        }
-        if (path == null) {
-            return null;
-        }
+        TreePath path = trees.getPath(element);
         return (JCCompilationUnit) path.getCompilationUnit();
     }
 
@@ -138,17 +121,10 @@ public class WebpbRequestMappingProcessor extends AbstractProcessor {
             return annotation;
         }
         ArrayList<JCTree.JCExpression> args = new ArrayList<>();
-        unit.defs =
-            addImport(unit.defs, "org.springframework.web.bind.annotation", "RequestMapping");
+        unit.defs = addImport(unit.defs, SPRING_ANNOTATION, "RequestMapping");
         ClassSymbol messageSymbol = null;
         for (JCTree.JCExpression arg : annotation.args) {
-            if (!arg.getKind().equals(ASSIGNMENT)) {
-                continue;
-            }
             JCTree.JCAssign assign = (JCTree.JCAssign) arg;
-            if (!assign.lhs.getKind().equals(IDENTIFIER)) {
-                continue;
-            }
             String argName = (((JCTree.JCIdent) assign.lhs).name).toString();
             if (argName.equals("message")) {
                 messageSymbol = assign.rhs.type.allparams().stream()
@@ -158,27 +134,20 @@ public class WebpbRequestMappingProcessor extends AbstractProcessor {
                 args.add(treeMaker.Assign(treeMaker.Ident(names.fromString(argName)), assign.rhs));
             }
         }
-        for (JCTree.JCVariableDecl parameter : method.getParameters()) {
-            if (messageSymbol != null) {
-                break;
-            }
-            if (!parameter.hasTag(JCTree.Tag.VARDEF)) {
-                continue;
-            }
-            TypeSymbol typeSymbol = parameter.sym.type.tsym;
-            if (!(typeSymbol instanceof ClassSymbol)) {
-                continue;
-            }
-            for (Type type : ((ClassSymbol) typeSymbol).getInterfaces()) {
-                if (WebpbMessage.class.getName().equals(type.tsym.getQualifiedName().toString())) {
-                    messageSymbol = ((ClassSymbol) typeSymbol);
-                    break;
+        if (messageSymbol == null) {
+            for (JCTree.JCVariableDecl parameter : method.getParameters()) {
+                TypeSymbol typeSymbol = parameter.sym.type.tsym;
+                for (Type type : ((ClassSymbol) typeSymbol).getInterfaces()) {
+                    if (WebpbMessage.class.getName()
+                        .equals(type.tsym.getQualifiedName().toString())) {
+                        messageSymbol = ((ClassSymbol) typeSymbol);
+                        break;
+                    }
                 }
             }
         }
         if (messageSymbol == null) {
-            processingEnv.getMessager()
-                .printMessage(ERROR, "Should specify a message for WebpbRequestMapping");
+            logError("Should specify a message for WebpbRequestMapping");
             return annotation;
         }
         processSymbolUnit(unit, messageSymbol, args);
@@ -201,8 +170,7 @@ public class WebpbRequestMappingProcessor extends AbstractProcessor {
                         names.fromString(varSymbol.getConstValue().toString())
                     )
                 ));
-                unit.defs = addImport(unit.defs, "org.springframework.web.bind.annotation",
-                    "RequestMethod");
+                unit.defs = addImport(unit.defs, SPRING_ANNOTATION, "RequestMethod");
             }
             if ("WEBPB_PATH".equals(varSymbol.getSimpleName().toString())) {
                 String path = varSymbol.getConstValue().toString();
@@ -230,5 +198,9 @@ public class WebpbRequestMappingProcessor extends AbstractProcessor {
             }
         }
         return List.from(jcTrees);
+    }
+
+    private void logError(String error) {
+        processingEnv.getMessager().printMessage(ERROR, error);
     }
 }
