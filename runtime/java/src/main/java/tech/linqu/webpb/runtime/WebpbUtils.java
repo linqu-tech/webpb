@@ -61,32 +61,53 @@ public class WebpbUtils {
     /**
      * Format request url from API base url and {@link WebpbMeta}.
      *
+     * @param objectMapper objectMapper to extract message properties
+     * @param message      {@link WebpbMessage}
+     * @return formatted url
+     */
+    public static String formatUrl(ObjectMapper objectMapper, WebpbMessage message) {
+        MessageContext context = getContext(message);
+        if (context.getParamGroup().isEmpty()) {
+            return context.getPath();
+        }
+        JsonNode data = objectMapper.convertValue(message, JsonNode.class);
+        String path = formatPath(data, context.getParamGroup(), null);
+        return emptyOrDefault(context.getContext(), "") + path;
+    }
+
+    /**
+     * Format request url from API base url and {@link WebpbMeta}.
+     *
      * @param baseUrl      {@link URL}
      * @param objectMapper objectMapper to extract message properties
      * @param message      {@link WebpbMessage}
      * @return formatted url
      */
     public static String formatUrl(URL baseUrl, ObjectMapper objectMapper, WebpbMessage message) {
-        MessageContext context = getContext(message);
-        if (!context.getPath().startsWith("/") && baseUrl != null) {
-            throw new RuntimeException(
-                String.format("Can not concat baseUrl: %s with path: %s", baseUrl,
-                    context.getPath()));
+        if (baseUrl == null) {
+            return formatUrl(objectMapper, message);
         }
-        if (context.getParamGroup() == null) {
-            return context.getPath();
+        MessageContext context = getContext(message);
+        if (!context.getPath().startsWith("/")) {
+            throw new RuntimeException(String
+                .format("Can not concat baseUrl: %s with path: %s", baseUrl, context.getPath()));
+        }
+        if (context.getParamGroup().isEmpty()) {
+            return concatUrl(baseUrl, context.getPath());
         }
         JsonNode data = objectMapper.convertValue(message, JsonNode.class);
-        String path =
-            formatPath(data, context.getParamGroup(), baseUrl == null ? null : baseUrl.getQuery());
-        String file = (baseUrl == null ? "" : emptyOrDefault(baseUrl.getPath(), ""))
-            + emptyOrDefault(context.getContext(), "") + path;
-        if (baseUrl == null) {
-            return file;
+        String path = formatPath(data, context.getParamGroup(), baseUrl.getQuery());
+        String file =
+            emptyOrDefault(baseUrl.getPath(), "") + emptyOrDefault(context.getContext(), "") + path;
+        return concatUrl(baseUrl, file);
+    }
+
+    private static String concatUrl(URL baseUrl, String file) {
+        if ("/".equals(file)) {
+            return baseUrl.toString();
         }
-        URL url = uncheckedCall(() ->
-            new URL(baseUrl.getProtocol(), baseUrl.getHost(), baseUrl.getPort(), file, null)
-        );
+        URL url = uncheckedCall(
+            () -> new URL(baseUrl.getProtocol(), baseUrl.getHost(), baseUrl.getPort(), file, null));
         return url.toString();
     }
 
@@ -103,7 +124,7 @@ public class WebpbUtils {
         if (!hasLength(path) || "/".equals(path)) {
             return true;
         }
-        if (path.contains("//")) {
+        if (path.startsWith("/") && path.contains("//")) {
             return false;
         }
         try {
@@ -154,39 +175,40 @@ public class WebpbUtils {
     private static String formatPath(JsonNode data, ParamGroup paramGroup, String query) {
         StringBuilder builder = new StringBuilder();
         Iterator<PathParam> iterator = paramGroup.getParams().iterator();
-        String link = "";
+        String link;
         while (iterator.hasNext()) {
             PathParam param = iterator.next();
             builder.append(param.getPrefix());
-            if (hasLength(query)) {
-                builder.append("?").append(query);
-            }
-            if (builder.length() > 0 && builder.charAt(builder.length() - 1) == '?') {
+            if (builder.charAt(builder.length() - 1) == '?') {
                 builder.deleteCharAt(builder.length() - 1);
             }
             if (hasLength(param.getKey())) {
-                link = "?";
+                if (hasLength(query)) {
+                    builder.append("?").append(query);
+                    link = "&";
+                } else {
+                    link = "?";
+                }
                 do {
                     param = param == null ? iterator.next() : param;
                     String value = resolve(data, param.getAccessor());
-                    if (hasLength(value) && !"null".equals(value)) {
+                    if (hasLength(value)) {
                         builder.append(link).append(param.getKey()).append("=").append(value);
                         link = "&";
                     }
                     param = null;
                 } while (iterator.hasNext());
-                if (hasLength(paramGroup.getSuffix())) {
-                    builder.append('&').append(paramGroup.getSuffix());
-                }
-                return builder.toString();
+                break;
             }
             String value = resolve(data, param.getAccessor());
-            if (hasLength(value) && !"null".equals(value)) {
-                builder.append(value);
+            if (!hasLength(value)) {
+                throw new RuntimeException(
+                    String.format("Path variable '%s' not found", param.getAccessor()));
             }
+            builder.append(value);
         }
         if (hasLength(paramGroup.getSuffix())) {
-            builder.append(link).append(paramGroup.getSuffix());
+            builder.append(paramGroup.getSuffix());
         }
         return builder.toString();
     }

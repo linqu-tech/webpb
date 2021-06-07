@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package tech.linqu.webpb.runtime.utils;
+package tech.linqu.webpb.processor.misc;
 
 import java.lang.reflect.Method;
-import tech.linqu.webpb.runtime.common.Unsafe;
 
 /**
  * Utilities to open JVM modules.
@@ -74,12 +73,6 @@ public class JvmOpens {
     }
 
     private static Object getJdkCompilerModule() {
-        /* call public api: ModuleLayer.boot().findModule("jdk.compiler").get();
-           but use reflection because we don't want this code to crash on jdk1.7 and below.
-           In that case, none of this stuff was needed in the first place, so we just exit via
-           the catch block and do nothing.
-         */
-
         try {
             Class<?> classModuleLayer = Class.forName("java.lang.ModuleLayer");
             Method methodBoot = classModuleLayer.getDeclaredMethod("boot");

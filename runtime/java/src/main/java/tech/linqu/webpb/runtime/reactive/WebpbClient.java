@@ -115,9 +115,6 @@ public class WebpbClient {
     public <T extends WebpbMessage> Mono<T> requestAsync(WebpbMessage message,
                                                          Class<T> responseType) {
         MessageContext context = WebpbUtils.getContext(message);
-        if (context == null) {
-            throw new RuntimeException("Request method and path is required");
-        }
         return Mono
             .just(uncheckedCall(() -> objectMapper.writeValueAsString(message)))
             .flatMap(body -> {

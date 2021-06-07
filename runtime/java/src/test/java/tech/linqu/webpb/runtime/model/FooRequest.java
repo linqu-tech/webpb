@@ -16,7 +16,9 @@ import tech.linqu.webpb.runtime.common.InQuery;
 @Setter
 public class FooRequest implements WebpbMessage {
 
-    public static final WebpbMeta WEBPB_META = new WebpbMeta.Builder()
+    public static final WebpbMeta WEBPB_META = WebpbMeta.builder().build();
+
+    private WebpbMeta webpbMeta = WebpbMeta.builder()
         .method("POST")
         .path(
             "/domain/{id}/action?pagination={pagination}&size={pageable.size}&page={pageable.page}")
@@ -24,7 +26,14 @@ public class FooRequest implements WebpbMessage {
 
     @Override
     public WebpbMeta webpbMeta() {
-        return WEBPB_META;
+        return webpbMeta;
+    }
+
+    public FooRequest() {
+    }
+
+    public FooRequest(WebpbMeta webpbMeta) {
+        this.webpbMeta = webpbMeta;
     }
 
     @InQuery
@@ -39,5 +48,5 @@ public class FooRequest implements WebpbMessage {
     @JsonIgnore
     private String ignored = "IGNORED";
 
-    private String data = "Hello, world!";
+    private String data = "data123";
 }

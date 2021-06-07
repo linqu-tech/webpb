@@ -9,6 +9,7 @@ object Vers {
 
     lateinit var checkstyle: String
     lateinit var commonsLang3: String
+    lateinit var compileTesting: String
     lateinit var hibernateValidator: String
     lateinit var jackson: String
     lateinit var jacoco: String

@@ -46,9 +46,9 @@ import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import tech.linqu.webpb.processor.misc.JvmOpens;
 import tech.linqu.webpb.runtime.WebpbMessage;
 import tech.linqu.webpb.runtime.mvc.WebpbRequestMapping;
-import tech.linqu.webpb.runtime.utils.JvmOpens;
 
 /**
  * Process the {@link WebpbRequestMapping} and transform it to Spring RequestMapping.
@@ -63,17 +63,23 @@ public class WebpbRequestMappingProcessor extends AbstractProcessor {
 
     private Names names;
 
+    static {
+        JvmOpens.addOpens(WebpbRequestMappingProcessor.class);
+    }
+
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
         JavacProcessingEnvironment env = getJavacProcessingEnvironment(processingEnv);
+        if (env == null) {
+            throw new RuntimeException("JavacProcessingEnvironment is required.");
+        }
         this.trees = Trees.instance(env);
         this.treeMaker = TreeMaker.instance(env.getContext());
         this.names = Names.instance(env.getContext());
     }
 
     private JavacProcessingEnvironment getJavacProcessingEnvironment(Object procEnv) {
-        JvmOpens.addOpens(this.getClass());
         if (procEnv instanceof JavacProcessingEnvironment) {
             return (JavacProcessingEnvironment) procEnv;
         }
@@ -81,6 +87,20 @@ public class WebpbRequestMappingProcessor extends AbstractProcessor {
         processingEnv.getMessager().printMessage(ERROR,
             "Can't get the delegate of the gradle IncrementalProcessingEnvironment.");
         return null;
+    }
+
+    @Override
+    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+        for (Element element : roundEnv.getRootElements()) {
+            if (element instanceof ClassSymbol) {
+                JCCompilationUnit unit = toUnit(element);
+                if (unit == null) {
+                    continue;
+                }
+                processUnit(unit);
+            }
+        }
+        return true;
     }
 
     private JCCompilationUnit toUnit(Element element) {
@@ -96,20 +116,6 @@ public class WebpbRequestMappingProcessor extends AbstractProcessor {
             return null;
         }
         return (JCCompilationUnit) path.getCompilationUnit();
-    }
-
-    @Override
-    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        for (Element element : roundEnv.getRootElements()) {
-            if (element instanceof ClassSymbol) {
-                JCCompilationUnit unit = toUnit(element);
-                if (unit == null) {
-                    continue;
-                }
-                processUnit(unit);
-            }
-        }
-        return true;
     }
 
     private void processUnit(JCCompilationUnit unit) {

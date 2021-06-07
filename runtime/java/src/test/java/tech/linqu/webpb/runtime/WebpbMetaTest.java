@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 class WebpbMetaTest {
 
-    private final WebpbMeta webpbMeta = new WebpbMeta.Builder()
+    private final WebpbMeta webpbMeta = WebpbMeta.builder()
         .method("GET")
         .context("user")
         .path("/get/user")

@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package tech.linqu.webpb.runtime.utils;
+package tech.linqu.webpb.processor.misc;
 
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import tech.linqu.webpb.runtime.common.Unsafe;
 
 /**
  * Utility to grant reflection permit.
