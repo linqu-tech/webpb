@@ -1,4 +1,4 @@
-name: PR build
+name: PR
 
 on:
   pull_request:
@@ -24,16 +24,17 @@ jobs:
         run: ./gradlew clean build
   coveralls:
     name: Update Coveralls
+    needs: [build]
     runs-on: ubuntu-latest
     env:
       COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
     steps:
       - uses: actions/checkout@v2
-      - name: Set up JDK 8
+      - name: Set up JDK
         uses: actions/setup-java@v1
         with:
-          java-version: 9
+          java-version: 8
       - name: Build with Gradle
-        run: ./gradlew clean build
+        run: ./gradlew clean coverage
       - name: Update Coveralls
         run: ./gradlew coveralls
