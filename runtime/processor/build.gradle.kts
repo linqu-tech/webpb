@@ -23,22 +23,3 @@ signAndPublish("webpb-processor") {
 tasks.javadoc {
     enabled = false
 }
-
-tasks {
-    jacocoTestReport {
-        classDirectories.setFrom(
-            sourceSets.main.get().output.asFileTree.matching {
-                exclude("tech/linqu/webpb/processor/misc/*")
-            }
-        )
-    }
-    jacocoTestCoverageVerification {
-        violationRules {
-            rule {
-                classDirectories.setFrom(sourceSets.main.get().output.asFileTree.matching {
-                    exclude("tech/linqu/webpb/processor/misc/*")
-                })
-            }
-        }
-    }
-}

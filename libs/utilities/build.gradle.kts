@@ -20,14 +20,6 @@ dependencies {
     testCompileOnly("org.projectlombok:lombok:${Vers.lombok}")
 }
 
-tasks.javadoc {
-    exclude("tech/linqu/webpb/utilities/descriptor/**")
-}
-
-tasks.withType<Checkstyle> {
-    exclude("tech/linqu/webpb/utilities/descriptor/**")
-}
-
 val extractSources by tasks.registering(DefaultTask::class) {
     sourceSets {
         main {

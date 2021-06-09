@@ -51,26 +51,6 @@ jacoco {
     toolVersion = Vers.jacoco
 }
 
-//tasks {
-//    jacocoTestCoverageVerification {
-//        violationRules {
-//            rule { limit { minimum = BigDecimal.valueOf(Props.jacocoMinCoverage) } }
-//        }
-//    }
-//    check {
-//        dependsOn(jacocoTestCoverageVerification)
-//    }
-//    test {
-//        finalizedBy(tasks.jacocoTestReport)
-//    }
-//    jacocoTestReport {
-//        dependsOn(tasks.test)
-//        reports {
-//            xml.isEnabled = true
-//        }
-//    }
-//}
-
 tasks.jacocoTestReport {
     enabled = false
 }
