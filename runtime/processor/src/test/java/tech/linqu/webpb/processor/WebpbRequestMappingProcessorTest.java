@@ -10,20 +10,66 @@ import static org.mockito.Mockito.when;
 import com.google.testing.compile.Compilation;
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class WebpbRequestMappingProcessorTest {
 
-    @Disabled
     @Test
-    void shouldProcessSampleSuccess() {
+    void shouldProcessSample1Success() {
         Compilation compilation = javac().withProcessors(new WebpbRequestMappingProcessor())
-            .compile(forResource("SampleSuccess.java"));
-        assertThat(compilation).succeededWithoutWarnings();
+            .compile(forResource("Sample1.java"));
+        assertThat(compilation).succeeded();
     }
 
-    @Disabled
+    @Test
+    void shouldProcessSample2Success() {
+        Compilation compilation = javac().withProcessors(new WebpbRequestMappingProcessor())
+            .compile(forResource("Sample2.java"));
+        assertThat(compilation).succeeded();
+    }
+
+    @Test
+    void shouldProcessSample3Success() {
+        Compilation compilation = javac().withProcessors(new WebpbRequestMappingProcessor())
+            .compile(forResource("Sample3.java"));
+        assertThat(compilation).succeeded();
+    }
+
+    @Test
+    void shouldProcessSample4Success() {
+        Compilation compilation = javac().withProcessors(new WebpbRequestMappingProcessor())
+            .compile(forResource("Sample4.java"));
+        assertThat(compilation).succeeded();
+    }
+
+    @Test
+    void shouldProcessSample5Success() {
+        Compilation compilation = javac().withProcessors(new WebpbRequestMappingProcessor())
+            .compile(forResource("Sample5.java"));
+        assertThat(compilation).succeeded();
+    }
+
+    @Test
+    void shouldProcessSample6Success() {
+        Compilation compilation = javac().withProcessors(new WebpbRequestMappingProcessor())
+            .compile(forResource("Sample6.java"));
+        assertThat(compilation).succeeded();
+    }
+
+    @Test
+    void shouldProcessSample7Success() {
+        Compilation compilation = javac().withProcessors(new WebpbRequestMappingProcessor())
+            .compile(forResource("Sample7.java"));
+        assertThat(compilation).succeeded();
+    }
+
+    @Test
+    void shouldProcessSample8Success() {
+        Compilation compilation = javac().withProcessors(new WebpbRequestMappingProcessor())
+            .compile(forResource("Sample8.java"));
+        assertThat(compilation).succeeded();
+    }
+
     @Test
     void shouldProcessSampleFailed() {
         Compilation compilation = javac().withProcessors(new WebpbRequestMappingProcessor())

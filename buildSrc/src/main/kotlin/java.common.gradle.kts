@@ -1,9 +1,6 @@
-import gradle.kotlin.dsl.accessors._b62b4054fca3097d153a801e2be568ce.annotationProcessor
-import gradle.kotlin.dsl.accessors._b62b4054fca3097d153a801e2be568ce.compileOnly
-import gradle.kotlin.dsl.accessors._b62b4054fca3097d153a801e2be568ce.testAnnotationProcessor
-import gradle.kotlin.dsl.accessors._b62b4054fca3097d153a801e2be568ce.testCompileOnly
 import utils.Props
 import utils.Vers
+import utils.createConfiguration
 
 plugins {
     checkstyle
@@ -54,19 +51,50 @@ jacoco {
     toolVersion = Vers.jacoco
 }
 
-tasks {
-    jacocoTestCoverageVerification {
-        violationRules {
-            rule { limit { minimum = BigDecimal.valueOf(Props.jacocoMinCoverage) } }
-        }
+//tasks {
+//    jacocoTestCoverageVerification {
+//        violationRules {
+//            rule { limit { minimum = BigDecimal.valueOf(Props.jacocoMinCoverage) } }
+//        }
+//    }
+//    check {
+//        dependsOn(jacocoTestCoverageVerification)
+//    }
+//    test {
+//        finalizedBy(tasks.jacocoTestReport)
+//    }
+//    jacocoTestReport {
+//        dependsOn(tasks.test)
+//        reports {
+//            xml.isEnabled = true
+//        }
+//    }
+//}
+
+tasks.jacocoTestReport {
+    enabled = false
+}
+
+createConfiguration("outgoingClassDirs", "classDirs") {
+    isCanBeResolved = false
+    isCanBeConsumed = true
+    sourceSets.main.get().output.forEach {
+        outgoing.artifact(it)
     }
-    check {
-        dependsOn(jacocoTestCoverageVerification)
+}
+
+createConfiguration("outgoingSourceDirs", "sourceDirs") {
+    isCanBeResolved = false
+    isCanBeConsumed = true
+    sourceSets.main.get().java.srcDirs.forEach {
+        outgoing.artifact(it)
     }
-    test {
-        finalizedBy(tasks.jacocoTestReport)
-    }
-    jacocoTestReport {
-        dependsOn(tasks.test)
-    }
+}
+
+createConfiguration("outgoingCoverageData", "coverageData") {
+    isCanBeResolved = false
+    isCanBeConsumed = true
+    outgoing.artifact(tasks.test.map {
+        it.extensions.getByType<JacocoTaskExtension>().destinationFile!!
+    })
 }

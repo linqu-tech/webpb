@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 rootProject.name = "webpb"
+include(":aggregation")
 include(":libs:commons")
 include(":libs:proto")
 include(":libs:utilities")
