@@ -37,7 +37,7 @@ val incomingCoverageData = createConfiguration("incomingCoverageData", "coverage
     isCanBeConsumed = false
 }
 
-val codeCoverageReport by tasks.registering(JacocoReport::class) {
+val coverage by tasks.registering(JacocoReport::class) {
     additionalClassDirs(incomingClassDirs.incoming.artifactView {
         lenient(true)
     }.files.asFileTree.matching {
@@ -58,7 +58,7 @@ val configCoveralls by tasks.registering(DefaultTask::class) {
         sourceDirs = incomingSourceDirs.incoming.artifactView { lenient(true) }.files.map {
             it.absolutePath
         }
-        jacocoReportPath = "build/reports/jacoco/codeCoverageReport/codeCoverageReport.xml"
+        jacocoReportPath = "build/reports/jacoco/coverage/coverage.xml"
     }
 }
 
@@ -67,5 +67,5 @@ tasks.coveralls {
 }
 
 tasks.check {
-    dependsOn(codeCoverageReport)
+    dependsOn(coverage)
 }
