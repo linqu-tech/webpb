@@ -19,12 +19,14 @@ for (key in properties.stringPropertyNames()) {
     ext.set(key, properties.getProperty(key))
 }
 
+val versionPluginCoveralls: String by project
 val versionPluginProtobuf: String by project
 val versionPluginSpringBoot: String by project
 val versionPluginVersions: String by project
 
 dependencies {
     implementation("com.github.ben-manes:gradle-versions-plugin:${versionPluginVersions}")
+    implementation("com.github.kt3k.coveralls:com.github.kt3k.coveralls.gradle.plugin:${versionPluginCoveralls}")
     implementation("com.google.protobuf:protobuf-gradle-plugin:${versionPluginProtobuf}")
     implementation("org.springframework.boot:spring-boot-gradle-plugin:${versionPluginSpringBoot}")
     implementation(kotlin("script-runtime"))

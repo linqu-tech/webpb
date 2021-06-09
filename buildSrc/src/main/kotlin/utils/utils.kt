@@ -1,11 +1,17 @@
 package utils
 
+import gradle.kotlin.dsl.accessors._9db69caf33bdadb52e152539254e937d.implementation
 import org.gradle.api.Action
 import org.gradle.api.Project
+import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.repositories.PasswordCredentials
+import org.gradle.api.attributes.Category
+import org.gradle.api.attributes.DocsType
+import org.gradle.api.attributes.Usage
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.kotlin.dsl.credentials
+import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.the
 import org.gradle.plugins.signing.SigningExtension
 
@@ -59,4 +65,22 @@ fun Project.signAndPublish(artifactId: String, configuration: Action<MavenPublic
     }
     configuration.execute(publication)
     project.the<SigningExtension>().sign(publication)
+}
+
+fun Project.createConfiguration(
+    name: String,
+    docsType: String,
+    configuration: Action<Configuration>
+): Configuration {
+    val conf = configurations.create(name) {
+        isVisible = false
+        extendsFrom(configurations.implementation.get())
+        attributes {
+            attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage.JAVA_RUNTIME))
+            attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category.DOCUMENTATION))
+            attribute(DocsType.DOCS_TYPE_ATTRIBUTE, objects.named(docsType))
+        }
+    }
+    configuration.execute(conf)
+    return conf
 }
