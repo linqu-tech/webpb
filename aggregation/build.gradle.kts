@@ -37,15 +37,27 @@ val incomingCoverageData = createConfiguration("incomingCoverageData", "coverage
     isCanBeConsumed = false
 }
 
-val coverage by tasks.registering(JacocoReport::class) {
-    additionalClassDirs(incomingClassDirs.incoming.artifactView {
+fun updateJacocoReport(base: JacocoReportBase) {
+    base.additionalClassDirs(incomingClassDirs.incoming.artifactView {
         lenient(true)
     }.files.asFileTree.matching {
         exclude("tech/linqu/webpb/processor/misc/*")
         exclude("tech/linqu/webpb/utilities/descriptor/*")
     })
-    additionalSourceDirs(incomingSourceDirs.incoming.artifactView { lenient(true) }.files)
-    executionData(incomingCoverageData.incoming.artifactView { lenient(true) }.files.filter { it.exists() })
+    base.additionalSourceDirs(incomingSourceDirs.incoming.artifactView { lenient(true) }.files)
+    base.executionData(incomingCoverageData.incoming.artifactView { lenient(true) }.files.filter { it.exists() })
+}
+
+val coverageVerification by tasks.registering(JacocoCoverageVerification::class) {
+    updateJacocoReport(this)
+
+    violationRules {
+        rule { limit { minimum = BigDecimal.valueOf(utils.Props.jacocoMinCoverage) } }
+    }
+}
+
+val coverage by tasks.registering(JacocoReport::class) {
+    updateJacocoReport(this)
 
     reports {
         xml.isEnabled = true
@@ -67,5 +79,5 @@ tasks.coveralls {
 }
 
 tasks.check {
-    dependsOn(coverage)
+    dependsOn(coverageVerification)
 }

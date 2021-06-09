@@ -43,8 +43,8 @@ Any line of the commit message cannot be longer than 100 characters.
   │       │             │
   │       │             └─⫸ Summary in present tense. Not capitalized. No period at the end.
   │       │
-  │       └─⫸ Commit Scope: libs.commons|libs.utilities|libs|plugins.java|plugins.ts|plugins|
-  |                          proto|runtime.java|runtime.processor|runtime.ts|sample|webpb
+  │       └─⫸ Commit Scope: aggregation|libs.commons|libs.utilities|libs|plugins.java|plugins.ts|
+  |                          plugins|proto|runtime.java|runtime.processor|runtime.ts|sample|webpb
   │
   └─⫸ Commit Type: build|ci|docs|feat|fix|perf|refactor|test
 ```
@@ -70,6 +70,7 @@ The scope should be the name of the package affected (as perceived by the person
 
 The following is the list of supported scopes:
 
+* `aggregation`
 * `libs.commons`
 * `libs.utilities`
 * `libs`
