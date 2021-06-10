@@ -196,7 +196,7 @@ public final class Generator {
 
     private void generateMessageFields(Descriptor descriptor, boolean isInterface) {
         for (FieldDescriptor fieldDescriptor : descriptor.getFields()) {
-            addImport(DescriptorUtils.getFieldTypeFilePackage(fieldDescriptor));
+            addImport(DescriptorUtils.getFieldTypePackage(fieldDescriptor));
             indent().append(fieldDescriptor.getName());
             if (fieldDescriptor.isOptional()) {
                 builder.append('?');
@@ -360,8 +360,8 @@ public final class Generator {
         if (StringUtils.startsWith(fullName, packageName)) {
             return DescriptorUtils.isMessage(fieldDescriptor) ? "I" + simpleName : simpleName;
         }
-        return DescriptorUtils.isMessage(fieldDescriptor)
-            ? DescriptorUtils.getFieldTypePackage(fieldDescriptor) + ".I" + simpleName : fullName;
+        String fieldPackage = DescriptorUtils.getFieldTypePackage(fieldDescriptor);
+        return fieldPackage == null ? fullName : fieldPackage + ".I" + simpleName;
     }
 
     private void trimDuplicatedNewline() {

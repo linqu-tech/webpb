@@ -1,0 +1,12 @@
+syntax = "proto2";
+
+package TestProto;
+
+option java_package = "tech.linqu.webpb.tests.proto";
+
+import "webpb/WebpbExtend.proto";
+import "WebpbOptions.proto";
+
+message Test {
+    required int32 id = 1;
+}

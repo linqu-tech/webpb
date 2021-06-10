@@ -1,0 +1,18 @@
+syntax = "proto2";
+
+package IncludeProto;
+
+import "webpb/WebpbExtend.proto";
+import "WebpbOptions.proto";
+
+message Message {
+    required int32 id = 1;
+}
+
+enum Enum {
+    option (e_opts).opt = {
+        tag: "A"
+    };
+
+    DEFAULT = 0;
+}

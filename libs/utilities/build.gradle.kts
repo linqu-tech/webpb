@@ -18,6 +18,7 @@ dependencies {
     implementation(project(":libs:proto"))
     testAnnotationProcessor("org.projectlombok:lombok:${Vers.lombok}")
     testCompileOnly("org.projectlombok:lombok:${Vers.lombok}")
+    testImplementation(project(":libs:tests"))
 }
 
 val extractSources by tasks.registering(DefaultTask::class) {
