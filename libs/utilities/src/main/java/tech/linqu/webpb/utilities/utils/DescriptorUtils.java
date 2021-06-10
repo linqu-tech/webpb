@@ -16,9 +16,11 @@
 
 package tech.linqu.webpb.utilities.utils;
 
+import static com.google.protobuf.Descriptors.FieldDescriptor.JavaType.ENUM;
 import static com.google.protobuf.Descriptors.FieldDescriptor.JavaType.MESSAGE;
 
 import com.google.protobuf.Descriptors.Descriptor;
+import com.google.protobuf.Descriptors.EnumDescriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Descriptors.FileDescriptor;
 import java.util.List;
@@ -31,6 +33,9 @@ import tech.linqu.webpb.commons.PathParam;
  */
 public class DescriptorUtils {
 
+    private DescriptorUtils() {
+    }
+
     /**
      * Filed type is enum.
      *
@@ -38,7 +43,7 @@ public class DescriptorUtils {
      * @return is enum
      */
     public static boolean isEnum(FieldDescriptor fieldDescriptor) {
-        return fieldDescriptor.getJavaType() == FieldDescriptor.JavaType.ENUM;
+        return fieldDescriptor.getJavaType() == ENUM;
     }
 
     /**
@@ -52,12 +57,71 @@ public class DescriptorUtils {
     }
 
     /**
+     * Resolve a message descriptor by name recursively.
+     *
+     * @param descriptors from descriptors
+     * @param name        descriptor name
+     * @return {@link Descriptor} or null
+     */
+    public static Descriptor resolveDescriptor(List<FileDescriptor> descriptors, String name) {
+        for (FileDescriptor fileDescriptor : descriptors) {
+            for (Descriptor descriptor : fileDescriptor.getMessageTypes()) {
+                if (StringUtils.equalsIgnoreCase(name, descriptor.getName())) {
+                    return descriptor;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Resolve an enum descriptor by name recursively.
+     *
+     * @param descriptors from descriptors
+     * @param name        descriptor name
+     * @return {@link Descriptor} or null
+     */
+    public static EnumDescriptor resolveEnumDescriptor(List<FileDescriptor> descriptors,
+                                                       String name) {
+        for (FileDescriptor fileDescriptor : descriptors) {
+            for (EnumDescriptor descriptor : fileDescriptor.getEnumTypes()) {
+                if (StringUtils.equalsIgnoreCase(name, descriptor.getName())) {
+                    return descriptor;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Resolve a file descriptor by name recursively.
+     *
+     * @param descriptors from descriptors
+     * @param name        descriptor name
+     * @return {@link FileDescriptor} or null
+     */
+    public static FileDescriptor resolveFileDescriptor(List<FileDescriptor> descriptors,
+                                                       String name) {
+        for (FileDescriptor descriptor : descriptors) {
+            if (StringUtils.equalsIgnoreCase(descriptor.getName(), name)) {
+                return descriptor;
+            }
+            FileDescriptor fileDescriptor =
+                resolveFileDescriptor(descriptor.getDependencies(), name);
+            if (fileDescriptor != null) {
+                return fileDescriptor;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Resolve file package from type of the field.
      *
      * @param fieldDescriptor {@link FileDescriptor}.
      * @return file package name
      */
-    public static String getFieldTypeFilePackage(FieldDescriptor fieldDescriptor) {
+    public static String getFieldTypePackage(FieldDescriptor fieldDescriptor) {
         if (isMessage(fieldDescriptor)) {
             return fieldDescriptor.getMessageType().getFile().getPackage();
         } else if (isEnum(fieldDescriptor)) {
@@ -65,21 +129,6 @@ public class DescriptorUtils {
         } else {
             return null;
         }
-    }
-
-    /**
-     * Resolve package from type of the field.
-     *
-     * @param fieldDescriptor {@link FileDescriptor}.
-     * @return package name
-     */
-    public static String getFieldTypePackage(FieldDescriptor fieldDescriptor) {
-        String fullName = getFieldTypeFullName(fieldDescriptor);
-        if (StringUtils.isNotEmpty(fullName)) {
-            String simpleName = getFieldTypeSimpleName(fieldDescriptor);
-            return StringUtils.removeEnd(fullName, "." + simpleName);
-        }
-        return null;
     }
 
     /**
@@ -94,7 +143,7 @@ public class DescriptorUtils {
         } else if (isEnum(fieldDescriptor)) {
             return fieldDescriptor.getEnumType().getName();
         } else {
-            return null;
+            return fieldDescriptor.getType().name();
         }
     }
 
@@ -110,7 +159,7 @@ public class DescriptorUtils {
         } else if (isEnum(fieldDescriptor)) {
             return fieldDescriptor.getEnumType().getFullName();
         } else {
-            return null;
+            return fieldDescriptor.getType().name();
         }
     }
 
@@ -120,7 +169,7 @@ public class DescriptorUtils {
      * @param fieldDescriptor {@link FieldDescriptor}
      * @return {@link FileDescriptor}
      */
-    public static FieldDescriptor getKeyDescriptor(FieldDescriptor fieldDescriptor) {
+    public static FieldDescriptor getMapKeyDescriptor(FieldDescriptor fieldDescriptor) {
         List<FieldDescriptor> fieldDescriptors = fieldDescriptor.getMessageType().getFields();
         return fieldDescriptors.get(0);
     }
@@ -131,31 +180,9 @@ public class DescriptorUtils {
      * @param fieldDescriptor {@link FieldDescriptor}
      * @return {@link FileDescriptor}
      */
-    public static FieldDescriptor getValueDescriptor(FieldDescriptor fieldDescriptor) {
+    public static FieldDescriptor getMapValueDescriptor(FieldDescriptor fieldDescriptor) {
         List<FieldDescriptor> fieldDescriptors = fieldDescriptor.getMessageType().getFields();
         return fieldDescriptors.get(1);
-    }
-
-    /**
-     * Resolve a file descriptor by name recursively.
-     *
-     * @param descriptors from descriptors
-     * @param dependency  dependency name
-     * @return {@link FileDescriptor} or null
-     */
-    public static FileDescriptor resolveDescriptor(List<FileDescriptor> descriptors,
-                                                   String dependency) {
-        for (FileDescriptor descriptor : descriptors) {
-            if (StringUtils.equalsIgnoreCase(descriptor.getName(), dependency)) {
-                return descriptor;
-            }
-            FileDescriptor fileDescriptor =
-                resolveDescriptor(descriptor.getDependencies(), dependency);
-            if (fileDescriptor != null) {
-                return fileDescriptor;
-            }
-        }
-        return null;
     }
 
     /**

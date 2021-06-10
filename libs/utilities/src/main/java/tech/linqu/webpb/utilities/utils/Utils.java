@@ -1,7 +1,5 @@
 package tech.linqu.webpb.utilities.utils;
 
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-
 import java.net.MalformedURLException;
 import java.net.URL;
 import org.apache.commons.lang3.StringUtils;
@@ -10,6 +8,9 @@ import org.apache.commons.lang3.StringUtils;
  * Utilities.
  */
 public class Utils {
+
+    private Utils() {
+    }
 
     /**
      * Normalize a path.
@@ -22,10 +23,8 @@ public class Utils {
             return path;
         }
         try {
-            URL url = new URL(path);
-            if (isNotEmpty(url.getProtocol()) || isNotEmpty(url.getHost())) {
-                return StringUtils.stripEnd(path, "/");
-            }
+            new URL(path);
+            return StringUtils.stripEnd(path, "/");
         } catch (MalformedURLException ignored) {
             // ignored
         }

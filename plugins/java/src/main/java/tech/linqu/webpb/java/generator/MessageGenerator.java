@@ -31,6 +31,9 @@ import static com.google.protobuf.Descriptors.FieldDescriptor.Type.SINT64;
 import static com.google.protobuf.Descriptors.FieldDescriptor.Type.STRING;
 import static com.google.protobuf.Descriptors.FieldDescriptor.Type.UINT32;
 import static com.google.protobuf.Descriptors.FieldDescriptor.Type.UINT64;
+import static tech.linqu.webpb.utilities.utils.DescriptorUtils.getFieldTypeSimpleName;
+import static tech.linqu.webpb.utilities.utils.DescriptorUtils.getMapKeyDescriptor;
+import static tech.linqu.webpb.utilities.utils.DescriptorUtils.getMapValueDescriptor;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.Modifier;
@@ -79,7 +82,6 @@ import tech.linqu.webpb.utilities.descriptor.WebpbExtend.MessageOpts;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend.OptFieldOpts;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend.OptMessageOpts;
 import tech.linqu.webpb.utilities.utils.Const;
-import tech.linqu.webpb.utilities.utils.DescriptorUtils;
 import tech.linqu.webpb.utilities.utils.OptionUtils;
 import tech.linqu.webpb.utilities.utils.Utils;
 
@@ -318,8 +320,8 @@ public class MessageGenerator {
 
     private Type toType(FieldDescriptor fieldDescriptor) {
         if (fieldDescriptor.isMapField()) {
-            FieldDescriptor keyDescriptor = DescriptorUtils.getKeyDescriptor(fieldDescriptor);
-            FieldDescriptor valueDescriptor = DescriptorUtils.getValueDescriptor(fieldDescriptor);
+            FieldDescriptor keyDescriptor = getMapKeyDescriptor(fieldDescriptor);
+            FieldDescriptor valueDescriptor = getMapValueDescriptor(fieldDescriptor);
             return new ClassOrInterfaceType(null, new SimpleName(Map.class.getSimpleName()),
                 NodeList.nodeList(toType(keyDescriptor), toType(valueDescriptor))
             );
@@ -328,8 +330,7 @@ public class MessageGenerator {
         if (type != null) {
             return type.clone();
         }
-        return new ClassOrInterfaceType(null,
-            DescriptorUtils.getFieldTypeSimpleName(fieldDescriptor));
+        return new ClassOrInterfaceType(null, getFieldTypeSimpleName(fieldDescriptor));
     }
 
     private void addImports(ClassOrInterfaceType type, List<Name> imports) {

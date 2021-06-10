@@ -33,9 +33,8 @@ dependencies {
 }
 
 tasks.create<Copy>("initGitHooks") {
-    val hooksDir = project.file("src/main/resources/hooks")
-    from(hooksDir)
-    into(project.file("../.git/hooks"))
+    from("src/main/resources/hooks")
+    into("../.git/hooks")
     fileMode = 0b111101101
 }
 

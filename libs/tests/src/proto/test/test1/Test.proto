@@ -1,0 +1,33 @@
+syntax = "proto2";
+
+import "Include.proto";
+
+import "webpb/WebpbExtend.proto";
+import "WebpbOptions.proto";
+
+option (f_opts).java = {
+    gen_getter: true
+    gen_setter: false
+};
+
+option (f_opts).ts = {
+    int64_as_string: true
+};
+
+message Test4 {
+    required int64 test4 = 1;
+}
+
+message Test {
+    option (m_opts).opt = {
+        method: "GET"
+        context: "test"
+        path: "/test/{test1}"
+    };
+
+    required int32 test1 = 1 [(opts).opt = {in_query: true}, (opts).ts = {as_string: true}];
+    required IncludeProto.Message test2 = 2;
+    required IncludeProto.Enum test3 = 3;
+    required Test4 test4 = 4;
+    map<int64, int32> test5 = 5;
+}

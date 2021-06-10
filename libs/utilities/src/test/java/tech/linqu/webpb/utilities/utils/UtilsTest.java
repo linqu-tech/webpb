@@ -17,6 +17,7 @@
 package tech.linqu.webpb.utilities.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static tech.linqu.webpb.utilities.utils.Utils.normalize;
 
 import org.junit.jupiter.api.Test;
 
@@ -24,13 +25,13 @@ class UtilsTest {
 
     @Test
     void shouldNormalizeStringSuccess() {
-        assertEquals("", Utils.normalize(""));
-        assertEquals("", Utils.normalize("/"));
-        assertEquals("", Utils.normalize("//"));
-        assertEquals("/a", Utils.normalize("/a"));
-        assertEquals("/a", Utils.normalize("a/"));
-        assertEquals("/a", Utils.normalize("/a/"));
-        assertEquals("/ab.c", Utils.normalize("//ab.c"));
-        assertEquals("https://ab.c", Utils.normalize("https://ab.c"));
+        assertEquals("", normalize(""));
+        assertEquals("", normalize("/"));
+        assertEquals("", normalize("//"));
+        assertEquals("/a", normalize("/a"));
+        assertEquals("/a", normalize("a/"));
+        assertEquals("/a", normalize("/a/"));
+        assertEquals("/ab.c", normalize("//ab.c"));
+        assertEquals("https://ab.c", normalize("https://ab.c"));
     }
 }

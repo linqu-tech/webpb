@@ -1,0 +1,18 @@
+syntax = "proto2";
+
+import "webpb/WebpbExtend.proto";
+
+// global file options
+option (f_opts).java = {
+    annotation: '@Accessors(chain = true)'
+    annotation: '@Getter'
+    annotation: '@Setter'
+    annotation: '@ToString'
+    gen_getter: false
+    gen_setter: false
+    gen_to_string: false
+};
+
+option (f_opts).ts = {
+    int64_as_string: false
+};

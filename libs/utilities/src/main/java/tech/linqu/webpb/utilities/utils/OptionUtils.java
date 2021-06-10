@@ -34,6 +34,9 @@ import tech.linqu.webpb.utilities.descriptor.WebpbExtend;
  */
 public class OptionUtils {
 
+    private OptionUtils() {
+    }
+
     /**
      * Determine if should skip by tags.
      *
@@ -144,7 +147,7 @@ public class OptionUtils {
      * Resolve {@link WebpbExtend.FieldOpts} from {@link FileDescriptor} with a filter.
      *
      * @param descriptor {@link FileDescriptor}
-     * @param predicate      option filter
+     * @param predicate  option filter
      * @return {@link WebpbExtend.FieldOpts}
      */
     public static WebpbExtend.FieldOpts getOpts(FieldDescriptor descriptor,

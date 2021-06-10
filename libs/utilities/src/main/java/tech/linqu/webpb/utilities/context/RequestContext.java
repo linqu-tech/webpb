@@ -21,20 +21,13 @@ import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.Descriptors.DescriptorValidationException;
 import com.google.protobuf.Descriptors.FileDescriptor;
 import com.google.protobuf.compiler.PluginProtos.CodeGeneratorRequest;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import lombok.Getter;
-import org.apache.commons.lang3.StringUtils;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend;
 import tech.linqu.webpb.utilities.utils.Const;
 import tech.linqu.webpb.utilities.utils.DescriptorUtils;
@@ -55,29 +48,24 @@ public class RequestContext {
     /**
      * Create context with a file option filter.
      *
+     * @throws Exception if eny exceptions
+     */
+    public RequestContext() throws Exception {
+        CodeGeneratorRequest request = CodeGeneratorRequest.parseFrom(System.in);
+        initDescriptors(request);
+        initWebpbOptions(opts -> true);
+    }
+
+    /**
+     * Create context with a file option filter.
+     *
      * @param predicate predicates for file option.
      * @throws Exception if eny exceptions
      */
     public RequestContext(Predicate<WebpbExtend.FileOpts> predicate) throws Exception {
-        CodeGeneratorRequest request = createRequest();
+        CodeGeneratorRequest request = CodeGeneratorRequest.parseFrom(System.in);
         initDescriptors(request);
         initWebpbOptions(predicate);
-    }
-
-    private CodeGeneratorRequest createRequest() throws IOException, URISyntaxException {
-        CodeGeneratorRequest request = null;
-        if (StringUtils.equalsIgnoreCase("true", System.getProperty("debug"))) {
-            URL url = RequestContext.class.getClassLoader().getResource("request.txt");
-            if (url != null) {
-                String input = new String(Files.readAllBytes(Paths.get(url.toURI())));
-                byte[] bytes = Base64.getDecoder().decode(input.trim());
-                request = CodeGeneratorRequest.parseFrom(bytes);
-            }
-        }
-        if (request == null) {
-            request = CodeGeneratorRequest.parseFrom(System.in);
-        }
-        return request;
     }
 
     private void initDescriptors(CodeGeneratorRequest request)
@@ -99,7 +87,7 @@ public class RequestContext {
 
     private void initWebpbOptions(Predicate<WebpbExtend.FileOpts> predicate) {
         FileDescriptor webpbDescriptor =
-            DescriptorUtils.resolveDescriptor(descriptors, Const.WEBPB_OPTIONS);
+            DescriptorUtils.resolveFileDescriptor(descriptors, Const.WEBPB_OPTIONS);
         this.fileOpts = OptionUtils.getOpts(webpbDescriptor, predicate);
     }
 }
