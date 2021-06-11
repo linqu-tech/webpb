@@ -11,7 +11,6 @@ plugins {
 group = hierarchicalGroup()
 
 dependencies {
-    implementation("commons-io:commons-io:2.9.0")
     implementation(project(":libs:proto"))
 }
 

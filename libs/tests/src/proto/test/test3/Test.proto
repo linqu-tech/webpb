@@ -2,11 +2,18 @@ syntax = "proto2";
 
 package TestProto;
 
-option java_package = "tech.linqu.webpb.tests.proto";
+option java_package = "test";
 
 import "webpb/WebpbExtend.proto";
-import "WebpbOptions.proto";
+
+option (f_opts).java = {
+    gen_getter: true
+    gen_setter: true
+    gen_to_string: true
+};
 
 message Test {
-    required int32 id = 1;
+    required int32 test1 = 1;
+    required bool test2 = 2;
+    required bool isTest3 = 3;
 }

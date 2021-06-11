@@ -6,16 +6,16 @@ import java.io.InputStream;
  * Utilities to handle test dump files.
  */
 public enum Dumps {
-    TEST1("/test1/dump/test.dump"),
-
-    TEST2("/test2/dump/test.dump"),
-
-    TEST3("/test3/dump/test.dump");
+    TEST1,
+    TEST2,
+    TEST3,
+    TEST4,
+    TEST5;
 
     private final String dumpName;
 
-    Dumps(String dumpName) {
-        this.dumpName = dumpName;
+    Dumps() {
+        this.dumpName = String.format("/%s/dump/test.dump", this.name().toLowerCase());
     }
 
     /**

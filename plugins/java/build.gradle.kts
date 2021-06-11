@@ -9,6 +9,8 @@ dependencies {
     implementation("com.github.javaparser:javaparser-core:${Vers.javaparser}")
     implementation(project(":libs:commons"))
     implementation(project(":libs:utilities"))
+    testImplementation(project(":libs:tests"))
+    testImplementation("commons-io:commons-io:2.9.0")
 }
 
 val artifactId = "protoc-webpb-${project.name}"

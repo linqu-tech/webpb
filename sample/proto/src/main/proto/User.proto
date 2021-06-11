@@ -14,5 +14,5 @@ message UserDataRequest {
         path: "/users/{id}"
     };
 
-    required int64 id = 1 [(opts).ts = {as_string: true} ];
+    required int64 id = 1 [(opts).ts = {as_string: true}];
 }

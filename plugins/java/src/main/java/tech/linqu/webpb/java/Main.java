@@ -16,14 +16,9 @@
 
 package tech.linqu.webpb.java;
 
-import com.github.javaparser.ast.CompilationUnit;
-import com.google.protobuf.Descriptors;
-import com.google.protobuf.Descriptors.FileDescriptor;
 import com.google.protobuf.compiler.PluginProtos.CodeGeneratorResponse;
-import java.util.Collections;
-import org.apache.commons.lang3.StringUtils;
+import java.util.Map;
 import tech.linqu.webpb.java.generator.Generator;
-import tech.linqu.webpb.java.generator.NameMap;
 import tech.linqu.webpb.utilities.context.RequestContext;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend.FileOpts;
 
@@ -37,47 +32,17 @@ public class Main {
      */
     public static void main(String[] args) throws Exception {
         RequestContext context = new RequestContext(FileOpts::hasJava);
-        NameMap nameMap = new NameMap(context.getDescriptors());
-
-        for (FileDescriptor fileDescriptor : context.getTargetDescriptors()) {
-            String javaPackage = fileDescriptor.getOptions().getJavaPackage();
-            if (shouldIgnore(javaPackage)) {
-                continue;
-            }
-            for (Descriptors.Descriptor descriptor : fileDescriptor.getMessageTypes()) {
-                CompilationUnit compilationUnit = Generator
-                    .of(context, fileDescriptor, nameMap, Collections.emptyList())
-                    .generateMessage(descriptor);
-                writeCompilationUnit(compilationUnit, filename(javaPackage, descriptor.getName()));
-            }
-            for (Descriptors.EnumDescriptor enumDescriptor : fileDescriptor.getEnumTypes()) {
-                CompilationUnit compilationUnit = Generator
-                    .of(context, fileDescriptor, nameMap, Collections.emptyList())
-                    .generateEnum(enumDescriptor);
-                writeCompilationUnit(compilationUnit,
-                    filename(javaPackage, enumDescriptor.getName()));
-            }
+        Map<String, String> fileMap = Generator.create().generate(context);
+        for (Map.Entry<String, String> entry : fileMap.entrySet()) {
+            writeCompilationUnit(entry.getKey(), entry.getValue());
         }
     }
 
-    private static boolean shouldIgnore(String packageName) {
-        return StringUtils.isEmpty(packageName) || "com.google.protobuf".equals(packageName);
-    }
-
-    private static String filename(String javaPackage, String className) {
-        return javaPackage.replaceAll("\\.", "/") + "/" + className + ".java";
-    }
-
-    private static void writeCompilationUnit(CompilationUnit compilationUnit, String filename)
-        throws Exception {
-        if (compilationUnit == null) {
-            return;
-        }
-        String formatted = compilationUnit.toString();
+    private static void writeCompilationUnit(String filename, String content) throws Exception {
         CodeGeneratorResponse.Builder builder = CodeGeneratorResponse.newBuilder();
         builder.addFileBuilder()
             .setName(filename)
-            .setContent(formatted);
+            .setContent(content);
         CodeGeneratorResponse response = builder.build();
         response.writeTo(System.out);
     }

@@ -1,9 +1,7 @@
 package tech.linqu.webpb.runtime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertLinesMatch;
 
-import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 
 class WebpbMetaTest {
@@ -12,7 +10,6 @@ class WebpbMetaTest {
         .method("GET")
         .context("user")
         .path("/get/user")
-        .tags("backend", "frontend")
         .build();
 
     @Test
@@ -31,14 +28,9 @@ class WebpbMetaTest {
     }
 
     @Test
-    void shouldGetTagsSuccess() {
-        assertLinesMatch(Arrays.asList("backend", "frontend"), webpbMeta.getTags());
-    }
-
-    @Test
     void shouldToStringSuccess() {
         assertEquals(
-            "WebpbMeta(method=GET, context=user, path=/get/user, tags=[backend, frontend])",
+            "WebpbMeta(method=GET, context=user, path=/get/user)",
             webpbMeta.toString());
     }
 }
