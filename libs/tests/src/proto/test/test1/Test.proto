@@ -1,9 +1,13 @@
 syntax = "proto2";
 
+option java_package = "test";
+
 import "Include.proto";
 
 import "webpb/WebpbExtend.proto";
 import "WebpbOptions.proto";
+
+import "google/protobuf/any.proto";
 
 option (f_opts).java = {
     gen_getter: true
@@ -13,6 +17,9 @@ option (f_opts).java = {
 option (f_opts).ts = {
     int64_as_string: true
 };
+
+message Test2 {
+}
 
 message Test4 {
     required int64 test4 = 1;
@@ -24,10 +31,30 @@ message Test {
         context: "test"
         path: "/test/{test1}"
     };
+    option (m_opts).java = {
+        annotation: '@ToString'
+    };
 
     required int32 test1 = 1 [(opts).opt = {in_query: true}, (opts).ts = {as_string: true}];
-    required IncludeProto.Message test2 = 2;
+    required IncludeProto.Message test2 = 2 [(opts).java = {annotation: '@NotNull'}];
     required IncludeProto.Enum test3 = 3;
     required Test4 test4 = 4;
     map<int64, int32> test5 = 5;
+    map<int32, IncludeProto.Message> tests6 = 6;
+    required google.protobuf.Any test7 = 7;
+
+    message NestedTest {
+        option (m_opts).opt = {
+            method: "GET"
+            context: "test"
+            path: "/test/nested/{test1}"
+        };
+
+        required int32 test1 = 1;
+    }
+
+    required NestedTest test8 = 8;
+    required int32 test9 = 9 [(opts).opt = {omitted: true}];
+    required int64 test10 = 10 [(opts).ts = {as_string: true}];
+    repeated IncludeProto.Message test11 = 11;
 }

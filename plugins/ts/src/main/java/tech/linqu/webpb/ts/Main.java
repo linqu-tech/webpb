@@ -18,7 +18,6 @@ package tech.linqu.webpb.ts;
 
 import com.google.protobuf.Descriptors.FileDescriptor;
 import com.google.protobuf.compiler.PluginProtos.CodeGeneratorResponse;
-import java.util.ArrayList;
 import org.apache.commons.lang3.StringUtils;
 import tech.linqu.webpb.ts.generator.Generator;
 import tech.linqu.webpb.utilities.context.RequestContext;
@@ -39,9 +38,7 @@ public class Main {
             if (shouldIgnore(fileDescriptor.getPackage())) {
                 continue;
             }
-            StringBuilder sb = Generator
-                .of(context, fileDescriptor, new ArrayList<>())
-                .generate();
+            StringBuilder sb = Generator.of(context, fileDescriptor).generate();
             if (sb.length() == 0) {
                 continue;
             }

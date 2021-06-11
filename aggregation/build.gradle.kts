@@ -8,12 +8,13 @@ dependencies {
     implementation(project(":libs:commons"))
     implementation(project(":libs:proto"))
     implementation(project(":libs:utilities"))
+    implementation(project(":plugins:dump"))
     implementation(project(":plugins:java"))
     implementation(project(":plugins:ts"))
+    implementation(project(":runtime:java"))
     implementation(project(":runtime:processor"))
     implementation(project(":sample:app"))
     implementation(project(":sample:proto"))
-    implementation(project(":runtime:java"))
 }
 
 configurations.implementation.get().dependencies.forEach {

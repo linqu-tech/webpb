@@ -1,7 +1,6 @@
 package tech.linqu.webpb.utilities.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -10,7 +9,6 @@ import static tech.linqu.webpb.utilities.TestUtils.createRequest;
 import static tech.linqu.webpb.utilities.utils.DescriptorUtils.resolveDescriptor;
 import static tech.linqu.webpb.utilities.utils.DescriptorUtils.resolveEnumDescriptor;
 import static tech.linqu.webpb.utilities.utils.DescriptorUtils.resolveFileDescriptor;
-import static tech.linqu.webpb.utilities.utils.OptionUtils.shouldSkip;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Descriptors.Descriptor;
@@ -18,8 +16,6 @@ import com.google.protobuf.Descriptors.EnumDescriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Descriptors.FileDescriptor;
 import com.google.protobuf.InvalidProtocolBufferException;
-import java.util.Arrays;
-import java.util.Collections;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import tech.linqu.webpb.tests.Dumps;
@@ -30,13 +26,6 @@ import tech.linqu.webpb.utilities.descriptor.WebpbExtend.FileOpts;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend.MessageOpts;
 
 class OptionUtilsTest {
-
-    @Test
-    void shouldTestSkipSuccess() {
-        assertFalse(shouldSkip(Collections.emptyList(), Collections.emptyList()));
-        assertFalse(shouldSkip(Arrays.asList("a", "b"), Arrays.asList("b", "c")));
-        assertTrue(shouldSkip(Arrays.asList("a", "b"), Arrays.asList("c", "d")));
-    }
 
     // FileOpts
     @Test
@@ -82,7 +71,7 @@ class OptionUtilsTest {
         assertEquals("GET", optOpts.getOpt().getMethod());
 
         MessageOpts javaOpts = OptionUtils.getOpts(descriptor, MessageOpts::hasJava);
-        assertEquals(0, javaOpts.getJava().getAnnotationCount());
+        assertEquals(1, javaOpts.getJava().getAnnotationCount());
     }
 
     @Test
@@ -114,7 +103,7 @@ class OptionUtilsTest {
         EnumDescriptor enumDescriptor = resolveEnumDescriptor(context.getDescriptors(), "Enum");
 
         EnumOpts optOpts = OptionUtils.getOpts(enumDescriptor, EnumOpts::hasOpt);
-        assertEquals("A", optOpts.getOpt().getTag(0));
+        assertNotNull(optOpts);
 
         EnumOpts javaOpts = OptionUtils.getOpts(enumDescriptor, EnumOpts::hasJava);
         assertEquals(0, javaOpts.getJava().getAnnotationCount());
@@ -173,10 +162,10 @@ class OptionUtilsTest {
 
     @Test
     void shouldGetFieldOptsSuccessWhenWithoutOptions() {
-        RequestContext context = createRequest(Dumps.TEST1);
+        RequestContext context = createRequest(Dumps.TEST2);
         Descriptor descriptor = resolveDescriptor(context.getDescriptors(), "Test");
         assertNotNull(descriptor);
-        FieldDescriptor fieldDescriptor = descriptor.getFields().get(1);
+        FieldDescriptor fieldDescriptor = descriptor.getFields().get(0);
         assertEquals(FieldOpts.getDefaultInstance(),
             OptionUtils.getOpts((FieldDescriptor) null, o -> true));
         assertEquals(FieldOpts.getDefaultInstance(),

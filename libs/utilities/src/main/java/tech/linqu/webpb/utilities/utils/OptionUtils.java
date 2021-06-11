@@ -25,7 +25,6 @@ import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Descriptors.FileDescriptor;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.UnknownFieldSet;
-import java.util.List;
 import java.util.function.Predicate;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend;
 
@@ -35,25 +34,6 @@ import tech.linqu.webpb.utilities.descriptor.WebpbExtend;
 public class OptionUtils {
 
     private OptionUtils() {
-    }
-
-    /**
-     * Determine if should skip by tags.
-     *
-     * @param optionTags list of wanted tags
-     * @param tags       tags to test
-     * @return should skip
-     */
-    public static boolean shouldSkip(List<String> optionTags, List<String> tags) {
-        if (tags.isEmpty()) {
-            return false;
-        }
-        for (String tag : tags) {
-            if (optionTags.contains(tag)) {
-                return false;
-            }
-        }
-        return true;
     }
 
     /**

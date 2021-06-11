@@ -16,9 +16,6 @@
 
 package tech.linqu.webpb.runtime;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -34,8 +31,6 @@ public class WebpbMeta {
     private String context;
 
     private String path;
-
-    private List<String> tags;
 
     /**
      * Create a builder.
@@ -56,8 +51,6 @@ public class WebpbMeta {
         private String context;
 
         private String path;
-
-        private List<String> tags = Collections.emptyList();
 
         /**
          * Set http method name.
@@ -93,17 +86,6 @@ public class WebpbMeta {
         }
 
         /**
-         * Set message tags.
-         *
-         * @param tags tag array
-         * @return {@link Builder}
-         */
-        public Builder tags(String... tags) {
-            this.tags = Arrays.asList(tags);
-            return this;
-        }
-
-        /**
          * Build the {@link WebpbMeta}.
          *
          * @return {@link WebpbMeta}
@@ -113,7 +95,6 @@ public class WebpbMeta {
             meta.method = this.method;
             meta.context = this.context;
             meta.path = this.path;
-            meta.tags = this.tags;
             return meta;
         }
     }

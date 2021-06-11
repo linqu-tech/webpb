@@ -4,13 +4,13 @@ import "webpb/WebpbExtend.proto";
 
 // global file options
 option (f_opts).java = {
-    annotation: '@Accessors(chain = true)'
-    annotation: '@Getter'
-    annotation: '@Setter'
-    annotation: '@ToString'
+    annotation: '@JsonIgnoreProperties(ignoreUnknown = true)'
     gen_getter: false
     gen_setter: false
     gen_to_string: false
+    import: 'com.fasterxml.jackson.annotation.JsonIgnoreProperties'
+    import: 'jakarta.validation.constraints.NotNull'
+    import: 'lombok.ToString'
 };
 
 option (f_opts).ts = {

@@ -157,7 +157,7 @@ public class MessageGenerator {
             .collect(Collectors.toSet());
         for (Descriptor nestedDescriptor : descriptor.getNestedTypes()) {
             if (mapFields.contains(nestedDescriptor.getName())) {
-                return;
+                continue;
             }
             TypeDeclaration<?> typeDeclaration = generate(nestedDescriptor);
             typeDeclaration.addModifier(Modifier.Keyword.STATIC);
@@ -192,13 +192,6 @@ public class MessageGenerator {
         callExpr = new MethodCallExpr(
             callExpr, "path", new NodeList<>(new NameExpr("WEBPB_PATH"))
         );
-        if (!messageOpts.getTagList().isEmpty()) {
-            callExpr = new MethodCallExpr(callExpr, "tags",
-                new NodeList<>(messageOpts.getTagList().stream()
-                    .map(StringLiteralExpr::new)
-                    .collect(Collectors.toList()))
-            );
-        }
         callExpr = new MethodCallExpr(callExpr, "build");
 
         FieldDeclaration field =
@@ -227,14 +220,12 @@ public class MessageGenerator {
     }
 
     private void addAnnotations(BodyDeclaration<?> declaration, List<String> annotations) {
-        if (annotations != null && !annotations.isEmpty()) {
-            for (String annotation : annotations) {
-                JAVA_PARSER.parseAnnotation(annotation).ifSuccessful(expr -> {
-                    parseImports(expr, imports);
-                    expr.getName().setQualifier(null);
-                    declaration.addAnnotation(expr);
-                });
-            }
+        for (String annotation : annotations) {
+            JAVA_PARSER.parseAnnotation(annotation).ifSuccessful(expr -> {
+                parseImports(expr, imports);
+                expr.getName().setQualifier(null);
+                declaration.addAnnotation(expr);
+            });
         }
     }
 

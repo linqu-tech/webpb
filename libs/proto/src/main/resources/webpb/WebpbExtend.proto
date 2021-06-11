@@ -50,15 +50,11 @@ message MessageOpts {
 }
 
 message OptMessageOpts {
-    repeated string tag = 1000;
+    optional string method = 1001;
 
-    optional bool ignore = 1001;
+    optional string path = 1002;
 
-    optional string method = 1002;
-
-    optional string path = 1003;
-
-    optional string context = 1004;
+    optional string context = 1003;
 }
 
 message JavaMessageOpts {
@@ -82,9 +78,6 @@ message EnumOpts {
 }
 
 message OptEnumOpts {
-    repeated string tag = 1000;
-
-    optional bool ignore = 1001;
 }
 
 message JavaEnumOpts {

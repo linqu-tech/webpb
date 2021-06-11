@@ -37,17 +37,14 @@ import tech.linqu.webpb.commons.ParamGroup;
 import tech.linqu.webpb.commons.PathParam;
 import tech.linqu.webpb.utilities.context.RequestContext;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend;
-import tech.linqu.webpb.utilities.descriptor.WebpbExtend.EnumOpts;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend.FieldOpts;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend.FileOpts;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend.MessageOpts;
-import tech.linqu.webpb.utilities.descriptor.WebpbExtend.OptEnumOpts;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend.OptFieldOpts;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend.OptMessageOpts;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend.TsFieldOpts;
 import tech.linqu.webpb.utilities.utils.Const;
 import tech.linqu.webpb.utilities.utils.DescriptorUtils;
-import tech.linqu.webpb.utilities.utils.OptionUtils;
 import tech.linqu.webpb.utilities.utils.Utils;
 
 /**
@@ -84,8 +81,6 @@ public final class Generator {
 
     private final FileDescriptor fileDescriptor;
 
-    private final List<String> tags;
-
     private final StringBuilder builder = new StringBuilder();
 
     private final Set<String> imports = new HashSet<>();
@@ -118,10 +113,6 @@ public final class Generator {
     private boolean generateTypes() {
         boolean hasContent = false;
         for (EnumDescriptor enumDescriptor : fileDescriptor.getEnumTypes()) {
-            OptEnumOpts optEnumOpts = getOpts(enumDescriptor, EnumOpts::hasOpt).getOpt();
-            if (OptionUtils.shouldSkip(optEnumOpts.getTagList(), this.tags)) {
-                continue;
-            }
             hasContent = true;
             generateEnum(enumDescriptor);
         }
@@ -136,9 +127,6 @@ public final class Generator {
         boolean hasContent = false;
         for (Descriptor descriptor : descriptors) {
             OptMessageOpts messageOpts = getOpts(descriptor, MessageOpts::hasOpt).getOpt();
-            if (OptionUtils.shouldSkip(messageOpts.getTagList(), this.tags)) {
-                continue;
-            }
             hasContent = true;
             generateMessage(descriptor, messageOpts);
             level(() -> generateNested(descriptor));

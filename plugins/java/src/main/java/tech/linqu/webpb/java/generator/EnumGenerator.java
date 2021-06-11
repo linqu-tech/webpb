@@ -34,6 +34,7 @@ import com.github.javaparser.ast.stmt.SwitchEntry;
 import com.github.javaparser.ast.stmt.SwitchStmt;
 import com.github.javaparser.ast.type.PrimitiveType;
 import com.google.protobuf.Descriptors;
+import com.google.protobuf.Descriptors.EnumDescriptor;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
@@ -48,10 +49,10 @@ public class EnumGenerator {
     /**
      * Generate enum declaration.
      *
-     * @param descriptor {@link com.google.protobuf.Descriptors.EnumDescriptor}.
+     * @param descriptor {@link EnumDescriptor}.
      * @return {@link EnumDeclaration}
      */
-    public EnumDeclaration generate(Descriptors.EnumDescriptor descriptor) {
+    public EnumDeclaration generate(EnumDescriptor descriptor) {
         EnumDeclaration declaration = new EnumDeclaration();
         declaration.setName(descriptor.getName());
         declaration.addModifier(Modifier.Keyword.PUBLIC);
@@ -80,8 +81,7 @@ public class EnumGenerator {
         ));
     }
 
-    private void generateEnumOfMethod(EnumDeclaration declaration,
-                                      Descriptors.EnumDescriptor descriptor) {
+    private void generateEnumOfMethod(EnumDeclaration declaration, EnumDescriptor descriptor) {
         MethodDeclaration method =
             declaration.addMethod("fromValue", Modifier.Keyword.PUBLIC, Modifier.Keyword.STATIC);
         method.addParameter(new Parameter(PrimitiveType.intType(), ENUM_VALUE));
