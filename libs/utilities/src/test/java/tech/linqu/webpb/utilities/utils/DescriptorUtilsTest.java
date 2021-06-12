@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static tech.linqu.webpb.utilities.TestUtils.createRequest;
+import static tech.linqu.webpb.utilities.test.TestUtils.createRequest;
 import static tech.linqu.webpb.utilities.utils.DescriptorUtils.getFieldTypeFullName;
 import static tech.linqu.webpb.utilities.utils.DescriptorUtils.getFieldTypePackage;
 import static tech.linqu.webpb.utilities.utils.DescriptorUtils.getFieldTypeSimpleName;

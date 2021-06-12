@@ -16,6 +16,7 @@
 
 package tech.linqu.webpb.java.generator;
 
+import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
@@ -35,13 +36,11 @@ import com.github.javaparser.ast.stmt.SwitchStmt;
 import com.github.javaparser.ast.type.PrimitiveType;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Descriptors.EnumDescriptor;
-import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
 /**
  * Generator for enum definition.
  */
-@RequiredArgsConstructor(staticName = "create")
 public class EnumGenerator {
 
     private static final String ENUM_VALUE = "value";
@@ -52,7 +51,7 @@ public class EnumGenerator {
      * @param descriptor {@link EnumDescriptor}.
      * @return {@link EnumDeclaration}
      */
-    public EnumDeclaration generate(EnumDescriptor descriptor) {
+    public CompilationUnit generate(CompilationUnit unit, EnumDescriptor descriptor) {
         EnumDeclaration declaration = new EnumDeclaration();
         declaration.setName(descriptor.getName());
         declaration.addModifier(Modifier.Keyword.PUBLIC);
@@ -68,7 +67,8 @@ public class EnumGenerator {
         generateEnumConstructor(declaration);
         generateEnumOfMethod(declaration, descriptor);
         generateEnumValueGetter(declaration);
-        return declaration;
+        unit.addType(declaration);
+        return unit;
     }
 
     private void generateEnumConstructor(EnumDeclaration declaration) {

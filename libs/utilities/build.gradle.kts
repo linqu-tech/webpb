@@ -12,7 +12,9 @@ plugins {
 dependencies {
     annotationProcessor("org.projectlombok:lombok:${Vers.lombok}")
     compileOnly("org.projectlombok:lombok:${Vers.lombok}")
+    compileOnly(project(":libs:tests"))
     implementation("com.google.protobuf:protobuf-java:${Vers.protobufJava}")
+    implementation("commons-io:commons-io:${Vers.commonsIo}")
     implementation("org.apache.commons:commons-lang3:${Vers.commonsLang3}")
     implementation(project(":libs:commons"))
     implementation(project(":libs:proto"))

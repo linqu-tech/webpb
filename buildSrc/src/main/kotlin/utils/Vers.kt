@@ -8,6 +8,7 @@ object Vers {
     private var initialized = false
 
     lateinit var checkstyle: String
+    lateinit var commonsIo: String
     lateinit var commonsLang3: String
     lateinit var compileTesting: String
     lateinit var hibernateValidator: String

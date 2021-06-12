@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mockStatic;
-import static tech.linqu.webpb.utilities.TestUtils.createRequest;
+import static tech.linqu.webpb.utilities.test.TestUtils.createRequest;
 import static tech.linqu.webpb.utilities.utils.DescriptorUtils.resolveDescriptor;
 import static tech.linqu.webpb.utilities.utils.DescriptorUtils.resolveEnumDescriptor;
 import static tech.linqu.webpb.utilities.utils.DescriptorUtils.resolveFileDescriptor;
@@ -71,7 +71,7 @@ class OptionUtilsTest {
         assertEquals("GET", optOpts.getOpt().getMethod());
 
         MessageOpts javaOpts = OptionUtils.getOpts(descriptor, MessageOpts::hasJava);
-        assertEquals(1, javaOpts.getJava().getAnnotationCount());
+        assertEquals(2, javaOpts.getJava().getAnnotationCount());
     }
 
     @Test

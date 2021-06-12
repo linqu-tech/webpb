@@ -3,6 +3,7 @@ syntax = "proto2";
 option java_package = "test";
 
 import "Include.proto";
+import "Include2.proto";
 
 import "webpb/WebpbExtend.proto";
 import "WebpbOptions.proto";
@@ -12,6 +13,9 @@ import "google/protobuf/any.proto";
 option (f_opts).java = {
     gen_getter: true
     gen_setter: false
+    import: 'com.fasterxml.jackson.annotation.JsonInclude'
+    import: 'com.fasterxml.jackson.annotation.JsonInclude.Include'
+    import: 'tech.linqu.webpb.tests.Const'
 };
 
 option (f_opts).ts = {
@@ -22,6 +26,10 @@ message Test2 {
 }
 
 message Test4 {
+    option (m_opts).java = {
+        annotation: '@JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)'
+    };
+
     required int64 test4 = 1;
 }
 
@@ -33,6 +41,7 @@ message Test {
     };
     option (m_opts).java = {
         annotation: '@ToString'
+        annotation: '@JsonInclude(Include.NON_NULL)'
     };
 
     required int32 test1 = 1 [(opts).opt = {in_query: true}, (opts).ts = {as_string: true}];
@@ -57,4 +66,13 @@ message Test {
     required int32 test9 = 9 [(opts).opt = {omitted: true}];
     required int64 test10 = 10 [(opts).ts = {as_string: true}];
     repeated IncludeProto.Message test11 = 11;
+    required IncludeProto.Message.Nested test12 = 12;
+    repeated Include2Proto.Message test13 = 13;
+    required Include2Proto.Message.Nested test14 = 14;
+    required string test15 = 15 [(opts).java = {annotation: '@Pattern(regexp = Const.REGEX)'}];
+    required bytes test16 = 16;
+
+    required group Test17 = 17 {
+        required string test = 1;
+    }
 }

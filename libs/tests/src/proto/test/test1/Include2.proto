@@ -1,8 +1,8 @@
 syntax = "proto2";
 
-option java_package = "include";
+option java_package = "include2";
 
-package IncludeProto;
+package Include2Proto;
 
 import "webpb/WebpbExtend.proto";
 import "WebpbOptions.proto";
@@ -13,11 +13,4 @@ message Message {
     message Nested {
         required int32 test1 = 1;
     }
-}
-
-enum Enum {
-    option (e_opts).opt = {
-    };
-
-    DEFAULT = 0;
 }
