@@ -30,4 +30,30 @@ public class Message implements WebpbMessage {
     public Message(Integer id) {
         this.id = id;
     }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Nested implements WebpbMessage {
+
+        public static final String WEBPB_METHOD = "";
+
+        public static final String WEBPB_CONTEXT = "";
+
+        public static final String WEBPB_PATH = "";
+
+        public static final WebpbMeta WEBPB_META = new WebpbMeta.Builder().method(WEBPB_METHOD).context(WEBPB_CONTEXT).path(WEBPB_PATH).build();
+
+        @Override
+        public WebpbMeta webpbMeta() {
+            return WEBPB_META;
+        }
+
+        private Integer test1;
+
+        public Nested() {
+        }
+
+        public Nested(Integer test1) {
+            this.test1 = test1;
+        }
+    }
 }

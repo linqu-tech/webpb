@@ -16,6 +16,7 @@
 
 package tech.linqu.webpb.java.generator;
 
+import static com.google.protobuf.Descriptors.FieldDescriptor.JavaType.ENUM;
 import static com.google.protobuf.Descriptors.FieldDescriptor.Type.BOOL;
 import static com.google.protobuf.Descriptors.FieldDescriptor.Type.BYTES;
 import static com.google.protobuf.Descriptors.FieldDescriptor.Type.DOUBLE;
@@ -31,11 +32,12 @@ import static com.google.protobuf.Descriptors.FieldDescriptor.Type.SINT64;
 import static com.google.protobuf.Descriptors.FieldDescriptor.Type.STRING;
 import static com.google.protobuf.Descriptors.FieldDescriptor.Type.UINT32;
 import static com.google.protobuf.Descriptors.FieldDescriptor.Type.UINT64;
-import static tech.linqu.webpb.utilities.utils.DescriptorUtils.getFieldTypeSimpleName;
+import static org.apache.commons.lang3.StringUtils.removeStart;
 import static tech.linqu.webpb.utilities.utils.DescriptorUtils.getMapKeyDescriptor;
 import static tech.linqu.webpb.utilities.utils.DescriptorUtils.getMapValueDescriptor;
 
 import com.github.javaparser.JavaParser;
+import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
@@ -61,6 +63,7 @@ import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.PrimitiveType;
 import com.github.javaparser.ast.type.Type;
+import com.google.protobuf.Descriptors;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Descriptors.FileDescriptor;
@@ -70,8 +73,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import tech.linqu.webpb.java.model.ImportLookup;
+import tech.linqu.webpb.java.model.ImportedName;
+import tech.linqu.webpb.java.model.Imports;
 import tech.linqu.webpb.utilities.context.RequestContext;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend.FieldOpts;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend.FileOpts;
@@ -88,7 +93,6 @@ import tech.linqu.webpb.utilities.utils.Utils;
 /**
  * Generator for {@link Descriptor}.
  */
-@RequiredArgsConstructor(staticName = "of")
 public class MessageGenerator {
 
     private static final Map<FieldDescriptor.Type, Type> TYPES;
@@ -98,9 +102,9 @@ public class MessageGenerator {
         map.put(BOOL, new ClassOrInterfaceType(null, Boolean.class.getSimpleName()));
         map.put(BYTES, new ArrayType(PrimitiveType.byteType()));
         map.put(DOUBLE, new ClassOrInterfaceType(null, Double.class.getSimpleName()));
-        map.put(FLOAT, new ClassOrInterfaceType(null, Float.class.getSimpleName()));
         map.put(FIXED32, new ClassOrInterfaceType(null, Integer.class.getSimpleName()));
         map.put(FIXED64, new ClassOrInterfaceType(null, Long.class.getSimpleName()));
+        map.put(FLOAT, new ClassOrInterfaceType(null, Float.class.getSimpleName()));
         map.put(INT32, new ClassOrInterfaceType(null, Integer.class.getSimpleName()));
         map.put(INT64, new ClassOrInterfaceType(null, Long.class.getSimpleName()));
         map.put(SFIXED32, new ClassOrInterfaceType(null, Integer.class.getSimpleName()));
@@ -115,13 +119,11 @@ public class MessageGenerator {
 
     private static final JavaParser JAVA_PARSER = new JavaParser();
 
-    private final RequestContext requestContext;
+    private Imports imports;
 
-    private final FileDescriptor fileDescriptor;
+    private RequestContext requestContext;
 
-    private final List<Name> imports;
-
-    private final NameMap nameMap;
+    private FileDescriptor fileDescriptor;
 
     /**
      * Entrance of the generator.
@@ -129,7 +131,22 @@ public class MessageGenerator {
      * @param descriptor {@link Descriptor}.
      * @return {@link ClassOrInterfaceDeclaration}
      */
-    public ClassOrInterfaceDeclaration generate(Descriptor descriptor) {
+    public CompilationUnit generate(CompilationUnit unit,
+                                    RequestContext requestContext,
+                                    ImportLookup importLookup,
+                                    FileDescriptor fileDescriptor,
+                                    Descriptor descriptor) {
+        this.requestContext = requestContext;
+        this.fileDescriptor = fileDescriptor;
+        this.imports = new Imports(new ImportLookup().copy(importLookup).update(fileDescriptor));
+
+        ClassOrInterfaceDeclaration declaration = generate(descriptor);
+        imports.computeUnit(unit);
+        unit.addType(declaration);
+        return unit;
+    }
+
+    private ClassOrInterfaceDeclaration generate(Descriptor descriptor) {
         ClassOrInterfaceDeclaration declaration = new ClassOrInterfaceDeclaration();
         declaration.setName(descriptor.getName());
         declaration.addModifier(Modifier.Keyword.PUBLIC);
@@ -167,11 +184,8 @@ public class MessageGenerator {
 
     private void addWebpbMeta(Descriptor descriptor, ClassOrInterfaceDeclaration declaration) {
         declaration.addImplementedType("WebpbMessage");
-        JAVA_PARSER.parseName(Const.RUNTIME_PACKAGE + ".WebpbMessage")
-            .ifSuccessful(v -> addImports(imports, v));
-
-        JAVA_PARSER.parseName(Const.RUNTIME_PACKAGE + ".WebpbMeta")
-            .ifSuccessful(v -> addImports(imports, v));
+        imports.checkAndImport(Const.RUNTIME_PACKAGE + ".WebpbMessage");
+        imports.checkAndImport(Const.RUNTIME_PACKAGE + ".WebpbMeta");
 
         OptMessageOpts messageOpts = OptionUtils.getOpts(descriptor, MessageOpts::hasOpt).getOpt();
         addStaticOption(declaration, "WEBPB_METHOD", messageOpts.getMethod());
@@ -222,27 +236,24 @@ public class MessageGenerator {
     private void addAnnotations(BodyDeclaration<?> declaration, List<String> annotations) {
         for (String annotation : annotations) {
             JAVA_PARSER.parseAnnotation(annotation).ifSuccessful(expr -> {
-                parseImports(expr, imports);
-                expr.getName().setQualifier(null);
-                declaration.addAnnotation(expr);
+                ImportedName name = parseAnnotationImports(expr);
+                declaration.addAnnotation(expr.setName(name.getName()));
             });
         }
     }
 
-    private void parseImports(Node node, List<Name> imports) {
+    private ImportedName parseAnnotationImports(Node node) {
+        ImportedName outName = null;
         if (node instanceof FieldAccessExpr) {
-            addImports(imports, nameMap
-                .getFullName(new Name(null, ((FieldAccessExpr) node).getScope().toString())));
+            outName = imports.checkAndImport(node.toString());
         } else if (node instanceof AnnotationExpr) {
-            addImports(imports, nameMap.getFullName(((AnnotationExpr) node).getName()));
-        } else if (node instanceof ClassOrInterfaceType) {
-            addImports((ClassOrInterfaceType) node, imports);
-        } else {
-            nameMap.getName(node.toString()).ifPresent(v -> addImports(imports, v));
+            AnnotationExpr expr = ((AnnotationExpr) node);
+            outName = imports.checkAndImport(expr.getName());
         }
         for (Node childNode : node.getChildNodes()) {
-            parseImports(childNode, imports);
+            parseAnnotationImports(childNode);
         }
+        return outName;
     }
 
     private void generateConstructor(ClassOrInterfaceDeclaration declaration,
@@ -265,7 +276,7 @@ public class MessageGenerator {
             .setModifiers(Modifier.Keyword.PUBLIC)
             .setBody(blockStmt);
         for (FieldDescriptor fieldDescriptor : descriptors) {
-            constructor.addParameter(getType(fieldDescriptor), fieldDescriptor.getName());
+            constructor.addParameter(getFieldType(fieldDescriptor), fieldDescriptor.getName());
             blockStmt.addStatement(new AssignExpr(
                 new FieldAccessExpr(new ThisExpr(), fieldDescriptor.getName()),
                 new NameExpr(fieldDescriptor.getName()),
@@ -283,8 +294,7 @@ public class MessageGenerator {
                 continue;
             }
 
-            Type fieldType = getType(fieldDescriptor);
-            parseImports(fieldType, imports);
+            Type fieldType = getFieldType(fieldDescriptor);
             FieldDeclaration fieldDeclaration = declaration.addField(
                 fieldType, fieldDescriptor.getName(), Modifier.Keyword.PRIVATE
             );
@@ -298,49 +308,57 @@ public class MessageGenerator {
         }
     }
 
-    private Type getType(FieldDescriptor fieldDescriptor) {
-        if (fieldDescriptor.isRepeated() && !fieldDescriptor.isMapField()) {
-            return new ClassOrInterfaceType(null,
-                new SimpleName(List.class.getSimpleName()),
-                NodeList.nodeList(toType(fieldDescriptor))
-            );
+    private Type getFieldType(FieldDescriptor fieldDescriptor) {
+        if (fieldDescriptor.isMapField()) {
+            FieldDescriptor keyDescriptor = getMapKeyDescriptor(fieldDescriptor);
+            FieldDescriptor valueDescriptor = getMapValueDescriptor(fieldDescriptor);
+            ImportedName name = imports.checkAndImport(Map.class.getName());
+            return toClassOrInterfaceType(name,
+                NodeList.nodeList(toType(keyDescriptor), toType(valueDescriptor)));
+        } else if (fieldDescriptor.isRepeated()) {
+            ImportedName name = imports.checkAndImport(List.class.getName());
+            return toClassOrInterfaceType(name, NodeList.nodeList(toType(fieldDescriptor)));
         } else {
             return toType(fieldDescriptor);
         }
     }
 
     private Type toType(FieldDescriptor fieldDescriptor) {
-        if (fieldDescriptor.isMapField()) {
-            FieldDescriptor keyDescriptor = getMapKeyDescriptor(fieldDescriptor);
-            FieldDescriptor valueDescriptor = getMapValueDescriptor(fieldDescriptor);
-            return new ClassOrInterfaceType(null, new SimpleName(Map.class.getSimpleName()),
-                NodeList.nodeList(toType(keyDescriptor), toType(valueDescriptor))
-            );
-        }
         Type type = TYPES.get(fieldDescriptor.getType());
         if (type != null) {
             return type.clone();
         }
-        return new ClassOrInterfaceType(null, getFieldTypeSimpleName(fieldDescriptor));
+        Name typeName = getQualifiedType(fieldDescriptor);
+        ImportedName importedName = imports.checkAndImport(typeName);
+        return toClassOrInterfaceType(importedName, null);
     }
 
-    private void addImports(ClassOrInterfaceType type, List<Name> imports) {
-        nameMap.getName(type.getNameAsString()).ifPresent(v -> addImports(imports, v));
-        type.getTypeArguments().ifPresent(list -> {
-            for (Type t : list) {
-                if (t instanceof ClassOrInterfaceType) {
-                    addImports((ClassOrInterfaceType) t, imports);
-                }
-            }
-        });
+    private ClassOrInterfaceType toClassOrInterfaceType(ImportedName importedName,
+                                                        NodeList<Type> arguments) {
+        Name name = importedName.getName();
+        SimpleName identifier = new SimpleName(name.getIdentifier());
+        return name.getQualifier()
+            .map(qualifier -> new ClassOrInterfaceType(
+                new ClassOrInterfaceType(null, qualifier.toString()),
+                identifier,
+                arguments
+            ))
+            .orElse(new ClassOrInterfaceType(null, identifier, arguments));
     }
 
-    private void addImports(List<Name> imports, Name name) {
-        if (StringUtils.equalsIgnoreCase(name.toString(), "com.google.protobuf.Any")) {
-            JAVA_PARSER.parseName(Const.RUNTIME_PACKAGE + ".Any")
-                .ifSuccessful(imports::add);
+    private Name getQualifiedType(FieldDescriptor fieldDescriptor) {
+        if (fieldDescriptor.getJavaType() == ENUM) {
+            Descriptors.EnumDescriptor descriptor = fieldDescriptor.getEnumType();
+            return new Name(
+                new Name(descriptor.getFile().getOptions().getJavaPackage()),
+                removeStart(descriptor.getFullName(), descriptor.getFile().getPackage() + ".")
+            );
         } else {
-            imports.add(name);
+            Descriptor descriptor = fieldDescriptor.getMessageType();
+            return new Name(
+                new Name(descriptor.getFile().getOptions().getJavaPackage()),
+                removeStart(descriptor.getFullName(), descriptor.getFile().getPackage() + ".")
+            );
         }
     }
 }

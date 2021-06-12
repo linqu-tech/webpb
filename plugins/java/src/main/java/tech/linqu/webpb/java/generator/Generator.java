@@ -18,19 +18,16 @@ package tech.linqu.webpb.java.generator;
 
 import static com.google.protobuf.Descriptors.EnumDescriptor;
 import static com.google.protobuf.Descriptors.FileDescriptor;
+import static tech.linqu.webpb.utilities.utils.DescriptorUtils.resolveFileDescriptor;
 
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.comments.LineComment;
-import com.github.javaparser.ast.expr.Name;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Descriptors.Descriptor;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import org.apache.commons.lang3.StringUtils;
+import tech.linqu.webpb.java.model.ImportLookup;
 import tech.linqu.webpb.utilities.context.RequestContext;
 import tech.linqu.webpb.utilities.utils.Const;
 
@@ -39,9 +36,9 @@ import tech.linqu.webpb.utilities.utils.Const;
  */
 public final class Generator {
 
-    private RequestContext requestContext;
+    private final ImportLookup importLookup = new ImportLookup();
 
-    private NameMap nameMap;
+    private RequestContext requestContext;
 
     /**
      * Create a generator.
@@ -60,7 +57,8 @@ public final class Generator {
      */
     public Map<String, String> generate(RequestContext context) {
         this.requestContext = context;
-        this.nameMap = new NameMap(context.getDescriptors());
+        this.importLookup
+            .update(resolveFileDescriptor(context.getDescriptors(), Const.WEBPB_OPTIONS));
 
         Map<String, String> fileMap = new TreeMap<>();
         for (FileDescriptor fileDescriptor : context.getTargetDescriptors()) {
@@ -85,7 +83,7 @@ public final class Generator {
     }
 
     private static boolean shouldIgnore(String packageName) {
-        return StringUtils.isEmpty(packageName) || "com.google.protobuf".equals(packageName);
+        return StringUtils.isEmpty(packageName) || packageName.startsWith("com.google.protobuf");
     }
 
     /**
@@ -97,14 +95,8 @@ public final class Generator {
      */
     public CompilationUnit generateMessage(FileDescriptor fileDescriptor, Descriptor descriptor) {
         CompilationUnit compilationUnit = createCompilationUnit(fileDescriptor);
-        List<Name> imports = new ArrayList<>();
-        TypeDeclaration<?> declaration = MessageGenerator
-            .of(requestContext, fileDescriptor, imports, nameMap)
-            .generate(descriptor);
-        imports.sort(Comparator.comparing(Name::asString));
-        imports.forEach(i -> compilationUnit.addImport(i.asString()));
-        compilationUnit.addType(declaration);
-        return compilationUnit;
+        return new MessageGenerator()
+            .generate(compilationUnit, requestContext, importLookup, fileDescriptor, descriptor);
     }
 
     /**
@@ -117,9 +109,7 @@ public final class Generator {
     public CompilationUnit generateEnum(FileDescriptor fileDescriptor,
                                         EnumDescriptor enumDescriptor) {
         CompilationUnit compilationUnit = createCompilationUnit(fileDescriptor);
-        TypeDeclaration<?> declaration = EnumGenerator.create().generate(enumDescriptor);
-        compilationUnit.addType(declaration);
-        return compilationUnit;
+        return new EnumGenerator().generate(compilationUnit, enumDescriptor);
     }
 
     private CompilationUnit createCompilationUnit(FileDescriptor fileDescriptor) {
@@ -127,10 +117,6 @@ public final class Generator {
         unit.addOrphanComment(new LineComment(Const.HEADER));
         unit.addOrphanComment(new LineComment(Const.GIT_URL));
         String javaPackage = fileDescriptor.getOptions().getJavaPackage();
-        if (StringUtils.isEmpty(javaPackage)) {
-            throw new IllegalArgumentException(
-                "java_package option is required in " + fileDescriptor.getFullName());
-        }
         unit.setPackageDeclaration(javaPackage);
         return unit;
     }

@@ -3,8 +3,11 @@
 package test;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import include.Enum;
 import include.Message;
+import include2.Message.Nested;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
@@ -13,9 +16,13 @@ import tech.linqu.webpb.runtime.Any;
 import tech.linqu.webpb.runtime.WebpbMessage;
 import tech.linqu.webpb.runtime.WebpbMeta;
 import tech.linqu.webpb.runtime.common.InQuery;
+import tech.linqu.webpb.tests.Const;
+import test.Test.NestedTest;
+import test.Test.Test17;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ToString
+@JsonInclude(Include.NON_NULL)
 public class Test implements WebpbMessage {
 
     public static final String WEBPB_METHOD = "GET";
@@ -53,6 +60,19 @@ public class Test implements WebpbMessage {
 
     private List<Message> test11;
 
+    private Message.Nested test12;
+
+    private List<include2.Message> test13;
+
+    private Nested test14;
+
+    @Pattern(regexp = Const.REGEX)
+    private String test15;
+
+    private byte[] test16;
+
+    private Test17 test17;
+
     public Test() {
     }
 
@@ -79,6 +99,32 @@ public class Test implements WebpbMessage {
 
         public NestedTest(Integer test1) {
             this.test1 = test1;
+        }
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Test17 implements WebpbMessage {
+
+        public static final String WEBPB_METHOD = "";
+
+        public static final String WEBPB_CONTEXT = "";
+
+        public static final String WEBPB_PATH = "";
+
+        public static final WebpbMeta WEBPB_META = new WebpbMeta.Builder().method(WEBPB_METHOD).context(WEBPB_CONTEXT).path(WEBPB_PATH).build();
+
+        @Override
+        public WebpbMeta webpbMeta() {
+            return WEBPB_META;
+        }
+
+        private String test;
+
+        public Test17() {
+        }
+
+        public Test17(String test) {
+            this.test = test;
         }
     }
 }
