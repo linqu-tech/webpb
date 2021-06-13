@@ -1,5 +1,7 @@
 syntax = "proto2";
 
+package TestProto;
+
 option java_package = "test";
 
 import "Include.proto";
@@ -22,7 +24,21 @@ option (f_opts).ts = {
     int64_as_string: true
 };
 
+message Data {
+    required string data1 = 1;
+    optional int32 data2 = 2;
+}
+
 message Test2 {
+    option (m_opts).opt = {
+        method: "GET"
+        context: "test"
+        path: "/test/{test2}?id={id}&data1={data.data1}&data2={data.data2}"
+    };
+
+    required int64 test2 = 1;
+    required string id = 2;
+    required Data data = 3;
 }
 
 message Test4 {
@@ -47,7 +63,7 @@ message Test {
     required int32 test1 = 1 [(opts).opt = {in_query: true}, (opts).ts = {as_string: true}];
     required IncludeProto.Message test2 = 2 [(opts).java = {annotation: '@NotNull'}];
     required IncludeProto.Enum test3 = 3;
-    required Test4 test4 = 4;
+    optional Test4 test4 = 4;
     map<int64, int32> test5 = 5;
     map<int32, IncludeProto.Message> tests6 = 6;
     required google.protobuf.Any test7 = 7;
@@ -63,7 +79,7 @@ message Test {
     }
 
     required NestedTest test8 = 8;
-    required int32 test9 = 9 [(opts).opt = {omitted: true}];
+    optional int32 test9 = 9 [(opts).opt = {omitted: true}];
     required int64 test10 = 10 [(opts).ts = {as_string: true}];
     repeated IncludeProto.Message test11 = 11;
     required IncludeProto.Message.Nested test12 = 12;
@@ -75,4 +91,7 @@ message Test {
     required group Test17 = 17 {
         required string test = 1;
     }
+
+    required int32 test18 = 18 [default = 123];
+    required string test19 = 19 [default = 'test19'];
 }

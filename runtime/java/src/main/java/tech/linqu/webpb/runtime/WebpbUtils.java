@@ -192,7 +192,7 @@ public class WebpbUtils {
                 do {
                     param = param == null ? iterator.next() : param;
                     String value = resolve(data, param.getAccessor());
-                    if (hasLength(value)) {
+                    if (hasLength(value) && !"null".equals(value)) {
                         builder.append(link).append(param.getKey()).append("=").append(value);
                         link = "&";
                     }

@@ -13,11 +13,12 @@ group = hierarchicalGroup()
 dependencies {
     annotationProcessor("org.projectlombok:lombok:${Vers.lombok}")
     compileOnly("org.projectlombok:lombok:${Vers.lombok}")
+    compileOnly(project(":runtime:java"))
     implementation(project(":libs:proto"))
-    implementation(project(":runtime:java"))
     testAnnotationProcessor("org.projectlombok:lombok:${Vers.lombok}")
     testCompileOnly("org.projectlombok:lombok:${Vers.lombok}")
     testImplementation("org.junit.jupiter:junit-jupiter-api:${Vers.jupiter}")
+    testImplementation(project(":runtime:java"))
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 }
 
@@ -29,9 +30,6 @@ protobuf {
         id("webpb") {
             artifact = "tech.linqu.webpb:protoc-webpb-java:${Vers.webpb}:all@jar"
         }
-        id("ts") {
-            artifact = "tech.linqu.webpb:protoc-webpb-ts:${Vers.webpb}:all@jar"
-        }
     }
     generateProtoTasks {
         ofSourceSet("main").forEach {
@@ -42,7 +40,6 @@ protobuf {
                 id("webpb") {
                     outputSubDir = "java"
                 }
-                id("ts")
             }
         }
     }

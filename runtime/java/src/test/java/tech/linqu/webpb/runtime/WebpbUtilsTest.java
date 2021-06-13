@@ -29,6 +29,7 @@ import java.net.URL;
 import org.junit.jupiter.api.Test;
 import tech.linqu.webpb.runtime.model.BadRequest;
 import tech.linqu.webpb.runtime.model.FooRequest;
+import tech.linqu.webpb.runtime.model.Pageable;
 
 class WebpbUtilsTest {
 
@@ -61,6 +62,14 @@ class WebpbUtilsTest {
         WebpbUtils.clearContextCache();
         String url = WebpbUtils.formatUrl(new URL("https://abc"), objectMapper, new FooRequest());
         assertEquals("https://abc/domain/123/action?pagination=true&size=20&page=10", url);
+    }
+
+    @Test
+    void shouldFormatUrlSuccessWhenWithoutPageable() throws MalformedURLException {
+        WebpbUtils.clearContextCache();
+        String url = WebpbUtils.formatUrl(new URL("https://abc"), objectMapper,
+            new FooRequest().setPageable(new Pageable().setPage(null).setSize(null)));
+        assertEquals("https://abc/domain/123/action?pagination=true", url);
     }
 
     @Test

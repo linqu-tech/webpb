@@ -13,8 +13,8 @@ dependencies {
     implementation(project(":plugins:ts"))
     implementation(project(":runtime:java"))
     implementation(project(":runtime:processor"))
-    implementation(project(":sample:app"))
     implementation(project(":sample:proto"))
+    implementation(project(":sample:spring"))
 }
 
 configurations.implementation.get().dependencies.forEach {

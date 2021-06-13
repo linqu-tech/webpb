@@ -1,0 +1,8 @@
+syntax = "proto2";
+
+package Test1Proto;
+
+option java_package = "test1";
+
+message Test {
+}
