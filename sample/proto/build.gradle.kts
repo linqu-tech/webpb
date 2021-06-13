@@ -29,9 +29,6 @@ protobuf {
         id("webpb") {
             artifact = "tech.linqu.webpb:protoc-webpb-java:${Vers.webpb}:all@jar"
         }
-        id("ts") {
-            artifact = "tech.linqu.webpb:protoc-webpb-ts:${Vers.webpb}:all@jar"
-        }
     }
     generateProtoTasks {
         ofSourceSet("main").forEach {
@@ -42,7 +39,6 @@ protobuf {
                 id("webpb") {
                     outputSubDir = "java"
                 }
-                id("ts")
             }
         }
     }

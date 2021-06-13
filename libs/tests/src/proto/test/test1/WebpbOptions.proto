@@ -14,5 +14,5 @@ option (f_opts).java = {
 };
 
 option (f_opts).ts = {
-    int64_as_string: false
+    int64_as_string: true
 };

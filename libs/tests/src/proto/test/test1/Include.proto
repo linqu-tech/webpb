@@ -1,8 +1,8 @@
 syntax = "proto2";
 
-option java_package = "include";
-
 package IncludeProto;
+
+option java_package = "include";
 
 import "webpb/WebpbExtend.proto";
 import "WebpbOptions.proto";

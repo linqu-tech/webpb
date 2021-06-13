@@ -27,7 +27,7 @@ import com.google.protobuf.Descriptors.Descriptor;
 import java.util.Map;
 import java.util.TreeMap;
 import org.apache.commons.lang3.StringUtils;
-import tech.linqu.webpb.java.model.ImportLookup;
+import tech.linqu.webpb.java.utils.ImportLookup;
 import tech.linqu.webpb.utilities.context.RequestContext;
 import tech.linqu.webpb.utilities.utils.Const;
 

@@ -1,0 +1,19 @@
+syntax = "proto2";
+
+package Test2Proto;
+
+option java_package = "test2";
+
+import "webpb/WebpbExtend.proto";
+
+option (f_opts).java = {
+    gen_getter: true
+    gen_setter: true
+    gen_to_string: true
+};
+
+message Test {
+    required int32 test1 = 1;
+    required bool test2 = 2;
+    required bool isTest3 = 3;
+}

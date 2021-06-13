@@ -73,6 +73,10 @@ public class Test implements WebpbMessage {
 
     private Test17 test17;
 
+    private Integer test18;
+
+    private String test19;
+
     public Test() {
     }
 

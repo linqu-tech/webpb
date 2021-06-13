@@ -1,0 +1,11 @@
+syntax = "proto2";
+
+package Test9Proto;
+
+option java_package = "test9";
+
+import "webpb/WebpbExtend.proto";
+
+message Test {
+    required int64 test1 = 1 [(opts).ts = {as_string: true}];
+}

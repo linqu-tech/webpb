@@ -54,7 +54,7 @@ class OptionUtilsTest {
     @Test
     void shouldGetFileOptsSuccessWhenWithoutOptions() {
         RequestContext context = createRequest(Dumps.TEST2);
-        FileDescriptor descriptor = resolveFileDescriptor(context.getDescriptors(), "Test.proto");
+        FileDescriptor descriptor = resolveFileDescriptor(context.getDescriptors(), "Test1.proto");
         assertEquals(FileOpts.getDefaultInstance(),
             OptionUtils.getOpts((FileDescriptor) null, o -> true));
         assertEquals(FileOpts.getDefaultInstance(),
@@ -89,7 +89,7 @@ class OptionUtilsTest {
     @Test
     void shouldGetMessageOptsSuccessWhenWithoutOptions() {
         RequestContext context = createRequest(Dumps.TEST2);
-        Descriptor descriptor = resolveDescriptor(context.getDescriptors(), "Test");
+        Descriptor descriptor = resolveDescriptor(context.getDescriptors(), "Test1");
         assertEquals(MessageOpts.getDefaultInstance(),
             OptionUtils.getOpts((Descriptor) null, o -> true));
         assertEquals(MessageOpts.getDefaultInstance(),
@@ -162,8 +162,8 @@ class OptionUtilsTest {
 
     @Test
     void shouldGetFieldOptsSuccessWhenWithoutOptions() {
-        RequestContext context = createRequest(Dumps.TEST2);
-        Descriptor descriptor = resolveDescriptor(context.getDescriptors(), "Test");
+        RequestContext context = createRequest(Dumps.TEST1);
+        Descriptor descriptor = resolveDescriptor(context.getDescriptors(), "Data");
         assertNotNull(descriptor);
         FieldDescriptor fieldDescriptor = descriptor.getFields().get(0);
         assertEquals(FieldOpts.getDefaultInstance(),

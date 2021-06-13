@@ -1,0 +1,16 @@
+syntax = "proto2";
+
+package Test3Proto;
+
+option java_package = "test3";
+
+import "webpb/WebpbExtend.proto";
+
+option (f_opts).java = {
+    annotation: '@JsonIgnoreProperties(ignoreUnknown = true)'
+    import: 'com.fasterxml.jackson.annotation.JsonIgnoreProperties'
+};
+
+message Test {
+    required int64 test1 = 1;
+}
