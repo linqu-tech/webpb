@@ -12,7 +12,7 @@ import lombok.experimental.Accessors;
 @Setter
 public class Pageable {
 
-    private int size = 234;
+    private Integer size = 234;
 
-    private int page = 345;
+    private Integer page = 345;
 }
