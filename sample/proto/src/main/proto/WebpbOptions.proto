@@ -4,17 +4,15 @@ import "webpb/WebpbExtend.proto";
 
 // global file options
 option (f_opts).java = {
+    gen_getter: false
+    gen_setter: false
+    gen_to_string: false
     annotation: '@Accessors(chain = true)'
     annotation: '@Getter'
     annotation: '@Setter'
     annotation: '@ToString'
-    gen_getter: false
-    gen_setter: false
-    gen_to_string: false
     import: 'com.fasterxml.jackson.annotation.JsonInclude'
     import: 'com.fasterxml.jackson.annotation.JsonInclude.Include'
-    import: 'com.fasterxml.jackson.databind.annotation.JsonSerialize'
-    import: 'com.fasterxml.jackson.databind.ser.std.ToStringSerializer'
     import: 'tech.linqu.webpb.sample.Const'
     import: 'jakarta.validation.constraints.NotNull'
     import: 'jakarta.validation.constraints.Pattern'
@@ -22,7 +20,6 @@ option (f_opts).java = {
     import: 'lombok.Setter'
     import: 'lombok.ToString'
     import: 'lombok.experimental.Accessors'
-    import: 'org.hibernate.validator.constraints.Length'
     import: 'org.hibernate.validator.constraints.Range'
 };
 

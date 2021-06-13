@@ -2,30 +2,26 @@
 // https://github.com/linqu-tech/webpb
 package test;
 
-import tech.linqu.webpb.runtime.WebpbMessage;
-import tech.linqu.webpb.runtime.WebpbMeta;
+public enum Test {
 
-public class Test implements WebpbMessage {
+    DEFAULT(0);
 
-    public static final String WEBPB_METHOD = "";
+    private int value;
 
-    public static final String WEBPB_CONTEXT = "";
-
-    public static final String WEBPB_PATH = "";
-
-    public static final WebpbMeta WEBPB_META = new WebpbMeta.Builder().method(WEBPB_METHOD).context(WEBPB_CONTEXT).path(WEBPB_PATH).build();
-
-    @Override
-    public WebpbMeta webpbMeta() {
-        return WEBPB_META;
+    Test(int value) {
+        this.value = value;
     }
 
-    private Long test1;
-
-    public Test() {
+    public static Test fromValue(int value) {
+        switch(value) {
+            case 0:
+                return DEFAULT;
+            default:
+                return null;
+        }
     }
 
-    public Test(Long test1) {
-        this.test1 = test1;
+    public int getValue() {
+        return this.value;
     }
 }

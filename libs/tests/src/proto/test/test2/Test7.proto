@@ -1,0 +1,8 @@
+syntax = "proto2";
+
+package google.protobuf;
+
+message Test {
+
+    required int32 test1 = 1;
+}

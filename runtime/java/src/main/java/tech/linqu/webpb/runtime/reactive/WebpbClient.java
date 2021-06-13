@@ -26,6 +26,7 @@ import java.net.URL;
 import java.util.Map;
 import java.util.function.Consumer;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -122,6 +123,7 @@ public class WebpbClient {
                 return webClient
                     .method(context.getMethod())
                     .uri(url)
+                    .contentType(MediaType.APPLICATION_JSON)
                     .bodyValue(body)
                     .attributes(attributes)
                     .retrieve()

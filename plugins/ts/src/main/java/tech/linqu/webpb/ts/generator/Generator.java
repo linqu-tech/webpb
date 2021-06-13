@@ -20,21 +20,24 @@ import static com.google.protobuf.Descriptors.EnumDescriptor;
 import static com.google.protobuf.Descriptors.EnumValueDescriptor;
 import static com.google.protobuf.Descriptors.FieldDescriptor.JavaType.LONG;
 import static com.google.protobuf.Descriptors.FileDescriptor;
+import static tech.linqu.webpb.utilities.utils.DescriptorUtils.getFieldTypeFullName;
+import static tech.linqu.webpb.utilities.utils.DescriptorUtils.getFieldTypePackage;
+import static tech.linqu.webpb.utilities.utils.DescriptorUtils.isMessage;
 import static tech.linqu.webpb.utilities.utils.OptionUtils.getOpts;
 
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import tech.linqu.webpb.commons.ParamGroup;
 import tech.linqu.webpb.commons.PathParam;
+import tech.linqu.webpb.ts.utils.Imports;
+import tech.linqu.webpb.ts.utils.SourceBuilder;
 import tech.linqu.webpb.utilities.context.RequestContext;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend.FieldOpts;
@@ -50,7 +53,6 @@ import tech.linqu.webpb.utilities.utils.Utils;
 /**
  * Generator to process {@link Descriptor}.
  */
-@RequiredArgsConstructor(staticName = "of")
 public final class Generator {
 
     private static final Map<FieldDescriptor.Type, String> TYPES;
@@ -75,66 +77,64 @@ public final class Generator {
         TYPES = map;
     }
 
-    private static final String INDENT = "  ";
+    private final SourceBuilder builder = new SourceBuilder();
 
-    private final RequestContext requestContext;
+    private Imports imports;
 
-    private final FileDescriptor fileDescriptor;
+    private RequestContext requestContext;
 
-    private final StringBuilder builder = new StringBuilder();
+    private FileDescriptor fileDescriptor;
 
-    private final Set<String> imports = new HashSet<>();
-
-    private int level = 0;
+    public static Generator create() {
+        return new Generator();
+    }
 
     /**
      * Entrance of the generator.
      *
-     * @return {@link StringBuilder}
+     * @return {@link SourceBuilder}
      */
-    public StringBuilder generate() {
-        String packageName = fileDescriptor.getName();
-        if (generateTypes()) {
+    public String generate(RequestContext requestContext, FileDescriptor fileDescriptor) {
+        if (shouldIgnore(fileDescriptor.getPackage())) {
+            return null;
+        }
+        this.requestContext = requestContext;
+        this.fileDescriptor = fileDescriptor;
+        this.imports = new Imports(fileDescriptor.getPackage());
+        generateTypes();
+        if (!builder.isEmpty()) {
             StringBuilder builder = new StringBuilder();
             builder.append("// " + Const.HEADER + "\n");
             builder.append("// " + Const.GIT_URL + "\n\n");
             builder.append("import * as Webpb from 'webpb';\n\n");
-            for (String type : imports) {
-                if (!StringUtils.startsWith(type, packageName)) {
-                    builder.append("import * as ").append(type)
-                        .append(" from './").append(type).append("';\n\n");
-                }
-            }
-            this.builder.insert(0, builder);
+            imports.updateBuilder(builder);
+            this.builder.prepend(builder.toString());
         }
-        return this.builder;
+        return this.builder.toString();
     }
 
-    private boolean generateTypes() {
-        boolean hasContent = false;
+    private static boolean shouldIgnore(String packageName) {
+        return StringUtils.isEmpty(packageName) || packageName.contains("google.protobuf");
+    }
+
+    private void generateTypes() {
         for (EnumDescriptor enumDescriptor : fileDescriptor.getEnumTypes()) {
-            hasContent = true;
             generateEnum(enumDescriptor);
         }
-        hasContent |= handleDescriptors(fileDescriptor.getMessageTypes());
-        if (level == 0) {
-            trimDuplicatedNewline();
-        }
-        return hasContent;
+        handleDescriptors(fileDescriptor.getMessageTypes());
+        builder.trimDuplicatedNewline();
     }
 
-    private boolean handleDescriptors(List<Descriptor> descriptors) {
-        boolean hasContent = false;
+    private void handleDescriptors(List<Descriptor> descriptors) {
         for (Descriptor descriptor : descriptors) {
             OptMessageOpts messageOpts = getOpts(descriptor, MessageOpts::hasOpt).getOpt();
-            hasContent = true;
             generateMessage(descriptor, messageOpts);
-            level(() -> generateNested(descriptor));
+            builder.level(() -> generateNested(descriptor));
         }
-        return hasContent;
     }
 
     private void generateNested(Descriptor descriptor) {
+        String namespace = descriptor.getName();
         Set<String> mapFields = descriptor.getFields().stream()
             .filter(FieldDescriptor::isMapField)
             .map(fieldDescriptor -> StringUtils.capitalize(fieldDescriptor.getName()) + "Entry")
@@ -142,63 +142,65 @@ public final class Generator {
         List<Descriptor> nestedDescriptors = descriptor.getNestedTypes().stream()
             .filter(d -> !mapFields.contains(d.getName()))
             .collect(Collectors.toList());
-        handleDescriptors(nestedDescriptors);
+        if (!nestedDescriptors.isEmpty()) {
+            builder.append("export namespace ").append(namespace).append(" {\n");
+            handleDescriptors(nestedDescriptors);
+            builder.closeBracket();
+        }
     }
 
     private void generateEnum(EnumDescriptor descriptor) {
-        indent().append("export enum ")
+        builder.indent().append("export enum ")
             .append(descriptor.getName())
             .append(" {\n");
 
         for (EnumValueDescriptor valueDescriptor : descriptor.getValues()) {
-            level(() -> indent().append(valueDescriptor.getName())
+            builder.level(() -> builder.indent().append(valueDescriptor.getName())
                 .append(" = ").append(valueDescriptor.getIndex()).append(",\n")
             );
         }
-        closeBracket();
+        builder.closeBracket();
     }
 
     private void generateMessage(Descriptor descriptor, OptMessageOpts messageOpts) {
         String className = descriptor.getName();
 
-        indent().append("export interface ").append(interfaceName(className)).append(" {\n");
-        level(() -> generateMessageFields(descriptor, true));
-        closeBracket();
+        builder.indent()
+            .append("export interface ").append(toInterfaceName(className)).append(" {\n");
+        builder.level(() -> generateMessageFields(descriptor, true));
+        builder.closeBracket();
 
-        indent()
+        builder.indent()
             .append("export class ").append(className)
-            .append(" implements ").append(interfaceName(className));
+            .append(" implements ").append(toInterfaceName(className));
         if (StringUtils.isNotEmpty(messageOpts.getPath())) {
             builder.append(", Webpb.WebpbMessage {\n");
         } else {
             builder.append(" {\n");
         }
 
-        level(() -> {
+        builder.level(() -> {
             generateMessageFields(descriptor, false);
-            indent().append("webpbMeta: () => Webpb.WebpbMeta;\n\n");
+            builder.indent().append("webpbMeta: () => Webpb.WebpbMeta;\n\n");
             generateConstructor(descriptor, messageOpts, className);
         });
-        closeBracket();
+        builder.closeBracket();
     }
 
     private void generateMessageFields(Descriptor descriptor, boolean isInterface) {
         for (FieldDescriptor fieldDescriptor : descriptor.getFields()) {
-            addImport(DescriptorUtils.getFieldTypePackage(fieldDescriptor));
-            indent().append(fieldDescriptor.getName());
+            builder.indent().append(fieldDescriptor.getName());
             if (fieldDescriptor.isOptional()) {
                 builder.append('?');
             } else if (!isInterface && !fieldDescriptor.hasDefaultValue()) {
                 builder.append('!');
             }
             if (fieldDescriptor.isMapField()) {
-                List<FieldDescriptor> fieldDescriptors =
-                    fieldDescriptor.getMessageType().getFields();
-                FieldDescriptor valueDescriptor = fieldDescriptors.get(1);
-                builder.append(": ").append("{ [k: string]: ")
-                    .append(getTypeName(valueDescriptor)).append(" }");
+                List<FieldDescriptor> descriptors = fieldDescriptor.getMessageType().getFields();
+                String typeName = getTypeAndImport(descriptors.get(1));
+                builder.append(": ").append("{ [k: string]: ").append(typeName).append(" }");
             } else {
-                String typeName = getTypeName(fieldDescriptor);
+                String typeName = getTypeAndImport(fieldDescriptor);
                 builder.append(": ").append(typeName);
                 if (fieldDescriptor.isRepeated()) {
                     builder.append("[]");
@@ -206,9 +208,10 @@ public final class Generator {
                 if (!isInterface && fieldDescriptor.hasDefaultValue()) {
                     builder.append(" = ");
                     if ("string".equals(typeName)) {
-                        builder.append('"').append(fieldDescriptor.getDefaultValue()).append('"');
+                        builder.append('"')
+                            .appendObj(fieldDescriptor.getDefaultValue()).append('"');
                     } else {
-                        builder.append(fieldDescriptor.getDefaultValue());
+                        builder.appendObj(fieldDescriptor.getDefaultValue());
                     }
                 }
             }
@@ -219,48 +222,56 @@ public final class Generator {
     private void generateConstructor(Descriptor descriptor, OptMessageOpts messageOpts,
                                      String className) {
         if (descriptor.getFields().isEmpty()) {
-            indent().append("private constructor() {\n");
-            level(() -> {
-                indent().append("this.webpbMeta = () => ({\n");
+            builder.indent().append("private constructor() {\n");
+            builder.level(() -> {
+                builder.indent().append("this.webpbMeta = () => ({\n");
                 initializeMeta(descriptor, messageOpts);
             });
-            closeBracket();
-            indent().append("static create(): ").append(className).append(" {\n");
-            level(() -> indent().append("return new ").append(className).append("();\n"));
+            builder.closeBracket();
+            builder.indent().append("static create(): ").append(className).append(" {\n");
+            builder.level(() ->
+                builder.indent().append("return new ").append(className).append("();\n"));
         } else {
-            String interfaceName = interfaceName(className);
-            indent().append("private constructor(p?: ").append(interfaceName).append(") {\n");
-            level(() -> {
-                indent().append("Webpb.assign(p, this, ")
+            String interfaceName = toInterfaceName(className);
+            builder.indent().append("private constructor(p?: ").append(interfaceName)
+                .append(") {\n");
+            builder.level(() -> {
+                builder.indent().append("Webpb.assign(p, this, ")
                     .append(generateOmitted(descriptor)).append(");\n");
-                indent().append("this.webpbMeta = () => (p && {\n");
+                builder.indent().append("this.webpbMeta = () => (p && {\n");
                 initializeMeta(descriptor, messageOpts);
             });
-            closeBracket();
-            indent().append("static create(properties: ")
+            builder.closeBracket();
+            builder.indent().append("static create(properties: ")
                 .append(interfaceName).append("): ").append(className).append(" {\n");
-            level(() -> indent().append("return new ")
+            builder.level(() -> builder.indent().append("return new ")
                 .append(descriptor.getName())
                 .append("(properties").append(");\n"));
         }
-        closeBracket();
+        builder.closeBracket();
     }
 
     private void initializeMeta(Descriptor descriptor, OptMessageOpts messageOpts) {
-        level(() -> {
-            generateMetaField("class", "'" + descriptor.getName() + "'");
+        builder.level(() -> {
+            generateMetaField("class", descriptor.getName());
             String method = messageOpts.getMethod();
-            generateMetaField("method", StringUtils.isEmpty(method) ? "''" : "'" + method + "'");
+            generateMetaField("method", method);
             String context = Utils.normalize(messageOpts.getContext());
-            generateMetaField("context", StringUtils.isEmpty(context) ? "''" : "'" + context + "'");
+            generateMetaField("context", context);
             generateMetaPath(descriptor, Utils.normalize(messageOpts.getPath()));
         });
-        trimDuplicatedNewline();
-        indent().append("}) as Webpb.WebpbMeta;\n\n");
+        builder.trimDuplicatedNewline();
+        builder.indent().append("}) as Webpb.WebpbMeta;\n\n");
+    }
+
+    private void generateMetaField(String key, String value) {
+        builder.indent().append(key).append(": ")
+            .append(StringUtils.isEmpty(value) ? "''" : "'" + value + "'")
+            .append(",\n");
     }
 
     private void generateMetaPath(Descriptor descriptor, String path) {
-        indent().append("path").append(": ");
+        builder.indent().append("path").append(": ");
         if (StringUtils.isEmpty(path)) {
             builder.append("''\n");
             return;
@@ -274,20 +285,18 @@ public final class Generator {
             PathParam param = iterator.next();
             builder.append(param.getPrefix());
             if (StringUtils.isNotEmpty(param.getKey())) {
-                if (builder.charAt(builder.length() - 1) == '?') {
-                    builder.deleteCharAt(builder.length() - 1);
-                }
+                builder.trimLast('?');
                 builder.append("${Webpb.query({\n");
-                level(() -> {
-                    indent().append(param.getKey()).append(": ")
+                builder.level(() -> {
+                    builder.indent().append(param.getKey()).append(": ")
                         .append(getter(param.getAccessor())).append(",\n");
                     while (iterator.hasNext()) {
                         PathParam p = iterator.next();
-                        indent().append(p.getKey()).append(": ")
+                        builder.indent().append(p.getKey()).append(": ")
                             .append(getter(p.getAccessor())).append(",\n");
                     }
                 });
-                indent().append("})}`\n").append(group.getSuffix());
+                builder.indent().append("})}`\n").append(group.getSuffix());
                 return;
             }
             builder.append("${").append(getter(param.getAccessor())).append("}");
@@ -321,18 +330,16 @@ public final class Generator {
         return builder.append("]").toString();
     }
 
-    private void generateMetaField(String key, String value) {
-        indent().append(key).append(": ").append(value == null ? "" : value).append(",\n");
-    }
-
-    private String getTypeName(FieldDescriptor fieldDescriptor) {
+    private String getTypeAndImport(FieldDescriptor fieldDescriptor) {
         WebpbExtend.TsFileOpts webpbOpts = requestContext.getFileOpts().getTs();
         WebpbExtend.TsFileOpts fileOpts = getOpts(fileDescriptor, FileOpts::hasTs).getTs();
         TsFieldOpts fieldOpts = getOpts(fieldDescriptor, FieldOpts::hasTs).getTs();
         FieldDescriptor.Type type = fieldDescriptor.getType();
         FieldDescriptor.JavaType javaType = fieldDescriptor.getJavaType();
         if (javaType == LONG) {
-            if (webpbOpts.getInt64AsString() || fileOpts.getInt64AsString()) {
+            if (webpbOpts.getInt64AsString()) {
+                return "string";
+            } else if (fileOpts.getInt64AsString()) {
                 return "string";
             } else if (fieldOpts.getAsString()) {
                 return "string";
@@ -342,54 +349,25 @@ public final class Generator {
             return TYPES.get(type);
         }
 
+        String fullName = getFieldTypeFullName(fieldDescriptor);
+        if ("google.protobuf.Any".equals(fullName)) {
+            return "unknown";
+        }
+        String name = isMessage(fieldDescriptor) ? toInterfaceName(fullName) : fullName;
         String packageName = fileDescriptor.getPackage();
-        String fullName = DescriptorUtils.getFieldTypeFullName(fieldDescriptor);
-        String simpleName = DescriptorUtils.getFieldTypeSimpleName(fieldDescriptor);
-        if (StringUtils.startsWith(fullName, packageName)) {
-            return DescriptorUtils.isMessage(fieldDescriptor) ? "I" + simpleName : simpleName;
+        if (StringUtils.startsWith(name, packageName)) {
+            return name.substring(packageName.length() + 1);
         }
-        String fieldPackage = DescriptorUtils.getFieldTypePackage(fieldDescriptor);
-        return fieldPackage == null ? fullName : fieldPackage + ".I" + simpleName;
+        String fieldPackage = getFieldTypePackage(fieldDescriptor);
+        imports.checkAndImport(fieldPackage);
+        return name;
     }
 
-    private void trimDuplicatedNewline() {
-        while (builder.length() > 1) {
-            if (builder.charAt(builder.length() - 1) != '\n') {
-                break;
-            }
-            if (builder.charAt(builder.length() - 2) != '\n') {
-                break;
-            }
-            builder.deleteCharAt(builder.length() - 1);
+    private String toInterfaceName(String name) {
+        int lastIndex = name.lastIndexOf(".");
+        if (lastIndex < 0) {
+            return "I" + name;
         }
-    }
-
-    private void closeBracket() {
-        trimDuplicatedNewline();
-        indent().append("}\n\n");
-    }
-
-    private void level(Runnable runnable) {
-        this.level++;
-        runnable.run();
-        this.level--;
-    }
-
-    private StringBuilder indent() {
-        for (int i = 0; i < level; i++) {
-            builder.append(INDENT);
-        }
-        return builder;
-    }
-
-    private String interfaceName(String className) {
-        return "I" + className;
-    }
-
-    private void addImport(String typeOrPackage) {
-        if (StringUtils.isNotEmpty(typeOrPackage)
-            && !StringUtils.startsWith(typeOrPackage, fileDescriptor.getPackage())) {
-            imports.add(typeOrPackage);
-        }
+        return name.substring(0, lastIndex) + ".I" + name.substring(lastIndex + 1);
     }
 }

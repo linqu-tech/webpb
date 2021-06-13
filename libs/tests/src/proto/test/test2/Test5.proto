@@ -1,0 +1,19 @@
+syntax = "proto2";
+
+package Test5Proto;
+
+option java_package = "test5";
+
+import "webpb/WebpbExtend.proto";
+
+option (f_opts).java = {
+    import: 'lombok.ToString'
+};
+
+enum Test {
+    option (e_opts).java = {
+        annotation: '@ToString'
+    };
+
+    DEFAULT = 0;
+}

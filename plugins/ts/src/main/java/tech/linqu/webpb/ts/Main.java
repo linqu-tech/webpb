@@ -35,24 +35,17 @@ public class Main {
         RequestContext context = new RequestContext(WebpbExtend.FileOpts::hasTs);
 
         for (FileDescriptor fileDescriptor : context.getTargetDescriptors()) {
-            if (shouldIgnore(fileDescriptor.getPackage())) {
-                continue;
-            }
-            StringBuilder sb = Generator.of(context, fileDescriptor).generate();
-            if (sb.length() == 0) {
+            String content = Generator.create().generate(context, fileDescriptor);
+            if (StringUtils.isEmpty(content)) {
                 continue;
             }
 
             CodeGeneratorResponse.Builder builder = CodeGeneratorResponse.newBuilder();
             builder.addFileBuilder()
                 .setName(fileDescriptor.getPackage() + ".ts")
-                .setContent(sb.toString());
+                .setContent(content);
             CodeGeneratorResponse response = builder.build();
             response.writeTo(System.out);
         }
-    }
-
-    private static boolean shouldIgnore(String packageName) {
-        return StringUtils.isEmpty(packageName) || "google.protobuf".equals(packageName);
     }
 }
