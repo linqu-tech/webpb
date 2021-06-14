@@ -13,11 +13,12 @@ group = hierarchicalGroup()
 dependencies {
     annotationProcessor("org.projectlombok:lombok:${Vers.lombok}")
     compileOnly("org.projectlombok:lombok:${Vers.lombok}")
+    compileOnly(project(":runtime:java"))
     implementation(project(":libs:proto"))
-    implementation(project(":runtime:java"))
     testAnnotationProcessor("org.projectlombok:lombok:${Vers.lombok}")
     testCompileOnly("org.projectlombok:lombok:${Vers.lombok}")
     testImplementation("org.junit.jupiter:junit-jupiter-api:${Vers.jupiter}")
+    testImplementation(project(":runtime:java"))
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 }
 

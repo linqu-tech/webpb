@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import tech.linqu.webpb.runtime.mvc.WepbRequestBodyAdvice;
 import tech.linqu.webpb.runtime.reactive.WebpbClient;
 
@@ -15,7 +17,7 @@ import tech.linqu.webpb.runtime.reactive.WebpbClient;
  */
 @EnableWebMvc
 @Configuration
-public class BeansConfiguration {
+public class WebMvcConfiguration implements WebMvcConfigurer {
 
     /**
      * {@link WepbRequestBodyAdvice} bean.
@@ -36,5 +38,10 @@ public class BeansConfiguration {
     @Bean
     public WebpbClient webpbClient(@Value("${server.port}") int port) throws MalformedURLException {
         return new WebpbClient(WebClient.builder().build(), new URL("http://127.0.0.1:" + port));
+    }
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**").allowedMethods("*");
     }
 }
