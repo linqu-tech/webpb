@@ -7,8 +7,22 @@
 </head>
 <body>
 <h1>Webpb App</h1>
-<input type="button" value="Get Store" id="getStoreButton"/>
-<input type="button" value="Get Stores" id="getStoresButton"/>
-<div id="logger" style="white-space: pre; border: 1px solid #999; padding: 10px; margin-top: 20px; word-break: break-all;"></div>
+<div class="operations">
+  <div class="operation">
+    <input type="button" value="Get Store" id="getStoreButton"/>
+    <label for="storeId">storeId:</label>
+    <input id="storeId" value="12345">
+    <label for="customer">customer:</label>
+    <input id="customer" value="Tom">
+  </div>
+  <div class="operation">
+    <input type="button" value="Get Stores" id="getStoresButton"/>
+    <label for="pageIndex">pageIndex:</label>
+    <input id="pageIndex" value="1">
+    <label for="pageSize">pageSize:</label>
+    <input id="pageSize" value="3">
+  </div>
+</div>
+<div id="logger"></div>
 </body>
 </html>

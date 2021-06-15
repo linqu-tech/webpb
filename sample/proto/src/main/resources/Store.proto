@@ -22,7 +22,10 @@ message StoreVisitRequest {
     };
 
     required int64 id = 1 [(opts).opt = {in_query: true}, (opts).ts = {as_string: true}];
-    required string customer = 2;
+    required string customer = 2 [(opts).java = {
+        annotation: '@NotBlank'
+        annotation: '@Length(min = 2, max = 20)'
+    }];
 }
 
 message StoreVisitResponse {

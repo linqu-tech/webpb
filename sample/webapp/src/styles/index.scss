@@ -4,3 +4,17 @@ body {
   color: $body-color;
   font-family: sans-serif;
 }
+
+#logger {
+  border: 1px solid #999;
+  margin-top: 20px;
+  padding: 10px;
+  white-space: pre;
+  word-break: break-all;
+}
+
+.operations {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}

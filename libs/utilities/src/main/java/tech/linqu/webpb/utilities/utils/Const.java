@@ -32,6 +32,11 @@ public interface Const {
     String GIT_URL = "https://github.com/linqu-tech/webpb";
 
     /**
+     * Webpb extends protobuf options.
+     */
+    String WEBPB_EXTEND = "WebpbExtend.proto";
+
+    /**
      * User custom options definition proto.
      */
     String WEBPB_OPTIONS = "WebpbOptions.proto";

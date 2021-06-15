@@ -5,6 +5,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 module.exports = {
   entry: {
     app: Path.resolve(__dirname, '../src/scripts/index.ts'),
+    styles: Path.resolve(__dirname, '../src/styles/index.scss'),
   },
   output: {
     path: Path.join(__dirname, '../dist'),
@@ -28,8 +29,8 @@ module.exports = {
     preferRelative: true,
     alias: {
       'build': Path.resolve(__dirname, '../build'),
-      '@proto': Path.resolve(__dirname, './src/scripts/proto'),
-      '@scripts': Path.resolve(__dirname, './src/scripts')
+      '@proto': Path.resolve(__dirname, '../src/scripts/proto'),
+      '@scripts': Path.resolve(__dirname, '../src/scripts')
     },
     extensions: ['.ts', '.js']
   },

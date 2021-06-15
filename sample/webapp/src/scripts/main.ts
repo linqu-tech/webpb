@@ -1,7 +1,5 @@
 import { HttpService } from './http.service';
-import {
-  CommonProto, StoreProto
-} from '@proto';
+import { CommonProto, StoreProto } from '@proto';
 import PageablePb = CommonProto.PageablePb;
 import StoreVisitResponse = StoreProto.StoreVisitResponse;
 import StoreVisitRequest = StoreProto.StoreVisitRequest;
@@ -24,9 +22,13 @@ export class Main {
   }
 
   getStore(): void {
+    const storeIdElement = document.getElementById('storeId') as HTMLInputElement;
+    const storeId = storeIdElement?.value ?? '12345';
+    const customerElement = document.getElementById('customer') as HTMLInputElement;
+    const customer = customerElement?.value ?? 'Tom';
     this.httpService
       .request<StoreVisitResponse>(
-        StoreVisitRequest.create({ customer: 'Tom', id: '123' })
+        StoreVisitRequest.create({ customer: customer, id: storeId })
       )
       .then(
         (res) => console.log(res),
@@ -35,9 +37,13 @@ export class Main {
   }
 
   getStores(): void {
+    const indexElement = document.getElementById('pageIndex') as HTMLInputElement;
+    const pageIndex = Number(indexElement?.value ?? '1');
+    const sizeElement = document.getElementById('pageSize') as HTMLInputElement;
+    const pageSize = Number(sizeElement?.value ?? '3');
     this.httpService
       .request<StoreListResponse>(
-        StoreListRequest.create({ pageable: { page: 2, size: 3 } })
+        StoreListRequest.create({ pageable: { page: pageIndex, size: pageSize } })
       )
       .then(
         (res) => console.log(res),
