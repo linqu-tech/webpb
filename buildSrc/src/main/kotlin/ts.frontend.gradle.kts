@@ -14,7 +14,7 @@ Vers.initialize(project)
 repositories {
     mavenLocal()
     mavenCentral()
-    maven { url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots") }
+    maven { url = uri(Props.snapshotRepo) }
 }
 
 protobuf {

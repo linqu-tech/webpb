@@ -27,8 +27,9 @@ module.exports = {
   resolve: {
     preferRelative: true,
     alias: {
-      '~': Path.resolve(__dirname, '../src'),
-      'build': Path.resolve(__dirname, '../build')
+      'build': Path.resolve(__dirname, '../build'),
+      '@proto': Path.resolve(__dirname, './src/scripts/proto'),
+      '@scripts': Path.resolve(__dirname, './src/scripts')
     },
     extensions: ['.ts', '.js']
   },

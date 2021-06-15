@@ -22,7 +22,9 @@
     "strictPropertyInitialization": false,
     "target": "es6",
     "paths": {
-      "build": ["./build"]
+      "build/*": ["./build/*"],
+      "@proto": ["./src/scripts/proto"],
+      "@scripts": ["./src/scripts"]
     },
     "typeRoots": [
       "node_modules/@types",

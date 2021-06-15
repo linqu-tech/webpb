@@ -1,50 +1,46 @@
 package tech.linqu.webpb.runtime.mvc;
 
+import static tech.linqu.webpb.runtime.mvc.WebpbRequestUtils.mergeVariables;
+
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.lang.reflect.Type;
-import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdviceAdapter;
-import tech.linqu.webpb.commons.ParamGroup;
-import tech.linqu.webpb.commons.PathParam;
 import tech.linqu.webpb.runtime.WebpbMessage;
-import tech.linqu.webpb.runtime.WebpbMeta;
+import tech.linqu.webpb.runtime.WebpbUtils;
 
 /**
  * Autowire request body properties from url path an query.
  */
 @RestControllerAdvice
-public class WepbRequestBodyAdvice extends RequestBodyAdviceAdapter {
+public class WebpbRequestBodyAdvice extends RequestBodyAdviceAdapter {
 
     private final ObjectMapper objectMapper;
 
     /**
-     * Construct an instance of {@link WepbRequestBodyAdvice}.
+     * Construct an instance of {@link WebpbRequestBodyAdvice}.
      */
-    public WepbRequestBodyAdvice() {
+    public WebpbRequestBodyAdvice() {
         this.objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
     /**
-     * Construct an instance of {@link WepbRequestBodyAdvice}.
+     * Construct an instance of {@link WebpbRequestBodyAdvice}.
      *
      * @param objectMapper {@link ObjectMapper}
      */
-    public WepbRequestBodyAdvice(ObjectMapper objectMapper) {
+    public WebpbRequestBodyAdvice(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
 
@@ -68,40 +64,9 @@ public class WepbRequestBodyAdvice extends RequestBodyAdviceAdapter {
         @SuppressWarnings("unchecked")
         Map<String, String> attributes = (Map<String, String>) request
             .getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
-        Map<String, String[]> parameterMap = request.getParameterMap();
-        if (CollectionUtils.isEmpty(attributes) && CollectionUtils.isEmpty(parameterMap)) {
-            return body;
-        }
-
-        Map<String, String> variablesMap =
-            attributes == null ? new HashMap<>() : new HashMap<>(attributes);
-        for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
-            if (entry.getValue() != null && entry.getValue().length > 0) {
-                variablesMap.put(entry.getKey(), entry.getValue()[0]);
-            }
-        }
-
-        WebpbMeta meta = ((WebpbMessage) object).webpbMeta();
-        if (meta == null) {
-            return object;
-        }
-        ParamGroup group = ParamGroup.of(meta.getPath());
-        ObjectNode objectNode = objectMapper.createObjectNode();
-        for (PathParam pathParam : group.getParams()) {
-            String key = pathParam.getKey();
-            String accessor = pathParam.getAccessor();
-            String value = variablesMap.get(StringUtils.hasLength(key) ? key : accessor);
-            if (value != null) {
-                String[] accessors = accessor.split("\\.");
-                ObjectNode targetNode = findNode(objectNode, accessors);
-                targetNode.put(accessors[accessors.length - 1], value);
-            }
-        }
-        try {
-            return objectMapper.readerForUpdating(object).readValue(objectNode);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        Map<String, String[]> parameters = request.getParameterMap();
+        Map<String, String> variablesMap = mergeVariables(attributes, parameters);
+        return WebpbUtils.updateMessage((WebpbMessage) object, variablesMap);
     }
 
     private static HttpServletRequest getHttpServletRequest() {
@@ -110,18 +75,5 @@ public class WepbRequestBodyAdvice extends RequestBodyAdviceAdapter {
             return ((ServletRequestAttributes) requestAttributes).getRequest();
         }
         return null;
-    }
-
-    private ObjectNode findNode(ObjectNode objectNode, String[] accessors) {
-        for (int i = 0; i < accessors.length - 1; i++) {
-            String accessor = accessors[i];
-            ObjectNode subNode = (ObjectNode) objectNode.get(accessor);
-            if (subNode == null) {
-                subNode = objectMapper.createObjectNode();
-                objectNode.set(accessor, subNode);
-            }
-            objectNode = subNode;
-        }
-        return objectNode;
     }
 }

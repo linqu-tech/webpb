@@ -37,17 +37,17 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import tech.linqu.webpb.runtime.WebpbUtils;
-import tech.linqu.webpb.runtime.mvc.WepbRequestBodyAdvice;
 import tech.linqu.webpb.runtime.reactive.WebpbClient;
 import tech.linqu.webpb.sample.proto.common.PageablePb;
-import tech.linqu.webpb.sample.proto.store.StoreDataRequest;
 import tech.linqu.webpb.sample.proto.store.StoreGreetingRequest;
 import tech.linqu.webpb.sample.proto.store.StoreGreetingResponse;
 import tech.linqu.webpb.sample.proto.store.StoreListRequest;
+import tech.linqu.webpb.sample.proto.store.StoreVisitRequest;
+import tech.linqu.webpb.sample.spring.config.WebMvcConfiguration;
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(StoreController.class)
-@ImportAutoConfiguration(WepbRequestBodyAdvice.class)
+@ImportAutoConfiguration(WebMvcConfiguration.class)
 class StoreControllerTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -61,56 +61,48 @@ class StoreControllerTest {
     @Test
     public void givenStoreId_whenGetStore_thenReturnStore() throws Exception {
         int storeId = 123;
-        StoreDataRequest request = new StoreDataRequest((long) storeId);
+        String customer = "fakeName";
+        StoreVisitRequest request = new StoreVisitRequest((long) storeId, customer);
         String url = WebpbUtils.formatUrl(objectMapper, request);
         assertEquals("/stores/123", url);
 
-        mvc.perform(get(url)
+        when(webpbClient.request(any(), any()))
+            .thenReturn(new StoreGreetingResponse("Welcome, " + customer));
+
+        mvc.perform(post(url)
+            .content("{\"customer\": \"" + customer + "\"}")
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.store.id", is(storeId)))
             .andExpect(jsonPath("$.store.name", is("store-" + storeId)))
-            .andExpect(jsonPath("$.store.city", is("Chengdu")));
+            .andExpect(jsonPath("$.store.city", is("Chengdu")))
+            .andExpect(jsonPath("$.greeting", is("Welcome, " + customer)));
     }
 
     @Test
     public void givenPageable_whenGetStores_thenReturnStoreList() throws Exception {
-        String customer = "fakeName";
-        StoreListRequest request =
-            new StoreListRequest(new PageablePb(true, 2, 11, null), customer);
+        StoreListRequest request = new StoreListRequest(new PageablePb(true, 2, 11, null));
         String url = WebpbUtils.formatUrl(objectMapper, request);
         assertEquals("/stores?page=2&size=11", url);
 
-        when(webpbClient.request(any(), any()))
-            .thenReturn(new StoreGreetingResponse("Welcome, " + customer));
-
-        mvc.perform(post(url)
-            .content("{\"customer\": \"" + customer + "\"}")
+        mvc.perform(get(url)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.paging.page", is(2)))
-            .andExpect(jsonPath("$.stores", hasSize(11)))
-            .andExpect(jsonPath("$.greeting", is("Welcome, " + customer)));
+            .andExpect(jsonPath("$.stores", hasSize(11)));
     }
 
     @Test
     public void givenNoPageable_whenGetStores_thenReturnStoreList() throws Exception {
-        String customer = "fakeName";
-        StoreListRequest request =
-            new StoreListRequest(new PageablePb(), customer);
+        StoreListRequest request = new StoreListRequest(new PageablePb());
         String url = WebpbUtils.formatUrl(objectMapper, request);
         assertEquals("/stores", url);
 
-        when(webpbClient.request(any(), any()))
-            .thenReturn(new StoreGreetingResponse("Welcome, " + customer));
-
-        mvc.perform(post(url)
-            .content("{\"customer\": \"" + customer + "\"}")
+        mvc.perform(get(url)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.paging.page", is(1)))
-            .andExpect(jsonPath("$.stores", hasSize(10)))
-            .andExpect(jsonPath("$.greeting", is("Welcome, " + customer)));
+            .andExpect(jsonPath("$.stores", hasSize(10)));
     }
 
     @Test

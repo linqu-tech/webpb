@@ -12,6 +12,8 @@ object Props {
     var checkstyleMaxErrors: Int = 0
     var checkstyleMaxWarnings: Int = 0
     var jacocoMinCoverage: Double = 1.0
+    var releaseRepo: String = ""
+    var snapshotRepo: String = ""
 
     fun initialize(project: Project) {
         if (initialized) {

@@ -20,8 +20,10 @@ import static org.springframework.util.StringUtils.hasLength;
 import static tech.linqu.webpb.commons.Utils.emptyOrDefault;
 import static tech.linqu.webpb.commons.Utils.uncheckedCall;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -29,6 +31,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.http.HttpMethod;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import tech.linqu.webpb.commons.ParamGroup;
 import tech.linqu.webpb.commons.PathParam;
 import tech.linqu.webpb.runtime.common.MessageContext;
@@ -39,6 +43,13 @@ import tech.linqu.webpb.runtime.common.MessageContext;
 public class WebpbUtils {
 
     private static final Map<Class<?>, MessageContext> contextCache = new ConcurrentHashMap<>();
+
+    private static final ObjectMapper objectMapper;
+
+    static {
+        objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
 
     private WebpbUtils() {
     }
@@ -56,6 +67,16 @@ public class WebpbUtils {
         } catch (NoSuchFieldException | IllegalAccessException e) {
             return null;
         }
+    }
+
+    /**
+     * Format request url from API base url and {@link WebpbMeta}.
+     *
+     * @param message {@link WebpbMessage}
+     * @return formatted url
+     */
+    public static String formatUrl(WebpbMessage message) {
+        return formatUrl(objectMapper, message);
     }
 
     /**
@@ -221,5 +242,55 @@ public class WebpbUtils {
             }
         }
         return jsonNode.asText();
+    }
+
+    /**
+     * Update a message extends from {@link WebpbMessage}.
+     *
+     * @param message      message extends from {@link WebpbMessage}
+     * @param variablesMap map of variables
+     * @param <T>          type extends from {@link WebpbMessage}
+     * @return T
+     */
+    public static <T extends WebpbMessage> T updateMessage(T message,
+                                                           Map<String, String> variablesMap) {
+        if (CollectionUtils.isEmpty(variablesMap)) {
+            return message;
+        }
+
+        WebpbMeta meta = message.webpbMeta();
+        if (meta == null) {
+            return message;
+        }
+        ParamGroup group = ParamGroup.of(meta.getPath());
+        ObjectNode objectNode = objectMapper.createObjectNode();
+        for (PathParam pathParam : group.getParams()) {
+            String key = pathParam.getKey();
+            String accessor = pathParam.getAccessor();
+            String value = variablesMap.get(StringUtils.hasLength(key) ? key : accessor);
+            if (value != null) {
+                String[] accessors = accessor.split("\\.");
+                ObjectNode targetNode = findNode(objectNode, accessors);
+                targetNode.put(accessors[accessors.length - 1], value);
+            }
+        }
+        try {
+            return objectMapper.readerForUpdating(message).readValue(objectNode);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static ObjectNode findNode(ObjectNode objectNode, String[] accessors) {
+        for (int i = 0; i < accessors.length - 1; i++) {
+            String accessor = accessors[i];
+            ObjectNode subNode = (ObjectNode) objectNode.get(accessor);
+            if (subNode == null) {
+                subNode = objectMapper.createObjectNode();
+                objectNode.set(accessor, subNode);
+            }
+            objectNode = subNode;
+        }
+        return objectNode;
     }
 }

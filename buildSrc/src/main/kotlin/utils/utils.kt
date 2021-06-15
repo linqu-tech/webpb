@@ -57,8 +57,8 @@ fun Project.signAndPublish(artifactId: String, configuration: Action<MavenPublic
     extension.repositories {
         maven {
             name = "oss"
-            val release = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
-            val snapshot = uri("https://s01.oss.sonatype.org/content/repositories/snapshots")
+            val release = uri(Props.releaseRepo)
+            val snapshot = uri(Props.snapshotRepo)
             url = if (version.toString().endsWith("SNAPSHOT")) snapshot else release
             credentials(PasswordCredentials::class)
         }
