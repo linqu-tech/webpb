@@ -83,7 +83,9 @@ public final class Generator {
     }
 
     private static boolean shouldIgnore(String packageName) {
-        return StringUtils.isEmpty(packageName) || packageName.startsWith("com.google.protobuf");
+        return StringUtils.isEmpty(packageName)
+            || packageName.startsWith("com.google.protobuf")
+            || packageName.startsWith("tech.linqu.webpb.utilities.descriptor");
     }
 
     /**

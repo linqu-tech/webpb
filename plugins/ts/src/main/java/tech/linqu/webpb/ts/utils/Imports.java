@@ -39,8 +39,8 @@ public class Imports {
      */
     public void updateBuilder(StringBuilder builder) {
         for (String type : imported) {
-            builder.append("import * as ")
-                .append(type).append(" from './").append(type).append("';\n");
+            builder.append("import { ")
+                .append(type).append(" } from './").append(type).append("';\n");
         }
     }
 }

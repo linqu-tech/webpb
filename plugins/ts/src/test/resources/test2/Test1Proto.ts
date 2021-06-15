@@ -3,22 +3,25 @@
 
 import * as Webpb from 'webpb';
 
-export interface ITest {
-}
-
-export class Test implements ITest {
-  webpbMeta: () => Webpb.WebpbMeta;
-
-  private constructor() {
-    this.webpbMeta = () => ({
-      class: 'Test',
-      method: '',
-      context: '',
-      path: ''
-    }) as Webpb.WebpbMeta;
+export namespace Test1Proto {
+  export interface ITest {
   }
 
-  static create(): Test {
-    return new Test();
+  export class Test implements ITest {
+    webpbMeta: () => Webpb.WebpbMeta;
+
+    private constructor() {
+      this.webpbMeta = () => ({
+        class: 'Test',
+        method: '',
+        context: '',
+        path: ''
+      }) as Webpb.WebpbMeta;
+    }
+
+    static create(): Test {
+      return new Test();
+    }
   }
 }
+

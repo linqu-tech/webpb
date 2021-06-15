@@ -56,6 +56,7 @@ tasks.jacocoTestReport {
 }
 
 createConfiguration("outgoingClassDirs", "classDirs") {
+    extendsFrom(configurations.implementation.get())
     isCanBeResolved = false
     isCanBeConsumed = true
     sourceSets.main.get().output.forEach {
@@ -64,6 +65,7 @@ createConfiguration("outgoingClassDirs", "classDirs") {
 }
 
 createConfiguration("outgoingSourceDirs", "sourceDirs") {
+    extendsFrom(configurations.implementation.get())
     isCanBeResolved = false
     isCanBeConsumed = true
     sourceSets.main.get().java.srcDirs.forEach {
@@ -72,6 +74,7 @@ createConfiguration("outgoingSourceDirs", "sourceDirs") {
 }
 
 createConfiguration("outgoingCoverageData", "coverageData") {
+    extendsFrom(configurations.implementation.get())
     isCanBeResolved = false
     isCanBeConsumed = true
     outgoing.artifact(tasks.test.map {

@@ -89,7 +89,7 @@ class StoreControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.paging.page", is(2)))
-            .andExpect(jsonPath("$.stores", hasSize(11)));
+            .andExpect(jsonPath("$.stores", hasSize(10)));
     }
 
     @Test

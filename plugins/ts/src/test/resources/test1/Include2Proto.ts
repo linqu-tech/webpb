@@ -3,50 +3,53 @@
 
 import * as Webpb from 'webpb';
 
-export interface IMessage {
-  id: number;
-}
-
-export class Message implements IMessage {
-  id!: number;
-  webpbMeta: () => Webpb.WebpbMeta;
-
-  private constructor(p?: IMessage) {
-    Webpb.assign(p, this, []);
-    this.webpbMeta = () => (p && {
-      class: 'Message',
-      method: '',
-      context: '',
-      path: ''
-    }) as Webpb.WebpbMeta;
+export namespace Include2Proto {
+  export interface IMessage {
+    id: number;
   }
 
-  static create(properties: IMessage): Message {
-    return new Message(properties);
-  }
-}
-
-export namespace Message {
-  export interface INested {
-    test1: number;
-  }
-
-  export class Nested implements INested {
-    test1!: number;
+  export class Message implements IMessage {
+    id!: number;
     webpbMeta: () => Webpb.WebpbMeta;
 
-    private constructor(p?: INested) {
+    private constructor(p?: IMessage) {
       Webpb.assign(p, this, []);
       this.webpbMeta = () => (p && {
-        class: 'Nested',
+        class: 'Message',
         method: '',
         context: '',
         path: ''
       }) as Webpb.WebpbMeta;
     }
 
-    static create(properties: INested): Nested {
-      return new Nested(properties);
+    static create(properties: IMessage): Message {
+      return new Message(properties);
     }
   }
-  }
+
+export namespace Message {
+    export interface INested {
+      test1: number;
+    }
+
+    export class Nested implements INested {
+      test1!: number;
+      webpbMeta: () => Webpb.WebpbMeta;
+
+      private constructor(p?: INested) {
+        Webpb.assign(p, this, []);
+        this.webpbMeta = () => (p && {
+          class: 'Nested',
+          method: '',
+          context: '',
+          path: ''
+        }) as Webpb.WebpbMeta;
+      }
+
+      static create(properties: INested): Nested {
+        return new Nested(properties);
+      }
+    }
+    }
+}
+

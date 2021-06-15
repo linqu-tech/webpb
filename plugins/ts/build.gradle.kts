@@ -7,7 +7,6 @@ plugins {
 dependencies {
     implementation(project(":libs:commons"))
     implementation(project(":libs:utilities"))
-    testImplementation("commons-io:commons-io:${utils.Vers.commonsIo}")
     testImplementation(project(":libs:tests"))
 }
 

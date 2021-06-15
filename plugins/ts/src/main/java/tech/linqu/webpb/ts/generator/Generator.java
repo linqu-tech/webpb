@@ -102,14 +102,12 @@ public final class Generator {
         this.fileDescriptor = fileDescriptor;
         this.imports = new Imports(fileDescriptor.getPackage());
         generateTypes();
-        if (!builder.isEmpty()) {
-            StringBuilder builder = new StringBuilder();
-            builder.append("// " + Const.HEADER + "\n");
-            builder.append("// " + Const.GIT_URL + "\n\n");
-            builder.append("import * as Webpb from 'webpb';\n\n");
-            imports.updateBuilder(builder);
-            this.builder.prepend(builder.toString());
-        }
+        StringBuilder builder = new StringBuilder();
+        builder.append("// " + Const.HEADER + "\n");
+        builder.append("// " + Const.GIT_URL + "\n\n");
+        builder.append("import * as Webpb from 'webpb';\n\n");
+        imports.updateBuilder(builder);
+        this.builder.prepend(builder.toString());
         return this.builder.toString();
     }
 
@@ -118,11 +116,15 @@ public final class Generator {
     }
 
     private void generateTypes() {
-        for (EnumDescriptor enumDescriptor : fileDescriptor.getEnumTypes()) {
-            generateEnum(enumDescriptor);
-        }
-        handleDescriptors(fileDescriptor.getMessageTypes());
-        builder.trimDuplicatedNewline();
+        builder.append("export namespace ").append(fileDescriptor.getPackage()).append(" {\n");
+        builder.level(() -> {
+            for (EnumDescriptor enumDescriptor : fileDescriptor.getEnumTypes()) {
+                generateEnum(enumDescriptor);
+            }
+            handleDescriptors(fileDescriptor.getMessageTypes());
+            builder.trimDuplicatedNewline();
+        });
+        builder.closeBracket();
     }
 
     private void handleDescriptors(List<Descriptor> descriptors) {
