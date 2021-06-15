@@ -1,5 +1,7 @@
 import { HttpService, Main } from '@scripts';
-import { StoreVisitResponse, StoreListResponse } from '@proto';
+import { StoreProto } from '@proto';
+import StoreVisitResponse = StoreProto.StoreVisitResponse;
+import StoreListResponse = StoreProto.StoreListResponse;
 
 describe('main', () => {
 

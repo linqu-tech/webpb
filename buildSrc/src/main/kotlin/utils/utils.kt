@@ -1,6 +1,5 @@
 package utils
 
-import gradle.kotlin.dsl.accessors._9db69caf33bdadb52e152539254e937d.implementation
 import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
@@ -74,7 +73,6 @@ fun Project.createConfiguration(
 ): Configuration {
     val conf = configurations.create(name) {
         isVisible = false
-        extendsFrom(configurations.implementation.get())
         attributes {
             attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage.JAVA_RUNTIME))
             attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category.DOCUMENTATION))

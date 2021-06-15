@@ -24,16 +24,19 @@ configurations.implementation.get().dependencies.forEach {
 }
 
 val incomingClassDirs = createConfiguration("incomingClassDirs", "classDirs") {
+    extendsFrom(configurations.implementation.get())
     isCanBeResolved = true
     isCanBeConsumed = false
 }
 
 val incomingSourceDirs = createConfiguration("incomingSourceDirs", "sourceDirs") {
+    extendsFrom(configurations.implementation.get())
     isCanBeResolved = true
     isCanBeConsumed = false
 }
 
 val incomingCoverageData = createConfiguration("incomingCoverageData", "coverageData") {
+    extendsFrom(configurations.implementation.get())
     isCanBeResolved = true
     isCanBeConsumed = false
 }

@@ -3,6 +3,6 @@
 
 import * as Webpb from 'webpb';
 
-export enum Test {
-  DEFAULT = 0,
+export namespace Test8Proto {
 }
+

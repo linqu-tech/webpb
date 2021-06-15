@@ -1,6 +1,8 @@
 import { HttpService } from '@scripts';
-import { StoreVisitRequest, StoreVisitResponse } from '@proto';
 import axios from 'axios';
+import { StoreProto } from '@proto';
+import StoreVisitResponse = StoreProto.StoreVisitResponse;
+import StoreVisitRequest = StoreProto.StoreVisitRequest;
 
 jest.mock("axios");
 

@@ -3,6 +3,9 @@
 
 import * as Webpb from 'webpb';
 
-export enum Test {
-  DEFAULT = 0,
+export namespace Test5Proto {
+  export enum Test {
+    DEFAULT = 0,
+  }
 }
+
