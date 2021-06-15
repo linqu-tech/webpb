@@ -11,13 +11,13 @@ import tech.linqu.webpb.runtime.mvc.WebpbRequestMapping;
 import tech.linqu.webpb.runtime.reactive.WebpbClient;
 import tech.linqu.webpb.sample.proto.common.PageablePb;
 import tech.linqu.webpb.sample.proto.common.PagingPb;
-import tech.linqu.webpb.sample.proto.store.StoreDataRequest;
-import tech.linqu.webpb.sample.proto.store.StoreDataResponse;
 import tech.linqu.webpb.sample.proto.store.StoreGreetingRequest;
 import tech.linqu.webpb.sample.proto.store.StoreGreetingResponse;
 import tech.linqu.webpb.sample.proto.store.StoreListRequest;
 import tech.linqu.webpb.sample.proto.store.StoreListResponse;
 import tech.linqu.webpb.sample.proto.store.StorePb;
+import tech.linqu.webpb.sample.proto.store.StoreVisitRequest;
+import tech.linqu.webpb.sample.proto.store.StoreVisitResponse;
 
 /**
  * Store controller.
@@ -31,13 +31,16 @@ public class StoreController {
     /**
      * Request a store data.
      *
-     * @param request {@link StoreDataRequest}
-     * @return {@link StoreDataResponse}
+     * @param request {@link StoreVisitRequest}
+     * @return {@link StoreVisitResponse}
      */
     @WebpbRequestMapping
-    public StoreDataResponse getStore(@Valid StoreDataRequest request) {
+    public StoreVisitResponse getStore(@Valid @RequestBody StoreVisitRequest request) {
         Long id = request.getId();
-        return new StoreDataResponse(new StorePb(id, "store-" + id, "Chengdu"));
+        StoreGreetingResponse response = this.webpbClient
+            .request(new StoreGreetingRequest(request.getCustomer()), StoreGreetingResponse.class);
+        return new StoreVisitResponse(new StorePb(id, "store-" + id, "Chengdu"),
+            response.getGreeting());
     }
 
     /**
@@ -47,13 +50,11 @@ public class StoreController {
      * @return {@link StoreListResponse}
      */
     @WebpbRequestMapping
-    public StoreListResponse getStores(@Valid @RequestBody StoreListRequest request) {
+    public StoreListResponse getStores(@Valid StoreListRequest request) {
         PageablePb pageablePb = request.getPageable();
         PagingPb pagingPb = pagingPb(pageablePb);
         List<StorePb> stores = randomStores(pagingPb);
-        StoreGreetingResponse response = this.webpbClient
-            .request(new StoreGreetingRequest(request.getCustomer()), StoreGreetingResponse.class);
-        return new StoreListResponse(pagingPb(pageablePb), stores, response.getGreeting());
+        return new StoreListResponse(pagingPb(pageablePb), stores);
     }
 
     private PagingPb pagingPb(PageablePb pageablePb) {

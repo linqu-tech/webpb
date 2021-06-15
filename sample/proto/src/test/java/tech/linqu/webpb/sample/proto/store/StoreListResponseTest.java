@@ -1,6 +1,5 @@
 package tech.linqu.webpb.sample.proto.store;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -12,11 +11,9 @@ class StoreListResponseTest {
     void test() {
         StoreListResponse response = new StoreListResponse()
             .setPaging(null)
-            .setStores(null)
-            .setGreeting("11");
+            .setStores(null);
         assertNotNull(response.webpbMeta());
         assertNull(response.getPaging());
         assertNull(response.getStores());
-        assertEquals("11", response.getGreeting());
     }
 }

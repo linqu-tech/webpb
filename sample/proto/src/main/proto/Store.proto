@@ -15,33 +15,33 @@ message StorePb {
     required string city = 3;
 }
 
-message StoreDataRequest {
+message StoreVisitRequest {
     option (m_opts).opt = {
-        method: "GET"
+        method: "POST"
         path: "/stores/{id}"
     };
 
     required int64 id = 1 [(opts).opt = {in_query: true}, (opts).ts = {as_string: true}];
+    required string customer = 2;
 }
 
-message StoreDataResponse {
+message StoreVisitResponse {
     required StorePb store = 1;
+    required string greeting = 2;
 }
 
 message StoreListRequest {
     option (m_opts).opt = {
-        method: "POST"
+        method: "GET"
         path: "/stores?page={pageable.page}&size={pageable.size}"
     };
 
     required CommonProto.PageablePb pageable = 1 [(opts).opt = {in_query: true}];
-    required string customer = 2;
 }
 
 message StoreListResponse {
     required CommonProto.PagingPb paging = 1;
     repeated StorePb stores = 2;
-    required string greeting = 3;
 }
 
 message StoreGreetingRequest {

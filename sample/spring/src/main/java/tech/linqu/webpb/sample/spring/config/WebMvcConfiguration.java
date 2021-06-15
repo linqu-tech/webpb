@@ -2,14 +2,17 @@ package tech.linqu.webpb.sample.spring.config;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import tech.linqu.webpb.runtime.mvc.WepbRequestBodyAdvice;
+import tech.linqu.webpb.runtime.mvc.WebpbHandlerMethodArgumentResolver;
+import tech.linqu.webpb.runtime.mvc.WebpbRequestBodyAdvice;
 import tech.linqu.webpb.runtime.reactive.WebpbClient;
 
 /**
@@ -20,13 +23,13 @@ import tech.linqu.webpb.runtime.reactive.WebpbClient;
 public class WebMvcConfiguration implements WebMvcConfigurer {
 
     /**
-     * {@link WepbRequestBodyAdvice} bean.
+     * {@link WebpbRequestBodyAdvice} bean.
      *
-     * @return {@link WepbRequestBodyAdvice}
+     * @return {@link WebpbRequestBodyAdvice}
      */
     @Bean
-    public WepbRequestBodyAdvice requestBodyAdvice() {
-        return new WepbRequestBodyAdvice();
+    public WebpbRequestBodyAdvice requestBodyAdvice() {
+        return new WebpbRequestBodyAdvice();
     }
 
     /**
@@ -38,6 +41,11 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
     @Bean
     public WebpbClient webpbClient(@Value("${server.port}") int port) throws MalformedURLException {
         return new WebpbClient(WebClient.builder().build(), new URL("http://127.0.0.1:" + port));
+    }
+
+    @Override
+    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+        argumentResolvers.add(new WebpbHandlerMethodArgumentResolver());
     }
 
     @Override

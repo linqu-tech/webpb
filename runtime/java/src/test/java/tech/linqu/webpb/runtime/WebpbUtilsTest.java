@@ -26,6 +26,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import tech.linqu.webpb.runtime.model.BadRequest;
 import tech.linqu.webpb.runtime.model.FooRequest;
@@ -162,6 +164,18 @@ class WebpbUtilsTest {
             () -> WebpbUtils.formatUrl(null, objectMapper,
                 new FooRequest(WebpbMeta.builder().method("GET").path("https://a/{b}/c").build())),
             "Path variable 'a' not found");
+    }
+
+    @Test
+    void givenNonEmptyParameters_whenUpdateMessage_ThenReturnUpdatedMessage() {
+        Map<String, String> map = new HashMap<>();
+        map.put("id", "12345678");
+        map.put("size", "111");
+        map.put("page", "222");
+        map.put("fake1", null);
+        FooRequest message = WebpbUtils.updateMessage(new FooRequest(), map);
+        assertEquals(12345678, message.getId());
+        assertEquals(111, message.getPageable().getSize());
     }
 }
 
