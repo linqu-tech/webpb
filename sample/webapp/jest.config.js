@@ -13,7 +13,7 @@ module.exports = {
     "./test/setup/jsdom.ts"
   ],
   testEnvironment: 'node',
-  testMatch: ['<rootDir>/test/**/?(*.)test.ts'],
+  testMatch: ['<rootDir>/test/**/*(*.)@(test).ts'],
   coverageThreshold: {
     global: {
       branches: 100,
