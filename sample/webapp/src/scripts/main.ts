@@ -1,5 +1,5 @@
-import { HttpService } from './http.service';
 import { CommonProto, StoreProto } from '@proto';
+import { HttpService } from './http.service';
 import PageablePb = CommonProto.PageablePb;
 import StoreVisitResponse = StoreProto.StoreVisitResponse;
 import StoreVisitRequest = StoreProto.StoreVisitRequest;
@@ -22,9 +22,9 @@ export class Main {
   }
 
   getStore(): void {
-    const storeIdElement = document.getElementById('storeId') as HTMLInputElement;
+    const storeIdElement = this.getInput('storeId');
     const storeId = storeIdElement?.value ?? '12345';
-    const customerElement = document.getElementById('customer') as HTMLInputElement;
+    const customerElement = this.getInput('customer');
     const customer = customerElement?.value ?? 'Tom';
     this.httpService
       .request<StoreVisitResponse>(
@@ -37,18 +37,24 @@ export class Main {
   }
 
   getStores(): void {
-    const indexElement = document.getElementById('pageIndex') as HTMLInputElement;
+    const indexElement = this.getInput('pageIndex');
     const pageIndex = Number(indexElement?.value ?? '1');
-    const sizeElement = document.getElementById('pageSize') as HTMLInputElement;
+    const sizeElement = this.getInput('pageSize');
     const pageSize = Number(sizeElement?.value ?? '3');
     this.httpService
       .request<StoreListResponse>(
-        StoreListRequest.create({ pageable: { page: pageIndex, size: pageSize } })
+        StoreListRequest.create({
+          pageable: { page: pageIndex, size: pageSize },
+        })
       )
       .then(
         (res) => console.log(res),
         (error) => console.log(error)
       );
+  }
+
+  private getInput(id: string): HTMLInputElement {
+    return document.getElementById(id) as HTMLInputElement;
   }
 }
 

@@ -69,4 +69,16 @@ describe('main', () => {
     main.getStores();
     expect(HttpService.prototype.request).toBeCalledTimes(1);
   });
+
+  it('given dom inputs when get store then return store', () => {
+    createElement('storeId');
+    createElement('customer');
+    createElement('pageIndex');
+    createElement('pageSize');
+    HttpService.prototype.request = jest.fn().mockRejectedValue({ error: 'ERROR' });
+    const main = new Main();
+    main.getStore();
+    main.getStores();
+    expect(HttpService.prototype.request).toBeCalledTimes(2);
+  });
 });

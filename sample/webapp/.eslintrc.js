@@ -17,7 +17,6 @@ module.exports = {
     "@typescript-eslint/no-use-before-define": "off",
     "@typescript-eslint/semi": "off",
     "import-quotes/import-quotes": [1, "single"],
-    "import/imports-first": ["error", "absolute-first"],
     "import/newline-after-import": "error",
     "import/order": [
       "error",
@@ -32,7 +31,7 @@ module.exports = {
     "max-len": [
       "error",
       {
-        code: 100,
+        code: 80,
         ignoreStrings: true,
         ignoreUrls: true,
       },
