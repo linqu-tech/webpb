@@ -21,6 +21,7 @@ export class HttpService {
           url: meta.path,
         })
         .then((res) => {
+          console.log(res);
           if (res.status >= 200 && res.status < 400) {
             logger.log('\n====> Response:');
             logger.stringify(res.data);
@@ -32,8 +33,12 @@ export class HttpService {
           }
         })
         .catch((error) => {
+          const req = error.request;
           logger.log('\n====> Error:');
-          logger.stringify(error);
+          logger.stringify({
+            data: JSON.parse(req.response),
+            status: req.status,
+          });
           reject && reject({ error: `Failed when request: ${url}` });
         })
     );
