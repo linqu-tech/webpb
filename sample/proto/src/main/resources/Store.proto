@@ -39,7 +39,10 @@ message StoreListRequest {
         path: "/stores?page={pageable.page}&size={pageable.size}"
     };
 
-    required CommonProto.PageablePb pageable = 1 [(opts).opt = {in_query: true}];
+    required CommonProto.PageablePb pageable = 1 [
+        (opts).opt = {in_query: true},
+        (opts).java = {annotation: '@Valid'}
+    ];
 }
 
 message StoreListResponse {
@@ -58,4 +61,8 @@ message StoreGreetingRequest {
 
 message StoreGreetingResponse {
     required string greeting = 1;
+}
+
+message ValidationResponse {
+    map<string, string> errors = 1;
 }

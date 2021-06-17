@@ -1,11 +1,18 @@
 package tech.linqu.webpb.sample.spring.controller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import tech.linqu.webpb.runtime.mvc.WebpbRequestMapping;
 import tech.linqu.webpb.runtime.reactive.WebpbClient;
@@ -18,6 +25,7 @@ import tech.linqu.webpb.sample.proto.store.StoreListResponse;
 import tech.linqu.webpb.sample.proto.store.StorePb;
 import tech.linqu.webpb.sample.proto.store.StoreVisitRequest;
 import tech.linqu.webpb.sample.proto.store.StoreVisitResponse;
+import tech.linqu.webpb.sample.proto.store.ValidationResponse;
 
 /**
  * Store controller.
@@ -87,5 +95,23 @@ public class StoreController {
     @WebpbRequestMapping
     public StoreGreetingResponse greeting(@Valid @RequestBody StoreGreetingRequest request) {
         return new StoreGreetingResponse("Welcome, " + request.getCustomer());
+    }
+
+    /**
+     * Format validation exception error message.
+     *
+     * @param ex {@link MethodArgumentNotValidException}
+     * @return map of messages
+     */
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ValidationResponse handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+        return new ValidationResponse(errors);
     }
 }

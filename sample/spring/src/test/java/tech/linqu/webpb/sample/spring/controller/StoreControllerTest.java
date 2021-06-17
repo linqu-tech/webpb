@@ -81,15 +81,26 @@ class StoreControllerTest {
 
     @Test
     public void givenPageable_whenGetStores_thenReturnStoreList() throws Exception {
+        StoreListRequest request = new StoreListRequest(new PageablePb(true, 2, 8, null));
+        String url = WebpbUtils.formatUrl(objectMapper, request);
+        assertEquals("/stores?page=2&size=8", url);
+
+        mvc.perform(get(url)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.paging.page", is(2)))
+            .andExpect(jsonPath("$.stores", hasSize(8)));
+    }
+
+    @Test
+    public void givenLargePageSize_whenGetStores_thenReturnBadRequest() throws Exception {
         StoreListRequest request = new StoreListRequest(new PageablePb(true, 2, 11, null));
         String url = WebpbUtils.formatUrl(objectMapper, request);
         assertEquals("/stores?page=2&size=11", url);
 
         mvc.perform(get(url)
             .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.paging.page", is(2)))
-            .andExpect(jsonPath("$.stores", hasSize(10)));
+            .andExpect(status().isBadRequest());
     }
 
     @Test

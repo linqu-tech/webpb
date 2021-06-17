@@ -3,6 +3,7 @@ package tech.linqu.webpb.sample.spring.config;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,8 +19,8 @@ import tech.linqu.webpb.runtime.reactive.WebpbClient;
 /**
  * Configuration for beans.
  */
-@EnableWebMvc
 @Configuration
+@EnableWebMvc
 public class WebMvcConfiguration implements WebMvcConfigurer {
 
     /**
