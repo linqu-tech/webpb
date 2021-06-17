@@ -17,7 +17,6 @@ dependencies {
     annotationProcessor(project(":runtime:processor"))
     compileOnly("org.projectlombok:lombok:${Vers.lombok}")
     implementation("com.fasterxml.jackson.core:jackson-annotations:${Vers.jackson}")
-    implementation("org.hibernate.validator:hibernate-validator:${Vers.hibernateValidator}")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-webflux")

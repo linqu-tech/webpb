@@ -47,7 +47,12 @@ describe("http.service", () => {
 
   it("should request on rejected", () => {
     const httpService = new HttpService('https://abc');
-    axios.request = jest.fn().mockRejectedValue(RESPONSE_DATA);
+    axios.request = jest.fn().mockRejectedValue({
+      request: {
+        status: 500,
+        response: JSON.stringify({ error: 'invalid' })
+      }
+    });
     httpService
       .request<StoreVisitResponse>(StoreVisitRequest.create({ customer: 'Tom', id: '123' }))
       .then(
