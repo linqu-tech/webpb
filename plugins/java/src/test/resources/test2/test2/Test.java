@@ -34,4 +34,39 @@ public class Test implements WebpbMessage {
         this.test2 = test2;
         this.isTest3 = isTest3;
     }
+
+    public Integer getTest1() {
+        return this.test1;
+    }
+
+    public Test setTest1(Integer test1) {
+        this.test1 = test1;
+        return this;
+    }
+
+    public Boolean getTest2() {
+        return this.test2;
+    }
+
+    public boolean isTest2() {
+        return this.test2 != null && this.test2;
+    }
+
+    public Test setTest2(Boolean test2) {
+        this.test2 = test2;
+        return this;
+    }
+
+    public Boolean getIsTest3() {
+        return this.isTest3;
+    }
+
+    public boolean isIsTest3() {
+        return this.isTest3 != null && this.isTest3;
+    }
+
+    public Test setIsTest3(Boolean isTest3) {
+        this.isTest3 = isTest3;
+        return this;
+    }
 }

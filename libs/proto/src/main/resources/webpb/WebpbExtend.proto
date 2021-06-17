@@ -21,15 +21,13 @@ message OptFileOpts {
 }
 
 message JavaFileOpts {
-    optional bool gen_getter = 1000;
+    optional bool gen_getter = 1000 [default = true];
 
-    optional bool gen_setter = 1001;
+    optional bool gen_setter = 1001 [default = true];
 
-    optional bool gen_to_string = 1002;
+    repeated string import = 1002;
 
-    repeated string import = 1003;
-
-    repeated string annotation = 1004;
+    repeated string annotation = 1003;
 }
 
 message TsFileOpts {

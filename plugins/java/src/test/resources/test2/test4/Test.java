@@ -28,4 +28,13 @@ public class Test implements WebpbMessage {
     public Test(Long test1) {
         this.test1 = test1;
     }
+
+    public Long getTest1() {
+        return this.test1;
+    }
+
+    public Test setTest1(Long test1) {
+        this.test1 = test1;
+        return this;
+    }
 }

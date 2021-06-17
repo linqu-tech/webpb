@@ -9,7 +9,6 @@ import "webpb/WebpbExtend.proto";
 option (f_opts).java = {
     gen_getter: true
     gen_setter: true
-    gen_to_string: true
 };
 
 message Test {
