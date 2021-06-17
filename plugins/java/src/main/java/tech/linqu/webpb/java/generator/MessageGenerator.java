@@ -16,6 +16,7 @@
 
 package tech.linqu.webpb.java.generator;
 
+import static com.google.protobuf.Descriptors.FieldDescriptor.JavaType.BOOLEAN;
 import static com.google.protobuf.Descriptors.FieldDescriptor.JavaType.ENUM;
 import static com.google.protobuf.Descriptors.FieldDescriptor.Type.BOOL;
 import static com.google.protobuf.Descriptors.FieldDescriptor.Type.BYTES;
@@ -45,14 +46,18 @@ import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.AssignExpr;
+import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.expr.NameExpr;
+import com.github.javaparser.ast.expr.NullLiteralExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
@@ -163,6 +168,7 @@ public class MessageGenerator {
 
         generateMessageFields(declaration, descriptor);
         generateConstructor(declaration, descriptor);
+        generateGettersAndSetters(declaration, descriptor);
         generateNested(declaration, descriptor);
         return declaration;
     }
@@ -261,13 +267,7 @@ public class MessageGenerator {
         declaration.addConstructor()
             .setModifiers(Modifier.Keyword.PUBLIC)
             .setBody(new BlockStmt());
-        List<FieldDescriptor> descriptors = descriptor.getFields().stream()
-            .filter(fieldDescriptor -> {
-                OptFieldOpts fieldOpts =
-                    OptionUtils.getOpts(fieldDescriptor, FieldOpts::hasOpt).getOpt();
-                return !fieldOpts.getOmitted();
-            })
-            .collect(Collectors.toList());
+        List<FieldDescriptor> descriptors = getMemberFields(descriptor);
         if (descriptors.isEmpty() || descriptors.size() > 5) {
             return;
         }
@@ -287,13 +287,7 @@ public class MessageGenerator {
 
     private void generateMessageFields(ClassOrInterfaceDeclaration declaration,
                                        Descriptor descriptor) {
-        for (FieldDescriptor fieldDescriptor : descriptor.getFields()) {
-            OptFieldOpts fieldOpts =
-                OptionUtils.getOpts(fieldDescriptor, FieldOpts::hasOpt).getOpt();
-            if (fieldOpts.getOmitted()) {
-                continue;
-            }
-
+        for (FieldDescriptor fieldDescriptor : getMemberFields(descriptor)) {
             Type fieldType = getFieldType(fieldDescriptor);
             FieldDeclaration fieldDeclaration = declaration.addField(
                 fieldType, fieldDescriptor.getName(), Modifier.Keyword.PRIVATE
@@ -301,7 +295,9 @@ public class MessageGenerator {
             JavaFieldOpts javaFieldOpts =
                 OptionUtils.getOpts(fieldDescriptor, FieldOpts::hasJava).getJava();
             List<String> annotations = new ArrayList<>(javaFieldOpts.getAnnotationList());
-            if (fieldOpts.getInQuery()) {
+            OptFieldOpts optFieldOpts =
+                OptionUtils.getOpts(fieldDescriptor, FieldOpts::hasOpt).getOpt();
+            if (optFieldOpts.getInQuery()) {
                 annotations.add("@" + Const.RUNTIME_PACKAGE + ".common.InQuery");
             }
             addAnnotations(fieldDeclaration, annotations);
@@ -321,6 +317,66 @@ public class MessageGenerator {
         } else {
             return toType(fieldDescriptor);
         }
+    }
+
+    private void generateGettersAndSetters(ClassOrInterfaceDeclaration declaration,
+                                           Descriptor descriptor) {
+        JavaFileOpts webpbOpts = requestContext.getFileOpts().getJava();
+        for (FieldDescriptor fieldDescriptor : getMemberFields(descriptor)) {
+            if (webpbOpts.getGenGetter()) {
+                generateGetter(declaration, fieldDescriptor);
+            }
+            if (webpbOpts.getGenSetter()) {
+                generateSetter(declaration, descriptor, fieldDescriptor);
+            }
+        }
+    }
+
+    private void generateGetter(ClassOrInterfaceDeclaration declaration,
+                                FieldDescriptor fieldDescriptor) {
+        String member = fieldDescriptor.getName();
+        MethodDeclaration method = declaration
+            .addMethod("get" + StringUtils.capitalize(member), Modifier.Keyword.PUBLIC);
+        method.setType(getFieldType(fieldDescriptor));
+        method.setBody(new BlockStmt().addStatement(new ReturnStmt(
+            new FieldAccessExpr(new ThisExpr(), member)
+        )));
+        if (fieldDescriptor.getJavaType() == BOOLEAN) {
+            MethodDeclaration isMethod = declaration
+                .addMethod("is" + StringUtils.capitalize(member), Modifier.Keyword.PUBLIC);
+            isMethod.setType(PrimitiveType.booleanType());
+            isMethod.setBody(new BlockStmt().addStatement(new ReturnStmt(
+                new BinaryExpr(
+                    new BinaryExpr(
+                        new FieldAccessExpr(new ThisExpr(), member),
+                        new NullLiteralExpr(),
+                        BinaryExpr.Operator.NOT_EQUALS
+                    ),
+                    new FieldAccessExpr(new ThisExpr(), member),
+                    BinaryExpr.Operator.AND
+                )))
+            );
+        }
+    }
+
+    private void generateSetter(ClassOrInterfaceDeclaration declaration,
+                                Descriptor descriptor,
+                                FieldDescriptor fieldDescriptor) {
+        String member = fieldDescriptor.getName();
+        MethodDeclaration method = declaration
+            .addMethod("set" + StringUtils.capitalize(member), Modifier.Keyword.PUBLIC);
+        method.setType(new ClassOrInterfaceType(null, descriptor.getName()));
+        method.setParameters(NodeList.nodeList(new Parameter(
+            getFieldType(fieldDescriptor), member
+        )));
+        method.setBody(new BlockStmt()
+            .addStatement(new AssignExpr(
+                new FieldAccessExpr(new ThisExpr(), member),
+                new NameExpr(member),
+                AssignExpr.Operator.ASSIGN
+            ))
+            .addStatement(new ReturnStmt(new ThisExpr()))
+        );
     }
 
     private Type toType(FieldDescriptor fieldDescriptor) {
@@ -360,5 +416,12 @@ public class MessageGenerator {
                 removeStart(descriptor.getFullName(), descriptor.getFile().getPackage() + ".")
             );
         }
+    }
+
+    private List<FieldDescriptor> getMemberFields(Descriptor descriptor) {
+        return descriptor.getFields().stream()
+            .filter(fieldDescriptor -> !OptionUtils
+                .getOpts(fieldDescriptor, FieldOpts::hasOpt).getOpt().getOmitted())
+            .collect(Collectors.toList());
     }
 }
