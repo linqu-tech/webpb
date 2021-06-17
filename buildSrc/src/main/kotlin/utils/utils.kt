@@ -13,6 +13,7 @@ import org.gradle.kotlin.dsl.credentials
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.the
 import org.gradle.plugins.signing.SigningExtension
+import java.io.File
 
 fun Project.hierarchicalGroup(): String {
     var suffix = ""
@@ -81,4 +82,19 @@ fun Project.createConfiguration(
     }
     configuration.execute(conf)
     return conf
+}
+
+fun Project.extractDependencies(file: File): List<String> {
+    val text = file.readText()
+    val versionRegex = "(.*)\\$\\{?([\\w+]*)}?".toRegex()
+    return "(implementation|testImplementation)\\(\"(.*)\"\\)".toRegex()
+        .findAll(text)
+        .map { it.groupValues[2] }
+        .map {
+            val matchResult = versionRegex.find(it) ?: return@map it
+            val artifact = matchResult.groupValues[1]
+            val property = matchResult.groupValues[2]
+            "$artifact${project.property(property) as String}"
+        }
+        .toList()
 }

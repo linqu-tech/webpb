@@ -1,8 +1,15 @@
 import utils.createConfiguration
+import utils.extractDependencies
 
 plugins {
     id("jacoco.aggregation")
 }
+
+repositories {
+    gradlePluginPortal()
+}
+
+val buildSrcDependencies = extractDependencies(file("${rootDir}/buildSrc/build.gradle.kts"))
 
 dependencies {
     implementation(project(":libs:commons"))
@@ -15,6 +22,10 @@ dependencies {
     implementation(project(":runtime:processor"))
     implementation(project(":sample:proto"))
     implementation(project(":sample:spring"))
+
+    buildSrcDependencies.forEach {
+        testCompileOnly(it)
+    }
 }
 
 configurations.implementation.get().dependencies.forEach {
