@@ -39,7 +39,7 @@ import static tech.linqu.webpb.utilities.utils.DescriptorUtils.getMapValueDescri
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.Modifier;
+import com.github.javaparser.ast.Modifier.Keyword;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
@@ -154,7 +154,7 @@ public class MessageGenerator {
     private ClassOrInterfaceDeclaration generate(Descriptor descriptor) {
         ClassOrInterfaceDeclaration declaration = new ClassOrInterfaceDeclaration();
         declaration.setName(descriptor.getName());
-        declaration.addModifier(Modifier.Keyword.PUBLIC);
+        declaration.addModifier(Keyword.PUBLIC);
 
         addWebpbMeta(descriptor, declaration);
 
@@ -183,7 +183,7 @@ public class MessageGenerator {
                 continue;
             }
             TypeDeclaration<?> typeDeclaration = generate(nestedDescriptor);
-            typeDeclaration.addModifier(Modifier.Keyword.STATIC);
+            typeDeclaration.addModifier(Keyword.STATIC);
             declaration.addMember(typeDeclaration);
         }
     }
@@ -217,7 +217,7 @@ public class MessageGenerator {
         FieldDeclaration field =
             declaration.addFieldWithInitializer(metaType, "WEBPB_META", callExpr);
         field
-            .setModifiers(Modifier.Keyword.PUBLIC, Modifier.Keyword.STATIC, Modifier.Keyword.FINAL);
+            .setModifiers(Keyword.PUBLIC, Keyword.STATIC, Keyword.FINAL);
         addWebpbMetaMethod(declaration);
     }
 
@@ -225,16 +225,16 @@ public class MessageGenerator {
                                  String value) {
         value = StringUtils.isEmpty(value) ? "" : value;
         declaration.addFieldWithInitializer(String.class, key, new StringLiteralExpr(value),
-            Modifier.Keyword.PUBLIC,
-            Modifier.Keyword.STATIC,
-            Modifier.Keyword.FINAL
+            Keyword.PUBLIC,
+            Keyword.STATIC,
+            Keyword.FINAL
         );
     }
 
     private void addWebpbMetaMethod(ClassOrInterfaceDeclaration declaration) {
         declaration.addMethod("webpbMeta")
             .addAnnotation(new MarkerAnnotationExpr("Override"))
-            .setModifiers(Modifier.Keyword.PUBLIC)
+            .setModifiers(Keyword.PUBLIC)
             .setType("WebpbMeta")
             .setBody(new BlockStmt(NodeList.nodeList(new ReturnStmt("WEBPB_META"))));
     }
@@ -265,7 +265,7 @@ public class MessageGenerator {
     private void generateConstructor(ClassOrInterfaceDeclaration declaration,
                                      Descriptor descriptor) {
         declaration.addConstructor()
-            .setModifiers(Modifier.Keyword.PUBLIC)
+            .setModifiers(Keyword.PUBLIC)
             .setBody(new BlockStmt());
         List<FieldDescriptor> descriptors = getMemberFields(descriptor);
         if (descriptors.isEmpty() || descriptors.size() > 5) {
@@ -273,7 +273,7 @@ public class MessageGenerator {
         }
         BlockStmt blockStmt = new BlockStmt();
         ConstructorDeclaration constructor = declaration.addConstructor()
-            .setModifiers(Modifier.Keyword.PUBLIC)
+            .setModifiers(Keyword.PUBLIC)
             .setBody(blockStmt);
         for (FieldDescriptor fieldDescriptor : descriptors) {
             constructor.addParameter(getFieldType(fieldDescriptor), fieldDescriptor.getName());
@@ -290,7 +290,7 @@ public class MessageGenerator {
         for (FieldDescriptor fieldDescriptor : getMemberFields(descriptor)) {
             Type fieldType = getFieldType(fieldDescriptor);
             FieldDeclaration fieldDeclaration = declaration.addField(
-                fieldType, fieldDescriptor.getName(), Modifier.Keyword.PRIVATE
+                fieldType, fieldDescriptor.getName(), Keyword.PRIVATE
             );
             JavaFieldOpts javaFieldOpts =
                 OptionUtils.getOpts(fieldDescriptor, FieldOpts::hasJava).getJava();
@@ -336,14 +336,17 @@ public class MessageGenerator {
                                 FieldDescriptor fieldDescriptor) {
         String member = fieldDescriptor.getName();
         MethodDeclaration method = declaration
-            .addMethod("get" + StringUtils.capitalize(member), Modifier.Keyword.PUBLIC);
+            .addMethod("get" + StringUtils.capitalize(member), Keyword.PUBLIC);
         method.setType(getFieldType(fieldDescriptor));
         method.setBody(new BlockStmt().addStatement(new ReturnStmt(
             new FieldAccessExpr(new ThisExpr(), member)
         )));
         if (fieldDescriptor.getJavaType() == BOOLEAN) {
-            MethodDeclaration isMethod = declaration
-                .addMethod("is" + StringUtils.capitalize(member), Modifier.Keyword.PUBLIC);
+            MethodDeclaration isMethod =
+                declaration.addMethod("is" + StringUtils.capitalize(member), Keyword.PUBLIC);
+            String transientStr = java.beans.Transient.class.getName();
+            ImportedName importedName = imports.checkAndImport(transientStr);
+            isMethod.addAnnotation(new MarkerAnnotationExpr(importedName.getName()));
             isMethod.setType(PrimitiveType.booleanType());
             isMethod.setBody(new BlockStmt().addStatement(new ReturnStmt(
                 new BinaryExpr(
@@ -364,7 +367,7 @@ public class MessageGenerator {
                                 FieldDescriptor fieldDescriptor) {
         String member = fieldDescriptor.getName();
         MethodDeclaration method = declaration
-            .addMethod("set" + StringUtils.capitalize(member), Modifier.Keyword.PUBLIC);
+            .addMethod("set" + StringUtils.capitalize(member), Keyword.PUBLIC);
         method.setType(new ClassOrInterfaceType(null, descriptor.getName()));
         method.setParameters(NodeList.nodeList(new Parameter(
             getFieldType(fieldDescriptor), member

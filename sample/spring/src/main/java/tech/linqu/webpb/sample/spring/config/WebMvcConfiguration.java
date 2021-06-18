@@ -1,12 +1,11 @@
 package tech.linqu.webpb.sample.spring.config;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -40,8 +39,11 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
      * @return {@link WebpbClient}
      */
     @Bean
-    public WebpbClient webpbClient(@Value("${server.port}") int port) throws MalformedURLException {
-        return new WebpbClient(WebClient.builder().build(), new URL("http://127.0.0.1:" + port));
+    public WebpbClient webpbClient(@Value("${server.port}") int port) {
+        return new WebpbClient(WebClient.builder()
+            .baseUrl("http://localhost:" + port)
+            .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+            .build());
     }
 
     @Override
