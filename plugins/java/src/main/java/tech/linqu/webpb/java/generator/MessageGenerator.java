@@ -342,8 +342,11 @@ public class MessageGenerator {
             new FieldAccessExpr(new ThisExpr(), member)
         )));
         if (fieldDescriptor.getJavaType() == BOOLEAN) {
-            MethodDeclaration isMethod = declaration.addMethod(
-                "is" + StringUtils.capitalize(member), Keyword.PUBLIC, Keyword.TRANSIENT);
+            MethodDeclaration isMethod =
+                declaration.addMethod("is" + StringUtils.capitalize(member), Keyword.PUBLIC);
+            String transientStr = java.beans.Transient.class.getName();
+            ImportedName importedName = imports.checkAndImport(transientStr);
+            isMethod.addAnnotation(new MarkerAnnotationExpr(importedName.getName()));
             isMethod.setType(PrimitiveType.booleanType());
             isMethod.setBody(new BlockStmt().addStatement(new ReturnStmt(
                 new BinaryExpr(
