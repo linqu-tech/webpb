@@ -45,14 +45,25 @@ describe("http.service", () => {
       );
   });
 
-  it("should request on rejected", () => {
+  it("given error with response when request then log success", () => {
     const httpService = new HttpService('https://abc');
     axios.request = jest.fn().mockRejectedValue({
-      request: {
+      response: {
         status: 500,
-        response: JSON.stringify({ error: 'invalid' })
+        data: JSON.stringify({ error: 'invalid' })
       }
     });
+    httpService
+      .request<StoreVisitResponse>(StoreVisitRequest.create({ customer: 'Tom', id: '123' }))
+      .then(
+        res => expect(res).toMatchObject(RESPONSE_DATA),
+        error => console.log(error)
+      );
+  });
+
+  it("given error without response when request then log success", () => {
+    const httpService = new HttpService('https://abc');
+    axios.request = jest.fn().mockRejectedValue("ERROR");
     httpService
       .request<StoreVisitResponse>(StoreVisitRequest.create({ customer: 'Tom', id: '123' }))
       .then(

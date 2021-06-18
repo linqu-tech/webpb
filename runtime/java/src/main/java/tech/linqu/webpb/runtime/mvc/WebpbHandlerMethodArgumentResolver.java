@@ -25,6 +25,9 @@ import tech.linqu.webpb.runtime.WebpbUtils;
 public class WebpbHandlerMethodArgumentResolver
     extends AbstractMessageConverterMethodArgumentResolver {
 
+    /**
+     * Construct a {@link WebpbHandlerMethodArgumentResolver}.
+     */
     public WebpbHandlerMethodArgumentResolver() {
         super(Collections.singletonList(new ByteArrayHttpMessageConverter()));
     }

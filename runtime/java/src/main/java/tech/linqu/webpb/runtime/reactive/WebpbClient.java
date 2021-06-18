@@ -26,7 +26,6 @@ import java.net.URL;
 import java.util.Map;
 import java.util.function.Consumer;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -42,8 +41,6 @@ public class WebpbClient {
 
     private final WebClient webClient;
 
-    private final URL baseUrl;
-
     private final Consumer<Map<String, Object>> attributes;
 
     private final ObjectMapper formatMapper = new ObjectMapper();
@@ -57,10 +54,9 @@ public class WebpbClient {
      * WebpbClient constructor.
      *
      * @param webClient {@link WebpbClient}
-     * @param baseUrl   {@link URL}
      */
-    public WebpbClient(WebClient webClient, URL baseUrl) {
-        this(webClient, baseUrl, map -> {
+    public WebpbClient(WebClient webClient) {
+        this(webClient, map -> {
         });
     }
 
@@ -68,12 +64,10 @@ public class WebpbClient {
      * WebpbClient constructor.
      *
      * @param webClient  {@link WebpbClient}
-     * @param baseUrl    {@link URL}
      * @param attributes attributes for the client
      */
-    public WebpbClient(WebClient webClient, URL baseUrl, Consumer<Map<String, Object>> attributes) {
+    public WebpbClient(WebClient webClient, Consumer<Map<String, Object>> attributes) {
         this.webClient = webClient;
-        this.baseUrl = baseUrl;
         this.attributes = attributes;
     }
 
@@ -119,11 +113,10 @@ public class WebpbClient {
         return Mono
             .just(uncheckedCall(() -> objectMapper.writeValueAsString(message)))
             .flatMap(body -> {
-                String url = WebpbUtils.formatUrl(baseUrl, formatMapper, message);
+                String url = WebpbUtils.formatUrl(formatMapper, message);
                 return webClient
                     .method(context.getMethod())
                     .uri(url)
-                    .contentType(MediaType.APPLICATION_JSON)
                     .bodyValue(body)
                     .attributes(attributes)
                     .retrieve()

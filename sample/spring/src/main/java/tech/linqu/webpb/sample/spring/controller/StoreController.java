@@ -67,7 +67,7 @@ public class StoreController {
 
     private PagingPb pagingPb(PageablePb pageablePb) {
         pageablePb = pageablePb == null ? new PageablePb() : pageablePb;
-        int size = Math.min(10, pageablePb.getSize() == null ? 10 : pageablePb.getSize());
+        int size = pageablePb.getSize() == null ? 10 : pageablePb.getSize();
         int page = pageablePb.getPage() == null ? 1 : pageablePb.getPage();
         int totalCount = ThreadLocalRandom.current().nextInt(100, 200);
         int totalPage = (totalCount + size - 1) / size;

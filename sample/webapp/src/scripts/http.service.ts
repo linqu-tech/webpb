@@ -3,7 +3,8 @@ import { WebpbMessage } from 'webpb';
 import { logger } from './logger';
 
 export class HttpService {
-  constructor(private baseUrl: string) {}
+  constructor(private baseUrl: string) {
+  }
 
   request<T extends WebpbMessage>(request: WebpbMessage): Promise<T> {
     logger.reset();
@@ -22,23 +23,22 @@ export class HttpService {
         })
         .then((res) => {
           console.log(res);
-          if (res.status >= 200 && res.status < 400) {
-            logger.log('\n====> Response:');
-            logger.stringify(res.data);
-            resolve && resolve(res.data);
-          } else {
-            logger.log('\n====> Error:');
-            logger.stringify(res.data);
-            reject && reject(res.data);
-          }
+          logger.log('\n====> Response:');
+          logger.stringify(res.data);
+          resolve && resolve(res.data);
         })
         .catch((error) => {
-          const req = error.request;
           logger.log('\n====> Error:');
-          logger.stringify({
-            data: JSON.parse(req.response),
-            status: req.status,
-          });
+          if (error.response) {
+            const res = error.response;
+            logger.stringify({
+              data: res.data,
+              headers: res.headers,
+              status: res.status,
+            });
+          } else {
+            logger.stringify(error);
+          }
           reject && reject({ error: `Failed when request: ${url}` });
         })
     );
