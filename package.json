@@ -1,0 +1,47 @@
+{
+    "name": "dev-infa",
+    "version": "0.0.1",
+    "description": "Infrastructure for development",
+    "scripts": {
+        "cz": "cz",
+        "postinstall": "husky install"
+    },
+    "devDependencies": {
+        "@commitlint/config-conventional": "^12.1.4",
+        "@commitlint/cz-commitlint": "^12.1.4",
+        "commitizen": "^4.2.4",
+        "commitlint": "^12.1.4",
+        "husky": "^6.0.0"
+    },
+    "config": {
+        "commitizen": {
+            "path": "@commitlint/cz-commitlint"
+        }
+    },
+    "commitlint": {
+        "extends": "@commitlint/config-conventional",
+        "rules": {
+            "scope-enum": [
+                2,
+                "always",
+                [
+                    "aggregation",
+                    "libs.commons",
+                    "libs.tests",
+                    "libs.utilities",
+                    "libs",
+                    "plugins.dump",
+                    "plugins.java",
+                    "plugins.ts",
+                    "plugins",
+                    "proto",
+                    "runtime.java",
+                    "runtime.processor",
+                    "runtime.ts",
+                    "sample",
+                    "webpb"
+                ]
+            ]
+        }
+    }
+}

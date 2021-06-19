@@ -8,8 +8,20 @@ on:
     - cron: '0 10 * * *' # Once per day at 10am UTC
 
 jobs:
+  commitlint:
+    name: Check Commit Message
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: wagoid/commitlint-github-action@v3
+        with:
+          configFile: package.json
+          failOnWarnings: true
   build:
     name: Build
+    needs: [commitlint]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:

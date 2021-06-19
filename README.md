@@ -6,7 +6,7 @@
 
 Generate api definitions for web from protocol buffers file
 
-## How to run samples
+## Run samples
 
 Checkout source code from the repo
 
@@ -35,3 +35,7 @@ npm start
 ```
 
 Open webapp link http://localhost:4200
+
+## Contributing
+
+If you are interested in reporting/fixing issues and contributing directly to the code base, please see [CONTRIBUTING.md](CONTRIBUTING.md) for more information on what we're looking for and how to get started.

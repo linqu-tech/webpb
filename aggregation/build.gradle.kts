@@ -75,8 +75,8 @@ val coverage by tasks.registering(JacocoReport::class) {
     updateJacocoReport(this)
 
     reports {
-        xml.isEnabled = true
-        html.isEnabled = true
+        xml.required.set(true)
+        html.required.set(true)
     }
 }
 
