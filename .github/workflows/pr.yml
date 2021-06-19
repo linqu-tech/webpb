@@ -15,6 +15,7 @@ jobs:
       - uses: wagoid/commitlint-github-action@v3
         with:
           configFile: package.json
+          failOnWarnings: true
   build:
     name: Build
     runs-on: ${{ matrix.os }}
