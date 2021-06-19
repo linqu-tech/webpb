@@ -3,8 +3,7 @@ import { WebpbMessage } from 'webpb';
 import { logger } from './logger';
 
 export class HttpService {
-  constructor(private baseUrl: string) {
-  }
+  constructor(private baseUrl: string) {}
 
   request<T extends WebpbMessage>(request: WebpbMessage): Promise<T> {
     logger.reset();
