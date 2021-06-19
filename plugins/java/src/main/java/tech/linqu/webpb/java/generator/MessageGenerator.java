@@ -251,7 +251,11 @@ public class MessageGenerator {
     private ImportedName parseAnnotationImports(Node node) {
         ImportedName outName = null;
         if (node instanceof FieldAccessExpr) {
-            outName = imports.checkAndImport(node.toString());
+            return imports.checkAndImport(node.toString());
+        } else if (node instanceof Name) {
+            return imports.checkAndImport((Name) node);
+        } else if (node instanceof ClassOrInterfaceType) {
+            outName = imports.checkAndImport(((ClassOrInterfaceType) node).asString());
         } else if (node instanceof AnnotationExpr) {
             AnnotationExpr expr = ((AnnotationExpr) node);
             outName = imports.checkAndImport(expr.getName());

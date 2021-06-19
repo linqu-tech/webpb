@@ -2,9 +2,6 @@
 // https://github.com/linqu-tech/webpb
 package test;
 
-import com.fasterxml;
-import com.fasterxml.jackson;
-import com.fasterxml.jackson.annotation;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import tech.linqu.webpb.runtime.WebpbMessage;

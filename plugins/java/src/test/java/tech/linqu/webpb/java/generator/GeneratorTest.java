@@ -31,7 +31,7 @@ class GeneratorTest {
     }
 
     @Test
-    void test7() {
+    void test3() {
         RequestContext context = createRequest(Dumps.TEST3);
         assertThrows(RuntimeException.class,
             () -> Generator.create().generate(context), "Bad import: a..b");

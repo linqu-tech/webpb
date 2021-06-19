@@ -5,6 +5,8 @@ package test;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import include.Enum;
 import include.Message;
 import include2.Message.Nested;
@@ -56,6 +58,7 @@ public class Test implements WebpbMessage {
 
     private NestedTest test8;
 
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long test10;
 
     private List<Message> test11;
