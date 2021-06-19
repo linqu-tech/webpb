@@ -7,6 +7,7 @@ on:
 
 jobs:
   commitlint:
+    name: Check Commit Message
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -18,6 +19,7 @@ jobs:
           failOnWarnings: true
   build:
     name: Build
+    needs: [commitlint]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
