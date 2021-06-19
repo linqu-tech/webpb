@@ -12,12 +12,12 @@ repositories {
 val buildSrcDependencies = extractDependencies(file("${rootDir}/buildSrc/build.gradle.kts"))
 
 dependencies {
-    implementation(project(":libs:commons"))
-    implementation(project(":libs:proto"))
-    implementation(project(":libs:utilities"))
-    implementation(project(":plugins:dump"))
-    implementation(project(":plugins:java"))
-    implementation(project(":plugins:ts"))
+    implementation(project(":lib:commons"))
+    implementation(project(":lib:proto"))
+    implementation(project(":lib:utilities"))
+    implementation(project(":plugin:dump"))
+    implementation(project(":plugin:java"))
+    implementation(project(":plugin:ts"))
     implementation(project(":runtime:java"))
     implementation(project(":runtime:processor"))
     implementation(project(":sample:proto"))
