@@ -33,13 +33,3 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-gradle-plugin:${versionPluginSpringBoot}")
     implementation(kotlin("script-runtime"))
 }
-
-tasks.create<Copy>("initGitHooks") {
-    from("src/main/resources/hooks")
-    into("../.git/hooks")
-    fileMode = 0b111101101
-}
-
-tasks.build {
-    dependsOn("initGitHooks")
-}

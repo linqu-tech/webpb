@@ -6,7 +6,7 @@
 
 Generate api definitions for web from protocol buffers file
 
-## How to run samples
+## Run samples
 
 Checkout source code from the repo
 
@@ -35,3 +35,9 @@ npm start
 ```
 
 Open webapp link http://localhost:4200
+
+## Contributing
+
+### Conventional Commits
+
+Check if your commit messages meet the [conventional commit format](https://conventionalcommits.org).

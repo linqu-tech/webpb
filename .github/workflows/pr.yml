@@ -6,6 +6,15 @@ on:
       - master
 
 jobs:
+  commitlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: wagoid/commitlint-github-action@v3
+        with:
+          configFile: package.json
   build:
     name: Build
     runs-on: ${{ matrix.os }}
