@@ -12,14 +12,14 @@ describe('main', () => {
   };
 
   beforeAll(() => {
-    createElement('getStoreButton');
+    createElement('visitStoreButton');
     createElement('getStoresButton');
   });
 
-  it('when click getStoreButton then get store success', () => {
+  it('when click visitStoreButton then get store success', () => {
     HttpService.prototype.request = jest.fn().mockResolvedValue({ value: '11' });
     new Main();
-    const element = document.getElementById('getStoreButton');
+    const element = document.getElementById('visitStoreButton');
     return element.click();
   });
 
@@ -41,14 +41,14 @@ describe('main', () => {
     });
     HttpService.prototype.request = jest.fn().mockResolvedValue(res);
     const main = new Main();
-    main.getStore();
+    main.visitStore();
     expect(HttpService.prototype.request).toBeCalledTimes(1);
   });
 
   it('should get store failed', () => {
     HttpService.prototype.request = jest.fn().mockRejectedValue({ error: 'ERROR' });
     const main = new Main();
-    main.getStore();
+    main.visitStore();
     expect(HttpService.prototype.request).toBeCalledTimes(1);
   });
 
@@ -77,7 +77,7 @@ describe('main', () => {
     createElement('pageSize');
     HttpService.prototype.request = jest.fn().mockRejectedValue({ error: 'ERROR' });
     const main = new Main();
-    main.getStore();
+    main.visitStore();
     main.getStores();
     expect(HttpService.prototype.request).toBeCalledTimes(2);
   });

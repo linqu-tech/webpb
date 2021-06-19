@@ -11,7 +11,6 @@ object Vers {
     lateinit var commonsIo: String
     lateinit var commonsLang3: String
     lateinit var compileTesting: String
-    lateinit var hibernateValidator: String
     lateinit var jackson: String
     lateinit var jacoco: String
     lateinit var javaparser: String

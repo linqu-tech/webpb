@@ -10,7 +10,7 @@ export class Main {
   private httpService = new HttpService('http://127.0.0.1:8080');
 
   constructor() {
-    Main.addClickListener('getStoreButton', () => this.getStore());
+    Main.addClickListener('visitStoreButton', () => this.visitStore());
     Main.addClickListener('getStoresButton', () => this.getStores());
   }
 
@@ -21,7 +21,7 @@ export class Main {
     element && element.addEventListener('click', listener);
   }
 
-  getStore(): void {
+  visitStore(): void {
     const storeIdElement = this.getInput('storeId');
     const storeId = storeIdElement?.value ?? '12345';
     const customerElement = this.getInput('customer');

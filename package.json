@@ -2,6 +2,7 @@
     "name": "dev-infa",
     "version": "0.0.1",
     "description": "Infrastructure for development",
+    "license": "Apache-2.0",
     "scripts": {
         "cz": "cz",
         "postinstall": "husky install"
