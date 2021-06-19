@@ -6,7 +6,7 @@ plugins {
 }
 
 dependencies {
-    api(project(":libs:commons"))
+    api(project(":lib:commons"))
     compileOnly("javax.servlet:javax.servlet-api:${Vers.servletApi}")
     compileOnly("org.springframework:spring-messaging:${Vers.springFramework}")
     compileOnly("org.springframework:spring-webflux:${Vers.springFramework}")

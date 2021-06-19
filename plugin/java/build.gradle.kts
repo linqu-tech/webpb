@@ -7,9 +7,9 @@ plugins {
 
 dependencies {
     implementation("com.github.javaparser:javaparser-core:${Vers.javaparser}")
-    implementation(project(":libs:commons"))
-    implementation(project(":libs:utilities"))
-    testImplementation(project(":libs:tests"))
+    implementation(project(":lib:commons"))
+    implementation(project(":lib:utilities"))
+    testImplementation(project(":lib:tests"))
 }
 
 val artifactId = "protoc-webpb-${project.name}"

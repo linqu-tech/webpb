@@ -5,9 +5,9 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":libs:commons"))
-    implementation(project(":libs:utilities"))
-    testImplementation(project(":libs:tests"))
+    implementation(project(":lib:commons"))
+    implementation(project(":lib:utilities"))
+    testImplementation(project(":lib:tests"))
 }
 
 val filename = "protoc-webpb-${project.name}"

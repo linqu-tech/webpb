@@ -11,7 +11,7 @@ plugins {
 group = hierarchicalGroup()
 
 dependencies {
-    implementation(project(":libs:proto"))
+    implementation(project(":lib:proto"))
 }
 
 file("src/proto/test").listFiles()?.filter { it.isDirectory }?.forEach {

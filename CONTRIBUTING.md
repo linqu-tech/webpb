@@ -27,20 +27,17 @@ Must be one of the following:
 The following is the list of supported scopes:
 
 - `aggregation`
-- `libs.commons`
-- `libs.tests`
-- `libs.utilities`
-- `libs`
-- `plugins.dump`
-- `plugins.java`
-- `plugins.ts`
-- `plugins`
+- `lib.commons`
+- `lib.tests`
+- `lib.utilities`
+- `plugin.dump`
+- `plugin.java`
+- `plugin.ts`
 - `proto`
 - `runtime.java`
 - `runtime.processor`
 - `runtime.ts`
 - `sample`
-- `webpb`
 
 ### Create a commit
 
