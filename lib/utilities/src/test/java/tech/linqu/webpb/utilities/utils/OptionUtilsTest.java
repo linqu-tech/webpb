@@ -13,6 +13,7 @@ import static tech.linqu.webpb.utilities.utils.DescriptorUtils.resolveFileDescri
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Descriptors.EnumDescriptor;
+import com.google.protobuf.Descriptors.EnumValueDescriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Descriptors.FileDescriptor;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -21,6 +22,7 @@ import org.mockito.MockedStatic;
 import tech.linqu.webpb.tests.Dumps;
 import tech.linqu.webpb.utilities.context.RequestContext;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend.EnumOpts;
+import tech.linqu.webpb.utilities.descriptor.WebpbExtend.EnumValueOpts;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend.FieldOpts;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend.FileOpts;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend.MessageOpts;
@@ -170,5 +172,46 @@ class OptionUtilsTest {
             OptionUtils.getOpts((FieldDescriptor) null, o -> true));
         assertEquals(FieldOpts.getDefaultInstance(),
             OptionUtils.getOpts(fieldDescriptor, o -> true));
+    }
+
+    // EnumValueOpts
+    @Test
+    void shouldGetEnumValueOptsSuccess() {
+        RequestContext context = createRequest(Dumps.TEST1);
+        EnumDescriptor descriptor = resolveEnumDescriptor(context.getDescriptors(), "Test5");
+        assertNotNull(descriptor);
+        EnumValueDescriptor enumValueDescriptor = descriptor.getValues().get(0);
+
+        EnumValueOpts javaOpts = OptionUtils.getOpts(enumValueDescriptor, EnumValueOpts::hasJava);
+        assertEquals(0, javaOpts.getJava().getAnnotationCount());
+
+        EnumValueOpts tsOpts = OptionUtils.getOpts(enumValueDescriptor, EnumValueOpts::hasTs);
+        assertEquals("text1", tsOpts.getTs().getValue());
+    }
+
+    @Test
+    void shouldGetEnumValueOptsSuccessWhenParseError() {
+        RequestContext context = createRequest(Dumps.TEST1);
+        EnumDescriptor descriptor = resolveEnumDescriptor(context.getDescriptors(), "Test5");
+        assertNotNull(descriptor);
+        EnumValueDescriptor enumValueDescriptor = descriptor.getValues().get(0);
+        try (MockedStatic<EnumValueOpts> opts = mockStatic(EnumValueOpts.class)) {
+            opts.when(() -> EnumValueOpts.parseFrom((ByteString) any()))
+                .thenThrow(new InvalidProtocolBufferException("Invalid"));
+            assertEquals(EnumValueOpts.getDefaultInstance(),
+                OptionUtils.getOpts(enumValueDescriptor, o -> true));
+        }
+    }
+
+    @Test
+    void shouldGetEnumValueOptsSuccessWhenWithoutOptions() {
+        RequestContext context = createRequest(Dumps.TEST1);
+        EnumDescriptor descriptor = resolveEnumDescriptor(context.getDescriptors(), "Test5");
+        assertNotNull(descriptor);
+        EnumValueDescriptor enumValueDescriptor = descriptor.getValues().get(2);
+        assertEquals(EnumValueOpts.getDefaultInstance(),
+            OptionUtils.getOpts((EnumValueDescriptor) null, o -> true));
+        assertEquals(EnumValueOpts.getDefaultInstance(),
+            OptionUtils.getOpts(enumValueDescriptor, o -> true));
     }
 }

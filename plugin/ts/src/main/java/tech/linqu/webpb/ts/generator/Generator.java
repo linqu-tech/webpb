@@ -40,14 +40,17 @@ import tech.linqu.webpb.ts.utils.Imports;
 import tech.linqu.webpb.ts.utils.SourceBuilder;
 import tech.linqu.webpb.utilities.context.RequestContext;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend;
+import tech.linqu.webpb.utilities.descriptor.WebpbExtend.EnumValueOpts;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend.FieldOpts;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend.FileOpts;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend.MessageOpts;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend.OptFieldOpts;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend.OptMessageOpts;
+import tech.linqu.webpb.utilities.descriptor.WebpbExtend.TsEnumValueOpts;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend.TsFieldOpts;
 import tech.linqu.webpb.utilities.utils.Const;
 import tech.linqu.webpb.utilities.utils.DescriptorUtils;
+import tech.linqu.webpb.utilities.utils.OptionUtils;
 import tech.linqu.webpb.utilities.utils.Utils;
 
 /**
@@ -157,9 +160,18 @@ public final class Generator {
             .append(" {\n");
 
         for (EnumValueDescriptor valueDescriptor : descriptor.getValues()) {
-            builder.level(() -> builder.indent().append(valueDescriptor.getName())
-                .append(" = ").append(valueDescriptor.getIndex()).append(",\n")
-            );
+            TsEnumValueOpts opts =
+                OptionUtils.getOpts(valueDescriptor, EnumValueOpts::hasTs).getTs();
+            builder.level(() -> {
+                builder.indent().append(valueDescriptor.getName())
+                    .append(" = ");
+                if (StringUtils.isEmpty(opts.getValue())) {
+                    builder.append(valueDescriptor.getIndex());
+                } else {
+                    builder.append("'").append(opts.getValue()).append("'");
+                }
+                builder.append(",\n");
+            });
         }
         builder.closeBracket();
     }
