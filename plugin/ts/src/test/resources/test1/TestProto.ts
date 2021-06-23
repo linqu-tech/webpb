@@ -6,7 +6,13 @@ import * as Webpb from 'webpb';
 import { Include2Proto } from './Include2Proto';
 import { IncludeProto } from './IncludeProto';
 export namespace TestProto {
-  export interface IData {
+  export enum Test5 {
+    test1 = 'text1',
+    test2 = 'text2',
+    test3 = 2,
+  }
+
+    export interface IData {
     data1: string;
     data2?: number;
   }

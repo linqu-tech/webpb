@@ -27,16 +27,23 @@ import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.expr.AssignExpr;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.IntegerLiteralExpr;
+import com.github.javaparser.ast.expr.LiteralExpr;
 import com.github.javaparser.ast.expr.NameExpr;
+import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.expr.ThisExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.stmt.SwitchEntry;
 import com.github.javaparser.ast.stmt.SwitchStmt;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.PrimitiveType;
-import com.google.protobuf.Descriptors;
+import com.github.javaparser.ast.type.Type;
 import com.google.protobuf.Descriptors.EnumDescriptor;
+import com.google.protobuf.Descriptors.EnumValueDescriptor;
 import org.apache.commons.lang3.StringUtils;
+import tech.linqu.webpb.utilities.descriptor.WebpbExtend.EnumValueOpts;
+import tech.linqu.webpb.utilities.descriptor.WebpbExtend.TsEnumValueOpts;
+import tech.linqu.webpb.utilities.utils.OptionUtils;
 
 /**
  * Generator for enum definition.
@@ -45,6 +52,10 @@ public class EnumGenerator {
 
     private static final String ENUM_VALUE = "value";
 
+    private boolean stringValue;
+
+    private Type valueType = PrimitiveType.intType();
+
     /**
      * Generate enum declaration.
      *
@@ -52,18 +63,21 @@ public class EnumGenerator {
      * @return {@link EnumDeclaration}
      */
     public CompilationUnit generate(CompilationUnit unit, EnumDescriptor descriptor) {
+        this.stringValue = isStringValue(descriptor);
+        if (this.stringValue) {
+            this.valueType = new ClassOrInterfaceType(null, String.class.getSimpleName());
+        }
         EnumDeclaration declaration = new EnumDeclaration();
         declaration.setName(descriptor.getName());
         declaration.addModifier(Modifier.Keyword.PUBLIC);
 
-        for (Descriptors.EnumValueDescriptor valueDescriptor : descriptor.getValues()) {
+        for (EnumValueDescriptor valueDescriptor : descriptor.getValues()) {
             EnumConstantDeclaration enumConstant =
                 declaration.addEnumConstant(valueDescriptor.getName());
-            enumConstant
-                .addArgument(new IntegerLiteralExpr(String.valueOf(valueDescriptor.getIndex())));
+            enumConstant.addArgument(getValueLiteral(valueDescriptor));
         }
 
-        declaration.addField(PrimitiveType.intType(), ENUM_VALUE, Modifier.Keyword.PRIVATE);
+        declaration.addField(this.valueType, ENUM_VALUE, Modifier.Keyword.PRIVATE);
         generateEnumConstructor(declaration);
         generateEnumOfMethod(declaration, descriptor);
         generateEnumValueGetter(declaration);
@@ -71,9 +85,20 @@ public class EnumGenerator {
         return unit;
     }
 
+    private boolean isStringValue(EnumDescriptor descriptor) {
+        for (EnumValueDescriptor valueDescriptor : descriptor.getValues()) {
+            TsEnumValueOpts opts =
+                OptionUtils.getOpts(valueDescriptor, EnumValueOpts::hasTs).getTs();
+            if (!StringUtils.isEmpty(opts.getValue())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void generateEnumConstructor(EnumDeclaration declaration) {
         ConstructorDeclaration constructor = declaration.addConstructor();
-        constructor.addParameter(new Parameter(PrimitiveType.intType(), ENUM_VALUE));
+        constructor.addParameter(new Parameter(this.valueType, ENUM_VALUE));
         constructor.getBody().addStatement(new AssignExpr(
             new FieldAccessExpr(new ThisExpr(), ENUM_VALUE),
             new NameExpr(ENUM_VALUE),
@@ -84,13 +109,12 @@ public class EnumGenerator {
     private void generateEnumOfMethod(EnumDeclaration declaration, EnumDescriptor descriptor) {
         MethodDeclaration method =
             declaration.addMethod("fromValue", Modifier.Keyword.PUBLIC, Modifier.Keyword.STATIC);
-        method.addParameter(new Parameter(PrimitiveType.intType(), ENUM_VALUE));
+        method.addParameter(new Parameter(this.valueType, ENUM_VALUE));
         method.setType(declaration.getName().asString());
         NodeList<SwitchEntry> entries = new NodeList<>();
-        for (Descriptors.EnumValueDescriptor valueDescriptor : descriptor.getValues()) {
+        for (EnumValueDescriptor valueDescriptor : descriptor.getValues()) {
             entries.add(new SwitchEntry(
-                NodeList
-                    .nodeList(new IntegerLiteralExpr(String.valueOf(valueDescriptor.getIndex()))),
+                NodeList.nodeList(getValueLiteral(valueDescriptor)),
                 SwitchEntry.Type.STATEMENT_GROUP,
                 NodeList.nodeList(new ReturnStmt(new NameExpr(valueDescriptor.getName())))
             ));
@@ -103,9 +127,24 @@ public class EnumGenerator {
     private void generateEnumValueGetter(EnumDeclaration declaration) {
         MethodDeclaration method = declaration
             .addMethod("get" + StringUtils.capitalize(ENUM_VALUE), Modifier.Keyword.PUBLIC);
-        method.setType(PrimitiveType.intType());
+        method.setType(this.valueType);
         method.setBody(new BlockStmt().addStatement(new ReturnStmt(
             new FieldAccessExpr(new ThisExpr(), ENUM_VALUE)
         )));
+    }
+
+    private LiteralExpr getValueLiteral(EnumValueDescriptor valueDescriptor) {
+        TsEnumValueOpts opts = OptionUtils.getOpts(valueDescriptor, EnumValueOpts::hasTs).getTs();
+        LiteralExpr literalExpr;
+        if (StringUtils.isEmpty(opts.getValue())) {
+            if (this.stringValue) {
+                literalExpr = new IntegerLiteralExpr("\"" + valueDescriptor.getIndex() + "\"");
+            } else {
+                literalExpr = new IntegerLiteralExpr(String.valueOf(valueDescriptor.getIndex()));
+            }
+        } else {
+            literalExpr = new StringLiteralExpr(opts.getValue());
+        }
+        return literalExpr;
     }
 }

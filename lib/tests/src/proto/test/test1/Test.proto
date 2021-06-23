@@ -49,6 +49,12 @@ message Test4 {
     required int64 test4 = 1;
 }
 
+enum Test5 {
+    test1 = 0 [(v_opts).ts = {value: 'text1'}];
+    test2 = 1 [(v_opts).ts = {value: 'text2'}];
+    test3 = 2;
+}
+
 message Test {
     option (m_opts).opt = {
         method: "GET"
@@ -80,10 +86,7 @@ message Test {
 
     required NestedTest test8 = 8;
     optional int32 test9 = 9 [(opts).opt = {omitted: true}];
-    required int64 test10 = 10 [
-        (opts).ts = {as_string: true},
-        (opts).java = {annotation: '@JsonSerialize(using = ToStringSerializer.class)'}
-    ];
+    required int64 test10 = 10 [(opts).ts = {as_string: true}, (opts).java = {annotation: '@JsonSerialize(using = ToStringSerializer.class)'}];
     repeated IncludeProto.Message test11 = 11;
     required IncludeProto.Message.Nested test12 = 12;
     repeated Include2Proto.Message test13 = 13;

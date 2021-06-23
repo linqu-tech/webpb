@@ -21,12 +21,17 @@ import static com.google.protobuf.UnknownFieldSet.Field;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Descriptors.EnumDescriptor;
+import com.google.protobuf.Descriptors.EnumValueDescriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Descriptors.FileDescriptor;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.UnknownFieldSet;
 import java.util.function.Predicate;
-import tech.linqu.webpb.utilities.descriptor.WebpbExtend;
+import tech.linqu.webpb.utilities.descriptor.WebpbExtend.EnumOpts;
+import tech.linqu.webpb.utilities.descriptor.WebpbExtend.EnumValueOpts;
+import tech.linqu.webpb.utilities.descriptor.WebpbExtend.FieldOpts;
+import tech.linqu.webpb.utilities.descriptor.WebpbExtend.FileOpts;
+import tech.linqu.webpb.utilities.descriptor.WebpbExtend.MessageOpts;
 
 /**
  * Utilities to handle options.
@@ -37,23 +42,22 @@ public class OptionUtils {
     }
 
     /**
-     * Resolve {@link WebpbExtend.FieldOpts} from {@link FileDescriptor} with a filter.
+     * Resolve {@link FieldOpts} from {@link FileDescriptor} with a filter.
      *
      * @param fileDescriptor {@link FileDescriptor}
      * @param predicate      option filter
-     * @return {@link WebpbExtend.FieldOpts}
+     * @return {@link FieldOpts}
      */
-    public static WebpbExtend.FileOpts getOpts(FileDescriptor fileDescriptor,
-                                               Predicate<WebpbExtend.FileOpts> predicate) {
+    public static FileOpts getOpts(FileDescriptor fileDescriptor, Predicate<FileOpts> predicate) {
         if (fileDescriptor == null) {
-            return WebpbExtend.FileOpts.getDefaultInstance();
+            return FileOpts.getDefaultInstance();
         }
         UnknownFieldSet fieldSet = fileDescriptor.getOptions().getUnknownFields();
         for (Field field : fieldSet.asMap().values()) {
             for (ByteString byteString : field.getLengthDelimitedList()) {
-                WebpbExtend.FileOpts opts;
+                FileOpts opts;
                 try {
-                    opts = WebpbExtend.FileOpts.parseFrom(byteString);
+                    opts = FileOpts.parseFrom(byteString);
                 } catch (InvalidProtocolBufferException e) {
                     continue;
                 }
@@ -62,27 +66,26 @@ public class OptionUtils {
                 }
             }
         }
-        return WebpbExtend.FileOpts.getDefaultInstance();
+        return FileOpts.getDefaultInstance();
     }
 
     /**
-     * Resolve {@link WebpbExtend.MessageOpts} from {@link FileDescriptor} with a filter.
+     * Resolve {@link MessageOpts} from {@link FileDescriptor} with a filter.
      *
      * @param descriptor {@link Descriptor}
      * @param predicate  option filter
-     * @return {@link WebpbExtend.MessageOpts}
+     * @return {@link MessageOpts}
      */
-    public static WebpbExtend.MessageOpts getOpts(Descriptor descriptor,
-                                                  Predicate<WebpbExtend.MessageOpts> predicate) {
+    public static MessageOpts getOpts(Descriptor descriptor, Predicate<MessageOpts> predicate) {
         if (descriptor == null) {
-            return WebpbExtend.MessageOpts.getDefaultInstance();
+            return MessageOpts.getDefaultInstance();
         }
         UnknownFieldSet fieldSet = descriptor.getOptions().getUnknownFields();
         for (Field field : fieldSet.asMap().values()) {
             for (ByteString byteString : field.getLengthDelimitedList()) {
-                WebpbExtend.MessageOpts opts;
+                MessageOpts opts;
                 try {
-                    opts = WebpbExtend.MessageOpts.parseFrom(byteString);
+                    opts = MessageOpts.parseFrom(byteString);
                 } catch (InvalidProtocolBufferException e) {
                     continue;
                 }
@@ -91,27 +94,26 @@ public class OptionUtils {
                 }
             }
         }
-        return WebpbExtend.MessageOpts.getDefaultInstance();
+        return MessageOpts.getDefaultInstance();
     }
 
     /**
-     * Resolve {@link WebpbExtend.EnumOpts} from {@link FileDescriptor} with a filter.
+     * Resolve {@link EnumOpts} from {@link FileDescriptor} with a filter.
      *
      * @param descriptor {@link EnumDescriptor}
      * @param predicate  option filter
-     * @return {@link WebpbExtend.EnumOpts}
+     * @return {@link EnumOpts}
      */
-    public static WebpbExtend.EnumOpts getOpts(EnumDescriptor descriptor,
-                                               Predicate<WebpbExtend.EnumOpts> predicate) {
+    public static EnumOpts getOpts(EnumDescriptor descriptor, Predicate<EnumOpts> predicate) {
         if (descriptor == null) {
-            return WebpbExtend.EnumOpts.getDefaultInstance();
+            return EnumOpts.getDefaultInstance();
         }
         UnknownFieldSet fieldSet = descriptor.getOptions().getUnknownFields();
         for (Field field : fieldSet.asMap().values()) {
             for (ByteString byteString : field.getLengthDelimitedList()) {
-                WebpbExtend.EnumOpts opts;
+                EnumOpts opts;
                 try {
-                    opts = WebpbExtend.EnumOpts.parseFrom(byteString);
+                    opts = EnumOpts.parseFrom(byteString);
                 } catch (InvalidProtocolBufferException e) {
                     continue;
                 }
@@ -120,27 +122,26 @@ public class OptionUtils {
                 }
             }
         }
-        return WebpbExtend.EnumOpts.getDefaultInstance();
+        return EnumOpts.getDefaultInstance();
     }
 
     /**
-     * Resolve {@link WebpbExtend.FieldOpts} from {@link FileDescriptor} with a filter.
+     * Resolve {@link FieldOpts} from {@link FileDescriptor} with a filter.
      *
      * @param descriptor {@link FileDescriptor}
      * @param predicate  option filter
-     * @return {@link WebpbExtend.FieldOpts}
+     * @return {@link FieldOpts}
      */
-    public static WebpbExtend.FieldOpts getOpts(FieldDescriptor descriptor,
-                                                Predicate<WebpbExtend.FieldOpts> predicate) {
+    public static FieldOpts getOpts(FieldDescriptor descriptor, Predicate<FieldOpts> predicate) {
         if (descriptor == null) {
-            return WebpbExtend.FieldOpts.getDefaultInstance();
+            return FieldOpts.getDefaultInstance();
         }
         UnknownFieldSet fieldSet = descriptor.getOptions().getUnknownFields();
         for (Field field : fieldSet.asMap().values()) {
             for (ByteString byteString : field.getLengthDelimitedList()) {
-                WebpbExtend.FieldOpts opts;
+                FieldOpts opts;
                 try {
-                    opts = WebpbExtend.FieldOpts.parseFrom(byteString);
+                    opts = FieldOpts.parseFrom(byteString);
                 } catch (InvalidProtocolBufferException e) {
                     continue;
                 }
@@ -149,6 +150,35 @@ public class OptionUtils {
                 }
             }
         }
-        return WebpbExtend.FieldOpts.getDefaultInstance();
+        return FieldOpts.getDefaultInstance();
+    }
+
+    /**
+     * Resolve {@link EnumValueOpts} from {@link EnumValueDescriptor} with a filter.
+     *
+     * @param descriptor {@link EnumValueDescriptor}
+     * @param predicate  option filter
+     * @return {@link EnumValueOpts}
+     */
+    public static EnumValueOpts getOpts(EnumValueDescriptor descriptor,
+                                        Predicate<EnumValueOpts> predicate) {
+        if (descriptor == null) {
+            return EnumValueOpts.getDefaultInstance();
+        }
+        UnknownFieldSet fieldSet = descriptor.getOptions().getUnknownFields();
+        for (Field field : fieldSet.asMap().values()) {
+            for (ByteString byteString : field.getLengthDelimitedList()) {
+                EnumValueOpts opts;
+                try {
+                    opts = EnumValueOpts.parseFrom(byteString);
+                } catch (InvalidProtocolBufferException e) {
+                    continue;
+                }
+                if (predicate.test(opts)) {
+                    return opts;
+                }
+            }
+        }
+        return EnumValueOpts.getDefaultInstance();
     }
 }

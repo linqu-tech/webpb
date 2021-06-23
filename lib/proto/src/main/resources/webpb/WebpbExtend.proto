@@ -110,3 +110,27 @@ message JavaFieldOpts {
 message TsFieldOpts {
     optional bool as_string = 1000;
 }
+
+// enum value options
+extend google.protobuf.EnumValueOptions {
+    optional EnumValueOpts v_opts = 1000;
+}
+
+message EnumValueOpts {
+    oneof enumValueOpts {
+        OptEnumValueOpts opt = 1000;
+        JavaEnumValueOpts java = 1001;
+        TsEnumValueOpts ts = 1002;
+    }
+}
+
+message OptEnumValueOpts {
+}
+
+message JavaEnumValueOpts {
+    repeated string annotation = 1000;
+}
+
+message TsEnumValueOpts {
+    optional string value = 1000;
+}
