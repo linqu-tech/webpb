@@ -19,7 +19,7 @@ task<Exec>("npmInstall") {
   if (nodeModules.exists()) {
     commandLine(npm, "--version")
   } else {
-    commandLine(npm, "install")
+    commandLine(npm, "install", "--verbose")
   }
 }
 
