@@ -19,6 +19,7 @@ package tech.linqu.webpb.utilities.utils;
 import static com.google.protobuf.UnknownFieldSet.Field;
 
 import com.google.protobuf.ByteString;
+import com.google.protobuf.Descriptors;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Descriptors.EnumDescriptor;
 import com.google.protobuf.Descriptors.EnumValueDescriptor;
@@ -27,11 +28,13 @@ import com.google.protobuf.Descriptors.FileDescriptor;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.UnknownFieldSet;
 import java.util.function.Predicate;
+import org.apache.commons.lang3.StringUtils;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend.EnumOpts;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend.EnumValueOpts;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend.FieldOpts;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend.FileOpts;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend.MessageOpts;
+import tech.linqu.webpb.utilities.descriptor.WebpbExtend.OptEnumValueOpts;
 
 /**
  * Utilities to handle options.
@@ -180,5 +183,26 @@ public class OptionUtils {
             }
         }
         return EnumValueOpts.getDefaultInstance();
+    }
+
+    /**
+     * If this enum use string value.
+     *
+     * @param descriptor {@link EnumDescriptor}
+     * @return true if use string value
+     */
+    public static boolean isStringValue(EnumDescriptor descriptor) {
+        EnumOpts enumOpts = getOpts(descriptor, EnumOpts::hasOpt);
+        if (enumOpts.getOpt().getStringValue()) {
+            return true;
+        }
+        for (Descriptors.EnumValueDescriptor valueDescriptor : descriptor.getValues()) {
+            OptEnumValueOpts opts =
+                OptionUtils.getOpts(valueDescriptor, EnumValueOpts::hasOpt).getOpt();
+            if (!StringUtils.isEmpty(opts.getValue())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -42,7 +42,7 @@ import com.google.protobuf.Descriptors.EnumDescriptor;
 import com.google.protobuf.Descriptors.EnumValueDescriptor;
 import org.apache.commons.lang3.StringUtils;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend.EnumValueOpts;
-import tech.linqu.webpb.utilities.descriptor.WebpbExtend.TsEnumValueOpts;
+import tech.linqu.webpb.utilities.descriptor.WebpbExtend.OptEnumValueOpts;
 import tech.linqu.webpb.utilities.utils.OptionUtils;
 
 /**
@@ -63,7 +63,7 @@ public class EnumGenerator {
      * @return {@link EnumDeclaration}
      */
     public CompilationUnit generate(CompilationUnit unit, EnumDescriptor descriptor) {
-        this.stringValue = isStringValue(descriptor);
+        this.stringValue = OptionUtils.isStringValue(descriptor);
         if (this.stringValue) {
             this.valueType = new ClassOrInterfaceType(null, String.class.getSimpleName());
         }
@@ -83,17 +83,6 @@ public class EnumGenerator {
         generateEnumValueGetter(declaration);
         unit.addType(declaration);
         return unit;
-    }
-
-    private boolean isStringValue(EnumDescriptor descriptor) {
-        for (EnumValueDescriptor valueDescriptor : descriptor.getValues()) {
-            TsEnumValueOpts opts =
-                OptionUtils.getOpts(valueDescriptor, EnumValueOpts::hasTs).getTs();
-            if (!StringUtils.isEmpty(opts.getValue())) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private void generateEnumConstructor(EnumDeclaration declaration) {
@@ -134,11 +123,12 @@ public class EnumGenerator {
     }
 
     private LiteralExpr getValueLiteral(EnumValueDescriptor valueDescriptor) {
-        TsEnumValueOpts opts = OptionUtils.getOpts(valueDescriptor, EnumValueOpts::hasTs).getTs();
+        OptEnumValueOpts opts =
+            OptionUtils.getOpts(valueDescriptor, EnumValueOpts::hasOpt).getOpt();
         LiteralExpr literalExpr;
         if (StringUtils.isEmpty(opts.getValue())) {
             if (this.stringValue) {
-                literalExpr = new IntegerLiteralExpr("\"" + valueDescriptor.getIndex() + "\"");
+                literalExpr = new IntegerLiteralExpr("\"" + valueDescriptor.getName() + "\"");
             } else {
                 literalExpr = new IntegerLiteralExpr(String.valueOf(valueDescriptor.getIndex()));
             }

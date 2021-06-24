@@ -44,9 +44,9 @@ import tech.linqu.webpb.utilities.descriptor.WebpbExtend.EnumValueOpts;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend.FieldOpts;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend.FileOpts;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend.MessageOpts;
+import tech.linqu.webpb.utilities.descriptor.WebpbExtend.OptEnumValueOpts;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend.OptFieldOpts;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend.OptMessageOpts;
-import tech.linqu.webpb.utilities.descriptor.WebpbExtend.TsEnumValueOpts;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend.TsFieldOpts;
 import tech.linqu.webpb.utilities.utils.Const;
 import tech.linqu.webpb.utilities.utils.DescriptorUtils;
@@ -159,16 +159,22 @@ public final class Generator {
             .append(descriptor.getName())
             .append(" {\n");
 
+        boolean stringValue = OptionUtils.isStringValue(descriptor);
         for (EnumValueDescriptor valueDescriptor : descriptor.getValues()) {
-            TsEnumValueOpts opts =
-                OptionUtils.getOpts(valueDescriptor, EnumValueOpts::hasTs).getTs();
+            OptEnumValueOpts opts =
+                OptionUtils.getOpts(valueDescriptor, EnumValueOpts::hasOpt).getOpt();
             builder.level(() -> {
-                builder.indent().append(valueDescriptor.getName())
-                    .append(" = ");
-                if (StringUtils.isEmpty(opts.getValue())) {
-                    builder.append(valueDescriptor.getIndex());
+                builder.indent().append(valueDescriptor.getName()).append(" = ");
+                if (stringValue) {
+                    builder.append("'");
+                    if (StringUtils.isEmpty(opts.getValue())) {
+                        builder.append(valueDescriptor.getName());
+                    } else {
+                        builder.append(opts.getValue());
+                    }
+                    builder.append("'");
                 } else {
-                    builder.append("'").append(opts.getValue()).append("'");
+                    builder.append(valueDescriptor.getIndex());
                 }
                 builder.append(",\n");
             });
