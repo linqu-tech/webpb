@@ -41,6 +41,14 @@ message Test2 {
     required Data data = 3;
 }
 
+enum Test3 {
+    option (e_opts).opt = {string_value: true};
+
+    test3_1 = 0;
+    test3_2 = 1;
+    test3_3 = 2;
+}
+
 message Test4 {
     option (m_opts).java = {
         annotation: '@JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)'
@@ -50,9 +58,9 @@ message Test4 {
 }
 
 enum Test5 {
-    test1 = 0 [(v_opts).ts = {value: 'text1'}];
-    test2 = 1 [(v_opts).ts = {value: 'text2'}];
-    test3 = 2;
+    test5_1 = 0 [(v_opts).opt = {value: 'text1'}];
+    test5_2 = 1 [(v_opts).opt = {value: 'text2'}];
+    test5_3 = 2;
 }
 
 message Test {

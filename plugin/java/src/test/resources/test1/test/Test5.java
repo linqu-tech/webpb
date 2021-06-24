@@ -4,7 +4,7 @@ package test;
 
 public enum Test5 {
 
-    test1("text1"), test2("text2"), test3("2");
+    test5_1("text1"), test5_2("text2"), test5_3("test5_3");
 
     private String value;
 
@@ -15,11 +15,11 @@ public enum Test5 {
     public static Test5 fromValue(String value) {
         switch(value) {
             case "text1":
-                return test1;
+                return test5_1;
             case "text2":
-                return test2;
-            case "2":
-                return test3;
+                return test5_2;
+            case "test5_3":
+                return test5_3;
             default:
                 return null;
         }

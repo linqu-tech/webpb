@@ -76,6 +76,7 @@ message EnumOpts {
 }
 
 message OptEnumOpts {
+    optional bool string_value = 1000;
 }
 
 message JavaEnumOpts {
@@ -125,6 +126,7 @@ message EnumValueOpts {
 }
 
 message OptEnumValueOpts {
+    optional string value = 1000;
 }
 
 message JavaEnumValueOpts {
@@ -132,5 +134,4 @@ message JavaEnumValueOpts {
 }
 
 message TsEnumValueOpts {
-    optional string value = 1000;
 }

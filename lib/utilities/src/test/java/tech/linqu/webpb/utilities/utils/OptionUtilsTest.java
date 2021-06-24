@@ -1,6 +1,7 @@
 package tech.linqu.webpb.utilities.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -185,8 +186,8 @@ class OptionUtilsTest {
         EnumValueOpts javaOpts = OptionUtils.getOpts(enumValueDescriptor, EnumValueOpts::hasJava);
         assertEquals(0, javaOpts.getJava().getAnnotationCount());
 
-        EnumValueOpts tsOpts = OptionUtils.getOpts(enumValueDescriptor, EnumValueOpts::hasTs);
-        assertEquals("text1", tsOpts.getTs().getValue());
+        EnumValueOpts optOpts = OptionUtils.getOpts(enumValueDescriptor, EnumValueOpts::hasOpt);
+        assertEquals("text1", optOpts.getOpt().getValue());
     }
 
     @Test
@@ -213,5 +214,18 @@ class OptionUtilsTest {
             OptionUtils.getOpts((EnumValueDescriptor) null, o -> true));
         assertEquals(EnumValueOpts.getDefaultInstance(),
             OptionUtils.getOpts(enumValueDescriptor, o -> true));
+    }
+
+    @Test
+    void shouldReturnEnumIsStringValueSuccess() {
+        RequestContext context = createRequest(Dumps.TEST1);
+        EnumDescriptor descriptor1 = resolveEnumDescriptor(context.getDescriptors(), "Test3");
+        assertTrue(OptionUtils.isStringValue(descriptor1));
+
+        EnumDescriptor descriptor2 = resolveEnumDescriptor(context.getDescriptors(), "Test5");
+        assertTrue(OptionUtils.isStringValue(descriptor2));
+
+        EnumDescriptor descriptor3 = resolveEnumDescriptor(context.getDescriptors(), "Enum");
+        assertFalse(OptionUtils.isStringValue(descriptor3));
     }
 }
