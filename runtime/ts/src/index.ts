@@ -1,5 +1,7 @@
 export interface WebpbMessage {
   webpbMeta(): WebpbMeta;
+
+  toWebpbAlias(): any;
 }
 
 export interface WebpbMeta {
@@ -13,7 +15,7 @@ export interface WebpbMeta {
 }
 
 export function assign(src: any, dest: any, omitted?: string[]): void {
-  if (src) {
+  if (src && typeof src === 'object' && typeof dest === 'object') {
     for (let ks = Object.keys(src), i = 0; i < ks.length; ++i) {
       if (src[ks[i]] != undefined && !isOmitted(ks[i], omitted)) {
         dest[ks[i]] = src[ks[i]];
@@ -54,11 +56,33 @@ export function query(pre: '?' | '&', params: { [key: string]: any }): string {
   let str = '';
   for (const key in params) {
     const v = params[key];
-    if (v === null || v === undefined || v === '' || v.length === 0) {
+    if (v === null || v === undefined || v === '') {
       continue;
     }
-    str += `${pre}${key}=${encodeURIComponent(v)}`;
-    pre = '&';
+    const encoded = encodeURIComponent(v);
+    if (encoded) {
+      str += `${pre}${key}=${encodeURIComponent(v)}`;
+      pre = '&';
+    }
   }
   return str;
+}
+
+export function toAlias(data: any, aliases: { [key: string]: string }): any {
+  if (!data || typeof data !== 'object' || Array.isArray(data)) {
+    return data;
+  }
+  const obj = {};
+  for (const key of Object.keys(data)) {
+    const value = data[key];
+    const toAlias = value['toAlias'];
+    if (typeof toAlias === 'function') {
+      obj[key] = toAlias();
+    } else if (aliases && aliases[key]) {
+      obj[aliases[key]] = data[key];
+    } else {
+      obj[key] = data[key];
+    }
+  }
+  return obj;
 }

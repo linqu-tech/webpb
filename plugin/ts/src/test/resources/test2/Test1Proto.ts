@@ -9,6 +9,7 @@ export namespace Test1Proto {
 
   export class Test implements ITest {
     webpbMeta: () => Webpb.WebpbMeta;
+    toWebpbAlias = () => this;
 
     private constructor() {
       this.webpbMeta = () => ({

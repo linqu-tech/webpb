@@ -15,6 +15,7 @@ export namespace Test2Proto {
     test2!: boolean;
     isTest3!: boolean;
     webpbMeta: () => Webpb.WebpbMeta;
+    toWebpbAlias = () => this;
 
     private constructor(p?: ITest) {
       Webpb.assign(p, this, []);

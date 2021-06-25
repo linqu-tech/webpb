@@ -11,6 +11,7 @@ export namespace Test9Proto {
   export class Test implements ITest {
     test1!: string;
     webpbMeta: () => Webpb.WebpbMeta;
+    toWebpbAlias = () => this;
 
     private constructor(p?: ITest) {
       Webpb.assign(p, this, []);

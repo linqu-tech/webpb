@@ -15,6 +15,7 @@ export namespace IncludeProto {
   export class Message implements IMessage {
     id!: number;
     webpbMeta: () => Webpb.WebpbMeta;
+    toWebpbAlias = () => this;
 
     private constructor(p?: IMessage) {
       Webpb.assign(p, this, []);
@@ -39,6 +40,7 @@ export namespace IncludeProto {
     export class Nested implements INested {
       test1!: number;
       webpbMeta: () => Webpb.WebpbMeta;
+      toWebpbAlias = () => this;
 
       private constructor(p?: INested) {
         Webpb.assign(p, this, []);

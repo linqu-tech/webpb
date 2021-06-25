@@ -11,6 +11,7 @@ export namespace IgnoredProto {
   export class IgnoreTest implements IIgnoreTest {
     test1!: number;
     webpbMeta: () => Webpb.WebpbMeta;
+    toWebpbAlias = () => this;
 
     private constructor(p?: IIgnoreTest) {
       Webpb.assign(p, this, []);

@@ -1,5 +1,6 @@
 package tech.linqu.webpb.ts.utils;
 
+import java.util.concurrent.Callable;
 import tech.linqu.webpb.utilities.utils.Utils;
 
 /**
@@ -56,6 +57,24 @@ public class SourceBuilder {
         this.level++;
         runnable.run();
         this.level--;
+    }
+
+    /**
+     * Wrapper in new indent level.
+     *
+     * @param callable {@link Callable}
+     * @param <T>      return type
+     * @return value of type T
+     */
+    public <T> T level(Callable<T> callable) {
+        try {
+            this.level++;
+            T value = callable.call();
+            this.level--;
+            return value;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
