@@ -38,6 +38,7 @@ import tech.linqu.webpb.commons.ParamGroup;
 import tech.linqu.webpb.commons.PathParam;
 import tech.linqu.webpb.ts.utils.Imports;
 import tech.linqu.webpb.ts.utils.SourceBuilder;
+import tech.linqu.webpb.ts.utils.TsUtils;
 import tech.linqu.webpb.utilities.context.RequestContext;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend.EnumValueOpts;
@@ -202,10 +203,37 @@ public final class Generator {
 
         builder.level(() -> {
             generateMessageFields(descriptor, false);
-            builder.indent().append("webpbMeta: () => Webpb.WebpbMeta;\n\n");
+            builder.indent().append("webpbMeta: () => Webpb.WebpbMeta;\n");
+            generateToWebpbAlias(descriptor);
             generateConstructor(descriptor, messageOpts, className);
         });
         builder.closeBracket();
+    }
+
+    private void generateToWebpbAlias(Descriptor descriptor) {
+        if (!TsUtils.toAlias(descriptor)) {
+            builder.indent().append("toWebpbAlias = () => this;").alignNewline(2);
+            return;
+        }
+        builder.indent().append("toWebpbAlias = () => Webpb.toAlias(this, {");
+        boolean generated = builder.level(() -> {
+            boolean v = false;
+            for (FieldDescriptor fieldDescriptor : descriptor.getFields()) {
+                String alias = TsUtils.getAlias(fieldDescriptor);
+                if (StringUtils.isEmpty(alias)) {
+                    continue;
+                }
+                builder.append("\n").indent().append(fieldDescriptor.getName())
+                    .append(": '").append(alias).append("',");
+                v = true;
+            }
+            return v;
+        });
+        if (generated) {
+            builder.append('\n').indent().append("});").alignNewline(2);
+        } else {
+            builder.append("});").alignNewline(2);
+        }
     }
 
     private void generateMessageFields(Descriptor descriptor, boolean isInterface) {

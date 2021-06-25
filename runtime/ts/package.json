@@ -1,6 +1,6 @@
 {
   "name": "webpb",
-  "version": "0.0.12",
+  "version": "0.0.15",
   "description": "The webpb runtime library for javascript",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -9,7 +9,7 @@
     "check": "npm run lint && npm run test",
     "lint": "eslint --quiet src/**/*.ts",
     "lint-fix": "eslint --fix src/**/*.ts",
-    "publish": "npm run check && npm run build && npm publish ./dist --access public",
+    "deploy": "npm run check && npm run build && npm publish ./dist --access public",
     "test": "jest --forceExit --coverage --verbose --detectOpenHandles"
   },
   "author": "156023966@qq.com",

@@ -110,6 +110,7 @@ message JavaFieldOpts {
 
 message TsFieldOpts {
     optional bool as_string = 1000;
+    optional string alias = 1001;
 }
 
 // enum value options

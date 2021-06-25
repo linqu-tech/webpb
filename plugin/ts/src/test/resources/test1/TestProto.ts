@@ -28,6 +28,7 @@ export namespace TestProto {
     data1!: string;
     data2?: number;
     webpbMeta: () => Webpb.WebpbMeta;
+    toWebpbAlias = () => this;
 
     private constructor(p?: IData) {
       Webpb.assign(p, this, []);
@@ -53,6 +54,7 @@ export namespace TestProto {
     test1!: string;
     test2!: number;
     webpbMeta: () => Webpb.WebpbMeta;
+    toWebpbAlias = () => this;
 
     private constructor(p?: ITest1) {
       Webpb.assign(p, this, []);
@@ -84,6 +86,7 @@ export namespace TestProto {
     id!: string;
     data!: IData;
     webpbMeta: () => Webpb.WebpbMeta;
+    toWebpbAlias = () => this;
 
     private constructor(p?: ITest2) {
       Webpb.assign(p, this, []);
@@ -107,12 +110,20 @@ export namespace TestProto {
   }
 
   export interface ITest4 {
-    test4: string;
+    test1: string;
+    test2: number;
+    test3: string;
   }
 
   export class Test4 implements ITest4 {
-    test4!: string;
+    test1!: string;
+    test2!: number;
+    test3!: string;
     webpbMeta: () => Webpb.WebpbMeta;
+    toWebpbAlias = () => Webpb.toAlias(this, {
+      test1: 'aliasTest1',
+      test2: 'aliasTest2',
+    });
 
     private constructor(p?: ITest4) {
       Webpb.assign(p, this, []);
@@ -172,6 +183,7 @@ export namespace TestProto {
     test18: number = 123;
     test19: string = "test19";
     webpbMeta: () => Webpb.WebpbMeta;
+    toWebpbAlias = () => Webpb.toAlias(this, {});
 
     private constructor(p?: ITest) {
       Webpb.assign(p, this, ["test1", "test9"]);
@@ -196,6 +208,7 @@ export namespace TestProto {
     export class NestedTest implements INestedTest, Webpb.WebpbMessage {
       test1!: number;
       webpbMeta: () => Webpb.WebpbMeta;
+      toWebpbAlias = () => this;
 
       private constructor(p?: INestedTest) {
         Webpb.assign(p, this, []);
@@ -219,6 +232,7 @@ export namespace TestProto {
     export class Test17 implements ITest17 {
       test!: string;
       webpbMeta: () => Webpb.WebpbMeta;
+      toWebpbAlias = () => this;
 
       private constructor(p?: ITest17) {
         Webpb.assign(p, this, []);

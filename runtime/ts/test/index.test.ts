@@ -1,4 +1,4 @@
-import { assign, getter, query } from '../src';
+import { assign, getter, query, toAlias } from '../src';
 
 describe('index', () => {
   it('should assign to null success', () => {
@@ -39,11 +39,35 @@ describe('index', () => {
   it('should format query success', function () {
     expect(query('?', {})).toEqual('');
     expect(query('&', {})).toEqual('');
+    expect(query('', { a: 1 })).toEqual('a=1');
     expect(query('?', { a: 1 })).toEqual('?a=1');
     expect(query('?', { a: 1, b: 2 })).toEqual('?a=1&b=2');
     expect(query('?', { a: 1, b: 2, c: null, d: undefined, e: '' })).toEqual('?a=1&b=2');
     expect(query('?', { a: [], b: 2 })).toEqual('?b=2');
     expect(query('?', { a: [1] })).toEqual('?a=1');
     expect(query('?', { a: [1, 2] })).toEqual('?a=1%2C2');
+  });
+
+  it('should format query ignore function', function () {
+    expect(query('', { a: 1, b: () => 'hello' })).toEqual('a=1');
+  });
+
+  it('should to alias success', function () {
+    const b = { b: 2, c: 3 };
+    b['toAlias'] = () => toAlias(b, { b: 'b_' });
+    const a = { a: 1, b: b, c: 3 };
+    expect(toAlias(a, { a: 'a_' })).toMatchObject({
+      a_: 1, b: { b_: 2, c: 3 }, c: 3
+    });
+    expect(toAlias(a, {})).toMatchObject({
+      a: 1, b: { b_: 2, c: 3 }, c: 3
+    });
+  });
+
+  it('should to alias change nothing', function () {
+    expect(toAlias(null, {})).toEqual(null);
+    expect(toAlias('', {})).toEqual('');
+    expect(toAlias([], {})).toMatchObject([]);
+    expect(toAlias([1, 2], {})).toMatchObject([1, 2]);
   });
 });
