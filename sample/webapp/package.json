@@ -16,7 +16,11 @@
     "test": "jest --forceExit --coverage --silent --detectOpenHandles"
   },
   "license": "Apache-2.0",
-  "keywords": ["webpb", "sample", "webapp"],
+  "keywords": [
+    "webpb",
+    "sample",
+    "webapp"
+  ],
   "devDependencies": {
     "@babel/core": "~7.14.6",
     "@babel/plugin-proposal-class-properties": "~7.14.5",
@@ -58,7 +62,7 @@
     "webpack-cli": "~4.7.2",
     "webpack-dev-server": "~3.11.2",
     "webpack-merge": "~5.8.0",
-    "webpb": "~0.0.14"
+    "webpb": "~0.0.15"
   },
   "dependencies": {
     "@babel/polyfill": "~7.12.1",
