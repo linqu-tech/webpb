@@ -27,4 +27,3 @@ export namespace Test3Proto {
     }
   }
 }
-

@@ -27,7 +27,7 @@ export namespace Include2Proto {
     }
   }
 
-export namespace Message {
+  export namespace Message {
     export interface INested {
       test1: number;
     }
@@ -50,6 +50,5 @@ export namespace Message {
         return new Nested(properties);
       }
     }
-    }
+  }
 }
-

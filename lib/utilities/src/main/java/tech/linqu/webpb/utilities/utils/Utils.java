@@ -34,4 +34,39 @@ public class Utils {
         }
         return "/" + StringUtils.stripEnd(tmp, "/");
     }
+
+    /**
+     * Make sure tail newline count not greater than limit.
+     *
+     * @param builder {@link StringBuilder}
+     * @param limit   limit
+     */
+    public static void limitNewline(StringBuilder builder, int limit) {
+        int index = builder.length();
+        while (--index >= 0) {
+            char ch = builder.charAt(index);
+            if (ch != '\n') {
+                break;
+            }
+            if (builder.length() - index > limit) {
+                builder.deleteCharAt(builder.length() - 1);
+            }
+        }
+    }
+
+    /**
+     * Make sure there are count of tail newlines.
+     *
+     * @param builder {@link StringBuilder}
+     * @param count   count
+     */
+    public static void alignNewline(StringBuilder builder, int count) {
+        limitNewline(builder, count);
+        if (count <= 0) {
+            return;
+        }
+        while (builder.length() < count || builder.charAt(builder.length() - count) != '\n') {
+            builder.append('\n');
+        }
+    }
 }

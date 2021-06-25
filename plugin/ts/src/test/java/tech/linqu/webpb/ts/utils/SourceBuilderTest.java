@@ -47,4 +47,12 @@ class SourceBuilderTest {
         builder.trimLast('a');
         assertEquals("\n", builder.toString());
     }
+
+    @Test
+    void shouldTestContainsSuccess() {
+        SourceBuilder builder = new SourceBuilder();
+        assertFalse(builder.contains("hello"));
+        builder.append("adfhelloa dk");
+        assertTrue(builder.contains("hello"));
+    }
 }

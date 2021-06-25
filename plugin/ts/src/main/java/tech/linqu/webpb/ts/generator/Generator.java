@@ -111,6 +111,7 @@ public final class Generator {
         builder.append("import * as Webpb from 'webpb';\n\n");
         imports.updateBuilder(builder);
         this.builder.prepend(builder.toString());
+        this.builder.alignNewline(1);
         return this.builder.toString();
     }
 
@@ -134,7 +135,7 @@ public final class Generator {
         for (Descriptor descriptor : descriptors) {
             OptMessageOpts messageOpts = getOpts(descriptor, MessageOpts::hasOpt).getOpt();
             generateMessage(descriptor, messageOpts);
-            builder.level(() -> generateNested(descriptor));
+            generateNested(descriptor);
         }
     }
 
@@ -148,8 +149,8 @@ public final class Generator {
             .filter(d -> !mapFields.contains(d.getName()))
             .collect(Collectors.toList());
         if (!nestedDescriptors.isEmpty()) {
-            builder.append("export namespace ").append(namespace).append(" {\n");
-            handleDescriptors(nestedDescriptors);
+            builder.indent().append("export namespace ").append(namespace).append(" {\n");
+            builder.level(() -> handleDescriptors(nestedDescriptors));
             builder.closeBracket();
         }
     }
@@ -281,7 +282,7 @@ public final class Generator {
             generateMetaPath(descriptor, Utils.normalize(messageOpts.getPath()));
         });
         builder.trimDuplicatedNewline();
-        builder.indent().append("}) as Webpb.WebpbMeta;\n\n");
+        builder.indent().append("}) as Webpb.WebpbMeta;").alignNewline(2);
     }
 
     private void generateMetaField(String key, String value) {
@@ -303,20 +304,28 @@ public final class Generator {
         Iterator<PathParam> iterator = group.getParams().iterator();
         while (iterator.hasNext()) {
             PathParam param = iterator.next();
-            builder.append(param.getPrefix());
+            String prefix = StringUtils.removeEnd(param.getPrefix(), "?");
+            builder.append(prefix);
+            String pre = StringUtils.contains(prefix, "?") ? "'&'" : "'?'";
             if (StringUtils.isNotEmpty(param.getKey())) {
-                builder.trimLast('?');
-                builder.append("${Webpb.query({\n");
-                builder.level(() -> {
-                    builder.indent().append(param.getKey()).append(": ")
-                        .append(getter(param.getAccessor())).append(",\n");
-                    while (iterator.hasNext()) {
-                        PathParam p = iterator.next();
-                        builder.indent().append(p.getKey()).append(": ")
-                            .append(getter(p.getAccessor())).append(",\n");
+                do {
+                    builder.append("${Webpb.query(").append(pre).append(", {\n");
+                    PathParam paramFinal = param;
+                    builder.level(() -> builder.indent()
+                        .append(paramFinal.getKey()).append(": ")
+                        .append(getter(paramFinal.getAccessor())).append("\n")
+                    );
+                    builder.indent().append("})}");
+                    if (!iterator.hasNext()) {
+                        break;
                     }
-                });
-                builder.indent().append("})}`\n").append(group.getSuffix());
+                    param = iterator.next();
+                    pre = "'&'";
+                } while (true);
+                if (StringUtils.isNotEmpty(group.getSuffix())) {
+                    builder.append("&").append(group.getSuffix());
+                }
+                builder.append("`\n");
                 return;
             }
             builder.append("${").append(getter(param.getAccessor())).append("}");

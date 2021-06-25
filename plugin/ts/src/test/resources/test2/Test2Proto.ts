@@ -31,4 +31,3 @@ export namespace Test2Proto {
     }
   }
 }
-
