@@ -39,12 +39,17 @@ describe('index', () => {
   it('should format query success', function () {
     expect(query('?', {})).toEqual('');
     expect(query('&', {})).toEqual('');
+    expect(query('', { a: 1 })).toEqual('a=1');
     expect(query('?', { a: 1 })).toEqual('?a=1');
     expect(query('?', { a: 1, b: 2 })).toEqual('?a=1&b=2');
     expect(query('?', { a: 1, b: 2, c: null, d: undefined, e: '' })).toEqual('?a=1&b=2');
     expect(query('?', { a: [], b: 2 })).toEqual('?b=2');
     expect(query('?', { a: [1] })).toEqual('?a=1');
     expect(query('?', { a: [1, 2] })).toEqual('?a=1%2C2');
+  });
+
+  it('should format query ignore function', function () {
+    expect(query('', { a: 1, b: () => 'hello' })).toEqual('a=1');
   });
 
   it('should to alias success', function () {

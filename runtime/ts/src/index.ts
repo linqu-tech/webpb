@@ -52,11 +52,11 @@ export function getter(data: any, path: string): any {
   return data;
 }
 
-export function query(pre: '?' | '&', params: { [key: string]: any }): string {
+export function query(pre: string, params: { [key: string]: any }): string {
   let str = '';
-  for (const key in params) {
+  for (const key of Object.keys(params)) {
     const v = params[key];
-    if (v === null || v === undefined || v === '') {
+    if (v === null || v === undefined || v === '' || typeof v === 'function') {
       continue;
     }
     const encoded = encodeURIComponent(v);
