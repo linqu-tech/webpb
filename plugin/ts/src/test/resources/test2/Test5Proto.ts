@@ -8,4 +8,3 @@ export namespace Test5Proto {
     DEFAULT = 0,
   }
 }
-

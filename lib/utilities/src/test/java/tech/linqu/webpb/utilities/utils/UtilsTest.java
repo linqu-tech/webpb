@@ -17,6 +17,8 @@
 package tech.linqu.webpb.utilities.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static tech.linqu.webpb.utilities.utils.Utils.alignNewline;
+import static tech.linqu.webpb.utilities.utils.Utils.limitNewline;
 import static tech.linqu.webpb.utilities.utils.Utils.normalize;
 
 import org.junit.jupiter.api.Test;
@@ -33,5 +35,57 @@ class UtilsTest {
         assertEquals("/a", normalize("/a/"));
         assertEquals("/ab.c", normalize("//ab.c"));
         assertEquals("https://ab.c", normalize("https://ab.c"));
+    }
+
+    @Test
+    void shouldLimitNewlineSuccess() {
+        StringBuilder builder = new StringBuilder();
+
+        limitNewline(builder, -1);
+        assertEquals("", builder.toString());
+
+        limitNewline(builder, 0);
+        assertEquals("", builder.toString());
+
+        builder.append("a");
+        limitNewline(builder, 0);
+        assertEquals("a", builder.toString());
+
+        builder.append("\n");
+        limitNewline(builder, 1);
+        assertEquals("a\n", builder.toString());
+
+        builder.append("\n\n");
+        limitNewline(builder, 2);
+        assertEquals("a\n\n", builder.toString());
+    }
+
+    @Test
+    void shouldAlignNewlineSuccess() {
+        StringBuilder builder = new StringBuilder();
+
+        alignNewline(builder, -1);
+        assertEquals("", builder.toString());
+
+        alignNewline(builder, 1);
+        assertEquals("\n", builder.toString());
+
+        alignNewline(builder, 0);
+        assertEquals("", builder.toString());
+
+        builder.append("a");
+        alignNewline(builder, 0);
+        assertEquals("a", builder.toString());
+
+        alignNewline(builder, 1);
+        assertEquals("a\n", builder.toString());
+
+        builder.append("\n");
+        alignNewline(builder, 1);
+        assertEquals("a\n", builder.toString());
+
+        builder.append("\n\n");
+        alignNewline(builder, 2);
+        assertEquals("a\n\n", builder.toString());
     }
 }

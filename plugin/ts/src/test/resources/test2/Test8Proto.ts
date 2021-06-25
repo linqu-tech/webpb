@@ -5,4 +5,3 @@ import * as Webpb from 'webpb';
 
 export namespace Test8Proto {
 }
-

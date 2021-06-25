@@ -5,6 +5,7 @@ import * as Webpb from 'webpb';
 
 import { Include2Proto } from './Include2Proto';
 import { IncludeProto } from './IncludeProto';
+
 export namespace TestProto {
   export enum Test3 {
     test3_1 = 'test3_1',
@@ -18,7 +19,7 @@ export namespace TestProto {
     test5_3 = 'test5_3',
   }
 
-    export interface IData {
+  export interface IData {
     data1: string;
     data2?: number;
   }
@@ -43,6 +44,35 @@ export namespace TestProto {
     }
   }
 
+  export interface ITest1 {
+    test1: string;
+    test2: number;
+  }
+
+  export class Test1 implements ITest1, Webpb.WebpbMessage {
+    test1!: string;
+    test2!: number;
+    webpbMeta: () => Webpb.WebpbMeta;
+
+    private constructor(p?: ITest1) {
+      Webpb.assign(p, this, []);
+      this.webpbMeta = () => (p && {
+        class: 'Test1',
+        method: 'GET',
+        context: '/test',
+        path: `/test?a=123&${Webpb.query('&', {
+          b: p.test1
+        })}${Webpb.query('&', {
+          d: p.test2
+        })}&e=456`
+      }) as Webpb.WebpbMeta;
+    }
+
+    static create(properties: ITest1): Test1 {
+      return new Test1(properties);
+    }
+  }
+
   export interface ITest2 {
     test2: string;
     id: string;
@@ -61,10 +91,12 @@ export namespace TestProto {
         class: 'Test2',
         method: 'GET',
         context: '/test',
-        path: `/test/${p.test2}${Webpb.query({
-          id: p.id,
-          data1: Webpb.getter(p, 'data.data1'),
-          data2: Webpb.getter(p, 'data.data2'),
+        path: `/test/${p.test2}${Webpb.query('?', {
+          id: p.id
+        })}${Webpb.query('&', {
+          data1: Webpb.getter(p, 'data.data1')
+        })}${Webpb.query('&', {
+          data2: Webpb.getter(p, 'data.data2')
         })}`
       }) as Webpb.WebpbMeta;
     }
@@ -156,7 +188,7 @@ export namespace TestProto {
     }
   }
 
-export namespace Test {
+  export namespace Test {
     export interface INestedTest {
       test1: number;
     }
@@ -202,6 +234,5 @@ export namespace Test {
         return new Test17(properties);
       }
     }
-    }
+  }
 }
-

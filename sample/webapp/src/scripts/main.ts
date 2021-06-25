@@ -19,9 +19,9 @@ export class Main {
   }
 
   visitStore(): void {
-    const storeIdElement = this.getInput('storeId');
+    const storeIdElement = Main.getInput('storeId');
     const storeId = storeIdElement?.value ?? '12345';
-    const customerElement = this.getInput('customer');
+    const customerElement = Main.getInput('customer');
     const customer = customerElement?.value ?? 'Tom';
     this.httpService
       .request<StoreVisitResponse>(
@@ -34,9 +34,9 @@ export class Main {
   }
 
   getStores(): void {
-    const indexElement = this.getInput('pageIndex');
+    const indexElement = Main.getInput('pageIndex');
     const pageIndex = Number(indexElement?.value ?? '1');
-    const sizeElement = this.getInput('pageSize');
+    const sizeElement = Main.getInput('pageSize');
     const pageSize = Number(sizeElement?.value ?? '3');
     this.httpService
       .request<StoreListResponse>(
@@ -50,7 +50,7 @@ export class Main {
       );
   }
 
-  private getInput(id: string): HTMLInputElement {
+  private static getInput(id: string): HTMLInputElement {
     return document.getElementById(id) as HTMLInputElement;
   }
 }

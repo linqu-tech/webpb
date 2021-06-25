@@ -29,6 +29,17 @@ message Data {
     optional int32 data2 = 2;
 }
 
+message Test1 {
+    option (m_opts).opt = {
+        method: "GET"
+        context: "test"
+        path: "/test?a=123&b={test1}&c=321&d={test2}&e=456"
+    };
+
+    required int64 test1 = 1;
+    required int32 test2 = 2;
+}
+
 message Test2 {
     option (m_opts).opt = {
         method: "GET"

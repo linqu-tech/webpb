@@ -1,5 +1,7 @@
 package tech.linqu.webpb.ts.utils;
 
+import tech.linqu.webpb.utilities.utils.Utils;
+
 /**
  * Builder for source code.
  */
@@ -24,15 +26,17 @@ public class SourceBuilder {
      * Only leave one newline.
      */
     public void trimDuplicatedNewline() {
-        while (builder.length() > 1) {
-            if (builder.charAt(builder.length() - 1) != '\n') {
-                break;
-            }
-            if (builder.charAt(builder.length() - 2) != '\n') {
-                break;
-            }
-            builder.deleteCharAt(builder.length() - 1);
-        }
+        Utils.limitNewline(builder, 1);
+    }
+
+    /**
+     * Make sure there are count of tail newlines.
+     *
+     * @param count count
+     */
+    public SourceBuilder alignNewline(int count) {
+        Utils.alignNewline(this.builder, count);
+        return this;
     }
 
     /**
@@ -132,6 +136,16 @@ public class SourceBuilder {
             builder.deleteCharAt(builder.length() - 1);
         }
         return this;
+    }
+
+    /**
+     * If {@link SourceBuilder} contains a string.
+     *
+     * @param value target string
+     * @return true if contains the string
+     */
+    public boolean contains(String value) {
+        return builder.indexOf(value) >= 0;
     }
 
     /**

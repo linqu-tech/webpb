@@ -42,5 +42,8 @@ public class Imports {
             builder.append("import { ")
                 .append(type).append(" } from './").append(type).append("';\n");
         }
+        if (!imported.isEmpty()) {
+            builder.append('\n');
+        }
     }
 }

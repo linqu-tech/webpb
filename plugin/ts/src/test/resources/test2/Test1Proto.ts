@@ -24,4 +24,3 @@ export namespace Test1Proto {
     }
   }
 }
-
