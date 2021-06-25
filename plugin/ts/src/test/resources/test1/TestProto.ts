@@ -110,14 +110,19 @@ export namespace TestProto {
   }
 
   export interface ITest4 {
-    test4: string;
+    test1: string;
+    test2: number;
+    test3: string;
   }
 
   export class Test4 implements ITest4 {
-    test4!: string;
+    test1!: string;
+    test2!: number;
+    test3!: string;
     webpbMeta: () => Webpb.WebpbMeta;
     toWebpbAlias = () => Webpb.toAlias(this, {
-      test4: 'aliasTest4'
+      test1: 'aliasTest1',
+      test2: 'aliasTest2',
     });
 
     private constructor(p?: ITest4) {

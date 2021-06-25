@@ -65,7 +65,9 @@ message Test4 {
         annotation: '@JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)'
     };
 
-    required int64 test4 = 1 [(opts).ts = {alias: 'aliasTest4'}];
+    required int64 test1 = 1 [(opts).ts = {alias: 'aliasTest1'}];
+    required int32 test2 = 2 [(opts).ts = {alias: 'aliasTest2'}];
+    required string test3 = 3;
 }
 
 enum Test5 {

@@ -24,12 +24,18 @@ public class Test4 implements WebpbMessage {
         return WEBPB_META;
     }
 
-    private Long test4;
+    private Long test1;
+
+    private Integer test2;
+
+    private String test3;
 
     public Test4() {
     }
 
-    public Test4(Long test4) {
-        this.test4 = test4;
+    public Test4(Long test1, Integer test2, String test3) {
+        this.test1 = test1;
+        this.test2 = test2;
+        this.test3 = test3;
     }
 }

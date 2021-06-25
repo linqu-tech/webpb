@@ -224,7 +224,7 @@ public final class Generator {
                     continue;
                 }
                 builder.append("\n").indent().append(fieldDescriptor.getName())
-                    .append(": '").append(alias).append("'");
+                    .append(": '").append(alias).append("',");
                 v = true;
             }
             return v;
