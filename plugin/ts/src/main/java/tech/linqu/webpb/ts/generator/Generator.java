@@ -59,6 +59,8 @@ import tech.linqu.webpb.utilities.utils.Utils;
  */
 public final class Generator {
 
+    private static final String UNKNOWN = "unknown";
+
     private static final Map<FieldDescriptor.Type, String> TYPES;
 
     static {
@@ -203,37 +205,108 @@ public final class Generator {
 
         builder.level(() -> {
             generateMessageFields(descriptor, false);
-            builder.indent().append("webpbMeta: () => Webpb.WebpbMeta;\n");
-            generateToWebpbAlias(descriptor);
+            builder.indent().append("webpbMeta: () => Webpb.WebpbMeta;").alignNewline(2);
             generateConstructor(descriptor, messageOpts, className);
+            generateFromAlias(descriptor, className);
+            generateToWebpbAlias(descriptor);
+        });
+        builder.closeBracket();
+    }
+
+    private void generateFromAlias(Descriptor descriptor, String className) {
+        if (descriptor.getFields().isEmpty()) {
+            builder.indent().append("static fromAlias(_data?: Record<string, any>): ")
+                .append(className).append(" {\n");
+            builder.level(() -> builder.indent()
+                .append("return ").append(className).append(".create();\n"));
+            builder.closeBracket();
+            return;
+        }
+        builder.indent().append("static fromAlias(data: Record<string, any>): ")
+            .append(className).append(" {\n");
+        if (!TsUtils.hasAlias(descriptor)) {
+            builder.level(() -> {
+                builder.indent().append("return ")
+                    .append(className).append(".create(data as any);\n");
+            });
+            builder.closeBracket();
+            return;
+        }
+        generateFromAliasWithAlias(descriptor, className);
+    }
+
+    private void generateFromAliasWithAlias(Descriptor descriptor, String className) {
+        builder.level(() -> {
+            builder.indent().append("const properties = Webpb.toAlias(data, {");
+            boolean generated = builder.level(() -> {
+                boolean v = false;
+                for (FieldDescriptor fieldDescriptor : descriptor.getFields()) {
+                    String alias = TsUtils.getAlias(fieldDescriptor);
+                    if (StringUtils.isEmpty(alias)) {
+                        continue;
+                    }
+                    builder.append("\n").indent().append("'").append(alias)
+                        .append("': '").append(fieldDescriptor.getName()).append("',");
+                    v = true;
+                }
+                return v;
+            });
+            if (generated) {
+                builder.append('\n').indent().append("});\n");
+            } else {
+                builder.append("});\n");
+            }
+            for (FieldDescriptor fieldDescriptor : descriptor.getFields()) {
+                if (fieldDescriptor.isMapField() || fieldDescriptor.isRepeated()) {
+                    continue;
+                }
+                if (!DescriptorUtils.isMessage(fieldDescriptor)) {
+                    continue;
+                }
+                String typeName = getTypeAndImport(fieldDescriptor, false);
+                if (typeName.equals(UNKNOWN)) {
+                    continue;
+                }
+                builder.indent().append("data.").append(fieldDescriptor.getName()).append(" && (")
+                    .append("properties.").append(fieldDescriptor.getName())
+                    .append(" = ").append(typeName).append(".fromAlias(data.")
+                    .append(fieldDescriptor.getName()).append("));\n");
+            }
+            builder.indent().append("return ").append(className).append(".create(properties);\n");
         });
         builder.closeBracket();
     }
 
     private void generateToWebpbAlias(Descriptor descriptor) {
-        if (!TsUtils.toAlias(descriptor)) {
-            builder.indent().append("toWebpbAlias = () => this;").alignNewline(2);
+        builder.indent().append("toWebpbAlias(): any {\n");
+        if (!TsUtils.hasAlias(descriptor)) {
+            builder.level(() -> builder.indent().append("return this;\n"));
+            builder.closeBracket();
             return;
         }
-        builder.indent().append("toWebpbAlias = () => Webpb.toAlias(this, {");
-        boolean generated = builder.level(() -> {
-            boolean v = false;
-            for (FieldDescriptor fieldDescriptor : descriptor.getFields()) {
-                String alias = TsUtils.getAlias(fieldDescriptor);
-                if (StringUtils.isEmpty(alias)) {
-                    continue;
+        builder.level(() -> {
+            builder.indent().append("return Webpb.toAlias(this, {");
+            boolean generated = builder.level(() -> {
+                boolean v = false;
+                for (FieldDescriptor fieldDescriptor : descriptor.getFields()) {
+                    String alias = TsUtils.getAlias(fieldDescriptor);
+                    if (StringUtils.isEmpty(alias)) {
+                        continue;
+                    }
+                    builder.append("\n").indent()
+                        .append("'").append(fieldDescriptor.getName())
+                        .append("': '").append(alias).append("',");
+                    v = true;
                 }
-                builder.append("\n").indent().append(fieldDescriptor.getName())
-                    .append(": '").append(alias).append("',");
-                v = true;
+                return v;
+            });
+            if (generated) {
+                builder.append('\n').indent().append("});\n");
+            } else {
+                builder.append("});\n");
             }
-            return v;
         });
-        if (generated) {
-            builder.append('\n').indent().append("});").alignNewline(2);
-        } else {
-            builder.append("});").alignNewline(2);
-        }
+        builder.closeBracket();
     }
 
     private void generateMessageFields(Descriptor descriptor, boolean isInterface) {
@@ -246,10 +319,10 @@ public final class Generator {
             }
             if (fieldDescriptor.isMapField()) {
                 List<FieldDescriptor> descriptors = fieldDescriptor.getMessageType().getFields();
-                String typeName = getTypeAndImport(descriptors.get(1));
+                String typeName = getTypeAndImport(descriptors.get(1), true);
                 builder.append(": ").append("{ [k: string]: ").append(typeName).append(" }");
             } else {
-                String typeName = getTypeAndImport(fieldDescriptor);
+                String typeName = getTypeAndImport(fieldDescriptor, true);
                 builder.append(": ").append(typeName);
                 if (fieldDescriptor.isRepeated()) {
                     builder.append("[]");
@@ -387,7 +460,7 @@ public final class Generator {
         return builder.append("]").toString();
     }
 
-    private String getTypeAndImport(FieldDescriptor fieldDescriptor) {
+    private String getTypeAndImport(FieldDescriptor fieldDescriptor, boolean toI) {
         WebpbExtend.TsFileOpts webpbOpts = requestContext.getFileOpts().getTs();
         WebpbExtend.TsFileOpts fileOpts = getOpts(fileDescriptor, FileOpts::hasTs).getTs();
         TsFieldOpts fieldOpts = getOpts(fieldDescriptor, FieldOpts::hasTs).getTs();
@@ -408,9 +481,9 @@ public final class Generator {
 
         String fullName = getFieldTypeFullName(fieldDescriptor);
         if ("google.protobuf.Any".equals(fullName)) {
-            return "unknown";
+            return UNKNOWN;
         }
-        String name = isMessage(fieldDescriptor) ? toInterfaceName(fullName) : fullName;
+        String name = (toI && isMessage(fieldDescriptor)) ? toInterfaceName(fullName) : fullName;
         String packageName = fileDescriptor.getPackage();
         if (StringUtils.startsWith(name, packageName)) {
             return name.substring(packageName.length() + 1);

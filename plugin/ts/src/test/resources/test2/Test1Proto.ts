@@ -9,7 +9,6 @@ export namespace Test1Proto {
 
   export class Test implements ITest {
     webpbMeta: () => Webpb.WebpbMeta;
-    toWebpbAlias = () => this;
 
     private constructor() {
       this.webpbMeta = () => ({
@@ -22,6 +21,14 @@ export namespace Test1Proto {
 
     static create(): Test {
       return new Test();
+    }
+
+    static fromAlias(_data?: Record<string, any>): Test {
+      return Test.create();
+    }
+
+    toWebpbAlias(): any {
+      return this;
     }
   }
 }

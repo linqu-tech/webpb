@@ -79,9 +79,9 @@ export function toAlias(data: any, aliases: { [key: string]: string }): any {
     if (typeof toAlias === 'function') {
       obj[key] = toAlias();
     } else if (aliases && aliases[key]) {
-      obj[aliases[key]] = data[key];
+      obj[aliases[key]] = value;
     } else {
-      obj[key] = data[key];
+      obj[key] = value;
     }
   }
   return obj;

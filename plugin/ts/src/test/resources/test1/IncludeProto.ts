@@ -15,7 +15,6 @@ export namespace IncludeProto {
   export class Message implements IMessage {
     id!: number;
     webpbMeta: () => Webpb.WebpbMeta;
-    toWebpbAlias = () => this;
 
     private constructor(p?: IMessage) {
       Webpb.assign(p, this, []);
@@ -30,6 +29,14 @@ export namespace IncludeProto {
     static create(properties: IMessage): Message {
       return new Message(properties);
     }
+
+    static fromAlias(data: Record<string, any>): Message {
+      return Message.create(data as any);
+    }
+
+    toWebpbAlias(): any {
+      return this;
+    }
   }
 
   export namespace Message {
@@ -40,7 +47,6 @@ export namespace IncludeProto {
     export class Nested implements INested {
       test1!: number;
       webpbMeta: () => Webpb.WebpbMeta;
-      toWebpbAlias = () => this;
 
       private constructor(p?: INested) {
         Webpb.assign(p, this, []);
@@ -54,6 +60,14 @@ export namespace IncludeProto {
 
       static create(properties: INested): Nested {
         return new Nested(properties);
+      }
+
+      static fromAlias(data: Record<string, any>): Nested {
+        return Nested.create(data as any);
+      }
+
+      toWebpbAlias(): any {
+        return this;
       }
     }
   }
