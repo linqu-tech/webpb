@@ -28,7 +28,6 @@ export namespace TestProto {
     data1!: string;
     data2?: number;
     webpbMeta: () => Webpb.WebpbMeta;
-    toWebpbAlias = () => this;
 
     private constructor(p?: IData) {
       Webpb.assign(p, this, []);
@@ -43,6 +42,14 @@ export namespace TestProto {
     static create(properties: IData): Data {
       return new Data(properties);
     }
+
+    static fromAlias(data: Record<string, any>): Data {
+      return Data.create(data as any);
+    }
+
+    toWebpbAlias(): any {
+      return this;
+    }
   }
 
   export interface ITest1 {
@@ -54,7 +61,6 @@ export namespace TestProto {
     test1!: string;
     test2!: number;
     webpbMeta: () => Webpb.WebpbMeta;
-    toWebpbAlias = () => this;
 
     private constructor(p?: ITest1) {
       Webpb.assign(p, this, []);
@@ -73,6 +79,14 @@ export namespace TestProto {
     static create(properties: ITest1): Test1 {
       return new Test1(properties);
     }
+
+    static fromAlias(data: Record<string, any>): Test1 {
+      return Test1.create(data as any);
+    }
+
+    toWebpbAlias(): any {
+      return this;
+    }
   }
 
   export interface ITest2 {
@@ -86,7 +100,6 @@ export namespace TestProto {
     id!: string;
     data!: IData;
     webpbMeta: () => Webpb.WebpbMeta;
-    toWebpbAlias = () => this;
 
     private constructor(p?: ITest2) {
       Webpb.assign(p, this, []);
@@ -107,6 +120,14 @@ export namespace TestProto {
     static create(properties: ITest2): Test2 {
       return new Test2(properties);
     }
+
+    static fromAlias(data: Record<string, any>): Test2 {
+      return Test2.create(data as any);
+    }
+
+    toWebpbAlias(): any {
+      return this;
+    }
   }
 
   export interface ITest4 {
@@ -120,10 +141,6 @@ export namespace TestProto {
     test2!: number;
     test3!: string;
     webpbMeta: () => Webpb.WebpbMeta;
-    toWebpbAlias = () => Webpb.toAlias(this, {
-      test1: 'aliasTest1',
-      test2: 'aliasTest2',
-    });
 
     private constructor(p?: ITest4) {
       Webpb.assign(p, this, []);
@@ -138,6 +155,21 @@ export namespace TestProto {
     static create(properties: ITest4): Test4 {
       return new Test4(properties);
     }
+
+    static fromAlias(data: Record<string, any>): Test4 {
+      const properties = Webpb.toAlias(data, {
+        'aliasTest1': 'test1',
+        'aliasTest2': 'test2',
+      });
+      return Test4.create(properties);
+    }
+
+    toWebpbAlias(): any {
+      return Webpb.toAlias(this, {
+        'test1': 'aliasTest1',
+        'test2': 'aliasTest2',
+      });
+    }
   }
 
   export interface ITest {
@@ -146,7 +178,7 @@ export namespace TestProto {
     test3: IncludeProto.Enum;
     test4?: ITest4;
     test5: { [k: string]: number };
-    tests6: { [k: string]: IncludeProto.IMessage };
+    test6: { [k: string]: IncludeProto.IMessage };
     test7: unknown;
     test8: Test.INestedTest;
     test9?: number;
@@ -168,7 +200,7 @@ export namespace TestProto {
     test3!: IncludeProto.Enum;
     test4?: ITest4;
     test5!: { [k: string]: number };
-    tests6!: { [k: string]: IncludeProto.IMessage };
+    test6!: { [k: string]: IncludeProto.IMessage };
     test7!: unknown;
     test8!: Test.INestedTest;
     test9?: number;
@@ -183,7 +215,6 @@ export namespace TestProto {
     test18: number = 123;
     test19: string = "test19";
     webpbMeta: () => Webpb.WebpbMeta;
-    toWebpbAlias = () => Webpb.toAlias(this, {});
 
     private constructor(p?: ITest) {
       Webpb.assign(p, this, ["test1", "test9"]);
@@ -198,6 +229,21 @@ export namespace TestProto {
     static create(properties: ITest): Test {
       return new Test(properties);
     }
+
+    static fromAlias(data: Record<string, any>): Test {
+      const properties = Webpb.toAlias(data, {});
+      data.test2 && (properties.test2 = IncludeProto.Message.fromAlias(data.test2));
+      data.test4 && (properties.test4 = Test4.fromAlias(data.test4));
+      data.test8 && (properties.test8 = Test.NestedTest.fromAlias(data.test8));
+      data.test12 && (properties.test12 = IncludeProto.Message.Nested.fromAlias(data.test12));
+      data.test14 && (properties.test14 = Include2Proto.Message.Nested.fromAlias(data.test14));
+      data.test17 && (properties.test17 = Test.Test17.fromAlias(data.test17));
+      return Test.create(properties);
+    }
+
+    toWebpbAlias(): any {
+      return Webpb.toAlias(this, {});
+    }
   }
 
   export namespace Test {
@@ -208,7 +254,6 @@ export namespace TestProto {
     export class NestedTest implements INestedTest, Webpb.WebpbMessage {
       test1!: number;
       webpbMeta: () => Webpb.WebpbMeta;
-      toWebpbAlias = () => this;
 
       private constructor(p?: INestedTest) {
         Webpb.assign(p, this, []);
@@ -223,6 +268,14 @@ export namespace TestProto {
       static create(properties: INestedTest): NestedTest {
         return new NestedTest(properties);
       }
+
+      static fromAlias(data: Record<string, any>): NestedTest {
+        return NestedTest.create(data as any);
+      }
+
+      toWebpbAlias(): any {
+        return this;
+      }
     }
 
     export interface ITest17 {
@@ -232,7 +285,6 @@ export namespace TestProto {
     export class Test17 implements ITest17 {
       test!: string;
       webpbMeta: () => Webpb.WebpbMeta;
-      toWebpbAlias = () => this;
 
       private constructor(p?: ITest17) {
         Webpb.assign(p, this, []);
@@ -246,6 +298,14 @@ export namespace TestProto {
 
       static create(properties: ITest17): Test17 {
         return new Test17(properties);
+      }
+
+      static fromAlias(data: Record<string, any>): Test17 {
+        return Test17.create(data as any);
+      }
+
+      toWebpbAlias(): any {
+        return this;
       }
     }
   }

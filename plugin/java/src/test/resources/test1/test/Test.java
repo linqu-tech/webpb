@@ -52,7 +52,7 @@ public class Test implements WebpbMessage {
 
     private Map<Long, Integer> test5;
 
-    private Map<Integer, Message> tests6;
+    private Map<Integer, Message> test6;
 
     private Any test7;
 

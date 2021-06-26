@@ -15,7 +15,6 @@ export namespace Test2Proto {
     test2!: boolean;
     isTest3!: boolean;
     webpbMeta: () => Webpb.WebpbMeta;
-    toWebpbAlias = () => this;
 
     private constructor(p?: ITest) {
       Webpb.assign(p, this, []);
@@ -29,6 +28,14 @@ export namespace Test2Proto {
 
     static create(properties: ITest): Test {
       return new Test(properties);
+    }
+
+    static fromAlias(data: Record<string, any>): Test {
+      return Test.create(data as any);
+    }
+
+    toWebpbAlias(): any {
+      return this;
     }
   }
 }

@@ -11,7 +11,6 @@ export namespace IgnoredProto {
   export class IgnoreTest implements IIgnoreTest {
     test1!: number;
     webpbMeta: () => Webpb.WebpbMeta;
-    toWebpbAlias = () => this;
 
     private constructor(p?: IIgnoreTest) {
       Webpb.assign(p, this, []);
@@ -25,6 +24,14 @@ export namespace IgnoredProto {
 
     static create(properties: IIgnoreTest): IgnoreTest {
       return new IgnoreTest(properties);
+    }
+
+    static fromAlias(data: Record<string, any>): IgnoreTest {
+      return IgnoreTest.create(data as any);
+    }
+
+    toWebpbAlias(): any {
+      return this;
     }
   }
 }

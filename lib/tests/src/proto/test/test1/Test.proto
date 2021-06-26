@@ -92,7 +92,7 @@ message Test {
     required IncludeProto.Enum test3 = 3;
     optional Test4 test4 = 4;
     map<int64, int32> test5 = 5;
-    map<int32, IncludeProto.Message> tests6 = 6;
+    map<int32, IncludeProto.Message> test6 = 6;
     required google.protobuf.Any test7 = 7;
 
     message NestedTest {

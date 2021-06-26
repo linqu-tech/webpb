@@ -17,12 +17,12 @@ public class TsUtils {
     }
 
     /**
-     * Check if a {@link Descriptor} should generate toAlias function.
+     * Check if a {@link Descriptor} has any alias field.
      *
      * @param descriptor {@link Descriptor}
      * @return true if with toAlias
      */
-    public static boolean toAlias(Descriptor descriptor) {
+    public static boolean hasAlias(Descriptor descriptor) {
         for (FieldDescriptor fieldDescriptor : descriptor.getFields()) {
             if (StringUtils.isNotEmpty(getAlias(fieldDescriptor))) {
                 return true;
@@ -30,7 +30,7 @@ public class TsUtils {
             if (!DescriptorUtils.isMessage(fieldDescriptor)) {
                 continue;
             }
-            if (toAlias(fieldDescriptor.getMessageType())) {
+            if (hasAlias(fieldDescriptor.getMessageType())) {
                 return true;
             }
         }
