@@ -40,8 +40,14 @@ import com.github.javaparser.ast.type.PrimitiveType;
 import com.github.javaparser.ast.type.Type;
 import com.google.protobuf.Descriptors.EnumDescriptor;
 import com.google.protobuf.Descriptors.EnumValueDescriptor;
+import com.google.protobuf.Descriptors.FileDescriptor;
 import org.apache.commons.lang3.StringUtils;
+import tech.linqu.webpb.java.utils.ImportLookup;
+import tech.linqu.webpb.java.utils.ImportedName;
+import tech.linqu.webpb.java.utils.Imports;
+import tech.linqu.webpb.utilities.descriptor.WebpbExtend.EnumOpts;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend.EnumValueOpts;
+import tech.linqu.webpb.utilities.descriptor.WebpbExtend.JavaEnumOpts;
 import tech.linqu.webpb.utilities.descriptor.WebpbExtend.OptEnumValueOpts;
 import tech.linqu.webpb.utilities.utils.OptionUtils;
 
@@ -52,6 +58,8 @@ public class EnumGenerator {
 
     private static final String ENUM_VALUE = "value";
 
+    private Imports imports;
+
     private boolean stringValue;
 
     private Type valueType = PrimitiveType.intType();
@@ -59,17 +67,37 @@ public class EnumGenerator {
     /**
      * Generate enum declaration.
      *
-     * @param descriptor {@link EnumDescriptor}.
-     * @return {@link EnumDeclaration}
+     * @param unit           {@link CompilationUnit}
+     * @param importLookup   {@link ImportLookup}
+     * @param fileDescriptor {@link FileDescriptor}
+     * @param descriptor     {@link EnumDescriptor}
+     * @return {@link CompilationUnit}
      */
-    public CompilationUnit generate(CompilationUnit unit, EnumDescriptor descriptor) {
+    public CompilationUnit generate(CompilationUnit unit,
+                                    ImportLookup importLookup,
+                                    FileDescriptor fileDescriptor,
+                                    EnumDescriptor descriptor) {
+        this.imports = new Imports(new ImportLookup().copy(importLookup).update(fileDescriptor));
         this.stringValue = OptionUtils.isStringValue(descriptor);
         if (this.stringValue) {
             this.valueType = new ClassOrInterfaceType(null, String.class.getSimpleName());
         }
+        EnumDeclaration declaration = generate(descriptor);
+        imports.computeUnit(unit);
+        unit.addType(declaration);
+        return unit;
+    }
+
+    private EnumDeclaration generate(EnumDescriptor descriptor) {
         EnumDeclaration declaration = new EnumDeclaration();
         declaration.setName(descriptor.getName());
         declaration.addModifier(Modifier.Keyword.PUBLIC);
+
+        JavaEnumOpts enumOpts = OptionUtils.getOpts(descriptor, EnumOpts::hasJava).getJava();
+        for (String impl : enumOpts.getImplementsList()) {
+            ImportedName importedName = imports.checkAndImport(impl);
+            declaration.addImplementedType(importedName.getName().asString());
+        }
 
         for (EnumValueDescriptor valueDescriptor : descriptor.getValues()) {
             EnumConstantDeclaration enumConstant =
@@ -81,8 +109,7 @@ public class EnumGenerator {
         generateEnumConstructor(declaration);
         generateEnumOfMethod(declaration, descriptor);
         generateEnumValueGetter(declaration);
-        unit.addType(declaration);
-        return unit;
+        return declaration;
     }
 
     private void generateEnumConstructor(EnumDeclaration declaration) {

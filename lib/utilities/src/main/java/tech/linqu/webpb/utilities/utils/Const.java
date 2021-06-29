@@ -39,7 +39,7 @@ public interface Const {
     /**
      * User custom options definition proto.
      */
-    String WEBPB_OPTIONS = "WebpbOptions.proto";
+    String WEBPB_OPTIONS = "(.*/)?((?i)webpb[\\._-]?options\\.proto)";
 
     /**
      * Webpb java runtime package.

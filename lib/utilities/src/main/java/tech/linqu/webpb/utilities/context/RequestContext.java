@@ -17,6 +17,8 @@
 package tech.linqu.webpb.utilities.context;
 
 
+import static tech.linqu.webpb.utilities.utils.DescriptorUtils.resolveFile;
+
 import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.Descriptors.DescriptorValidationException;
 import com.google.protobuf.Descriptors.FileDescriptor;
@@ -86,8 +88,7 @@ public class RequestContext {
     }
 
     private void initWebpbOptions(Predicate<WebpbExtend.FileOpts> predicate) {
-        FileDescriptor webpbDescriptor =
-            DescriptorUtils.resolveFileDescriptor(descriptors, Const.WEBPB_OPTIONS);
+        FileDescriptor webpbDescriptor = resolveFile(descriptors, Const.WEBPB_OPTIONS);
         this.fileOpts = OptionUtils.getOpts(webpbDescriptor, predicate);
     }
 }

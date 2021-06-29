@@ -7,9 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mockStatic;
 import static tech.linqu.webpb.utilities.test.TestUtils.createRequest;
-import static tech.linqu.webpb.utilities.utils.DescriptorUtils.resolveDescriptor;
-import static tech.linqu.webpb.utilities.utils.DescriptorUtils.resolveEnumDescriptor;
-import static tech.linqu.webpb.utilities.utils.DescriptorUtils.resolveFileDescriptor;
+import static tech.linqu.webpb.utilities.utils.DescriptorUtils.resolveEnum;
+import static tech.linqu.webpb.utilities.utils.DescriptorUtils.resolveFile;
+import static tech.linqu.webpb.utilities.utils.DescriptorUtils.resolveMessage;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Descriptors.Descriptor;
@@ -34,7 +34,7 @@ class OptionUtilsTest {
     @Test
     void shouldGetFileOptsSuccess() {
         RequestContext context = createRequest(Dumps.TEST1);
-        FileDescriptor descriptor = resolveFileDescriptor(context.getDescriptors(), "Test.proto");
+        FileDescriptor descriptor = resolveFile(context.getDescriptors(), "Test.proto");
 
         FileOpts javaOpts = OptionUtils.getOpts(descriptor, FileOpts::hasJava);
         assertTrue(javaOpts.getJava().getGenGetter());
@@ -46,7 +46,7 @@ class OptionUtilsTest {
     @Test
     void shouldGetFileOptsSuccessWhenParseError() {
         RequestContext context = createRequest(Dumps.TEST1);
-        FileDescriptor descriptor = resolveFileDescriptor(context.getDescriptors(), "Test.proto");
+        FileDescriptor descriptor = resolveFile(context.getDescriptors(), "Test.proto");
         try (MockedStatic<FileOpts> opts = mockStatic(FileOpts.class)) {
             opts.when(() -> FileOpts.parseFrom((ByteString) any()))
                 .thenThrow(new InvalidProtocolBufferException("Invalid"));
@@ -57,7 +57,7 @@ class OptionUtilsTest {
     @Test
     void shouldGetFileOptsSuccessWhenWithoutOptions() {
         RequestContext context = createRequest(Dumps.TEST2);
-        FileDescriptor descriptor = resolveFileDescriptor(context.getDescriptors(), "Test1.proto");
+        FileDescriptor descriptor = resolveFile(context.getDescriptors(), "Test1.proto");
         assertEquals(FileOpts.getDefaultInstance(),
             OptionUtils.getOpts((FileDescriptor) null, o -> true));
         assertEquals(FileOpts.getDefaultInstance(),
@@ -68,7 +68,7 @@ class OptionUtilsTest {
     @Test
     void shouldGetMessageOptsSuccess() {
         RequestContext context = createRequest(Dumps.TEST1);
-        Descriptor descriptor = resolveDescriptor(context.getDescriptors(), "Test");
+        Descriptor descriptor = resolveMessage(context.getDescriptors(), "Test");
 
         MessageOpts optOpts = OptionUtils.getOpts(descriptor, MessageOpts::hasOpt);
         assertEquals("GET", optOpts.getOpt().getMethod());
@@ -80,7 +80,7 @@ class OptionUtilsTest {
     @Test
     void shouldGetMessageOptsSuccessWhenParseError() {
         RequestContext context = createRequest(Dumps.TEST1);
-        Descriptor descriptor = resolveDescriptor(context.getDescriptors(), "Test");
+        Descriptor descriptor = resolveMessage(context.getDescriptors(), "Test");
         try (MockedStatic<MessageOpts> opts = mockStatic(MessageOpts.class)) {
             opts.when(() -> MessageOpts.parseFrom((ByteString) any()))
                 .thenThrow(new InvalidProtocolBufferException("Invalid"));
@@ -92,7 +92,7 @@ class OptionUtilsTest {
     @Test
     void shouldGetMessageOptsSuccessWhenWithoutOptions() {
         RequestContext context = createRequest(Dumps.TEST2);
-        Descriptor descriptor = resolveDescriptor(context.getDescriptors(), "Test1");
+        Descriptor descriptor = resolveMessage(context.getDescriptors(), "Test1");
         assertEquals(MessageOpts.getDefaultInstance(),
             OptionUtils.getOpts((Descriptor) null, o -> true));
         assertEquals(MessageOpts.getDefaultInstance(),
@@ -103,7 +103,7 @@ class OptionUtilsTest {
     @Test
     void shouldGetEnumOptsSuccess() {
         RequestContext context = createRequest(Dumps.TEST1);
-        EnumDescriptor enumDescriptor = resolveEnumDescriptor(context.getDescriptors(), "Enum");
+        EnumDescriptor enumDescriptor = resolveEnum(context.getDescriptors(), "Enum");
 
         EnumOpts optOpts = OptionUtils.getOpts(enumDescriptor, EnumOpts::hasOpt);
         assertNotNull(optOpts);
@@ -115,7 +115,7 @@ class OptionUtilsTest {
     @Test
     void shouldGetEnumOptsSuccessWhenParseError() {
         RequestContext context = createRequest(Dumps.TEST1);
-        EnumDescriptor enumDescriptor = resolveEnumDescriptor(context.getDescriptors(), "Enum");
+        EnumDescriptor enumDescriptor = resolveEnum(context.getDescriptors(), "Enum");
         try (MockedStatic<EnumOpts> opts = mockStatic(EnumOpts.class)) {
             opts.when(() -> EnumOpts.parseFrom((ByteString) any()))
                 .thenThrow(new InvalidProtocolBufferException("Invalid"));
@@ -127,7 +127,7 @@ class OptionUtilsTest {
     @Test
     void shouldGetEnumOptsSuccessWhenWithoutOptions() {
         RequestContext context = createRequest(Dumps.TEST2);
-        EnumDescriptor enumDescriptor = resolveEnumDescriptor(context.getDescriptors(), "Enum");
+        EnumDescriptor enumDescriptor = resolveEnum(context.getDescriptors(), "Enum");
         assertEquals(EnumOpts.getDefaultInstance(),
             OptionUtils.getOpts((EnumDescriptor) null, o -> true));
         assertEquals(EnumOpts.getDefaultInstance(),
@@ -138,7 +138,7 @@ class OptionUtilsTest {
     @Test
     void shouldGetFieldOptsSuccess() {
         RequestContext context = createRequest(Dumps.TEST1);
-        Descriptor descriptor = resolveDescriptor(context.getDescriptors(), "Test");
+        Descriptor descriptor = resolveMessage(context.getDescriptors(), "Test");
         assertNotNull(descriptor);
         FieldDescriptor fieldDescriptor = descriptor.getFields().get(0);
 
@@ -152,7 +152,7 @@ class OptionUtilsTest {
     @Test
     void shouldGetFieldOptsSuccessWhenParseError() {
         RequestContext context = createRequest(Dumps.TEST1);
-        Descriptor descriptor = resolveDescriptor(context.getDescriptors(), "Test");
+        Descriptor descriptor = resolveMessage(context.getDescriptors(), "Test");
         assertNotNull(descriptor);
         FieldDescriptor fieldDescriptor = descriptor.getFields().get(0);
         try (MockedStatic<FieldOpts> opts = mockStatic(FieldOpts.class)) {
@@ -166,7 +166,7 @@ class OptionUtilsTest {
     @Test
     void shouldGetFieldOptsSuccessWhenWithoutOptions() {
         RequestContext context = createRequest(Dumps.TEST1);
-        Descriptor descriptor = resolveDescriptor(context.getDescriptors(), "Data");
+        Descriptor descriptor = resolveMessage(context.getDescriptors(), "Test6");
         assertNotNull(descriptor);
         FieldDescriptor fieldDescriptor = descriptor.getFields().get(0);
         assertEquals(FieldOpts.getDefaultInstance(),
@@ -179,7 +179,7 @@ class OptionUtilsTest {
     @Test
     void shouldGetEnumValueOptsSuccess() {
         RequestContext context = createRequest(Dumps.TEST1);
-        EnumDescriptor descriptor = resolveEnumDescriptor(context.getDescriptors(), "Test5");
+        EnumDescriptor descriptor = resolveEnum(context.getDescriptors(), "Test5");
         assertNotNull(descriptor);
         EnumValueDescriptor enumValueDescriptor = descriptor.getValues().get(0);
 
@@ -193,7 +193,7 @@ class OptionUtilsTest {
     @Test
     void shouldGetEnumValueOptsSuccessWhenParseError() {
         RequestContext context = createRequest(Dumps.TEST1);
-        EnumDescriptor descriptor = resolveEnumDescriptor(context.getDescriptors(), "Test5");
+        EnumDescriptor descriptor = resolveEnum(context.getDescriptors(), "Test5");
         assertNotNull(descriptor);
         EnumValueDescriptor enumValueDescriptor = descriptor.getValues().get(0);
         try (MockedStatic<EnumValueOpts> opts = mockStatic(EnumValueOpts.class)) {
@@ -207,7 +207,7 @@ class OptionUtilsTest {
     @Test
     void shouldGetEnumValueOptsSuccessWhenWithoutOptions() {
         RequestContext context = createRequest(Dumps.TEST1);
-        EnumDescriptor descriptor = resolveEnumDescriptor(context.getDescriptors(), "Test5");
+        EnumDescriptor descriptor = resolveEnum(context.getDescriptors(), "Test5");
         assertNotNull(descriptor);
         EnumValueDescriptor enumValueDescriptor = descriptor.getValues().get(2);
         assertEquals(EnumValueOpts.getDefaultInstance(),
@@ -219,13 +219,13 @@ class OptionUtilsTest {
     @Test
     void shouldReturnEnumIsStringValueSuccess() {
         RequestContext context = createRequest(Dumps.TEST1);
-        EnumDescriptor descriptor1 = resolveEnumDescriptor(context.getDescriptors(), "Test3");
+        EnumDescriptor descriptor1 = resolveEnum(context.getDescriptors(), "Test3");
         assertTrue(OptionUtils.isStringValue(descriptor1));
 
-        EnumDescriptor descriptor2 = resolveEnumDescriptor(context.getDescriptors(), "Test5");
+        EnumDescriptor descriptor2 = resolveEnum(context.getDescriptors(), "Test5");
         assertTrue(OptionUtils.isStringValue(descriptor2));
 
-        EnumDescriptor descriptor3 = resolveEnumDescriptor(context.getDescriptors(), "Enum");
+        EnumDescriptor descriptor3 = resolveEnum(context.getDescriptors(), "Enum");
         assertFalse(OptionUtils.isStringValue(descriptor3));
     }
 }

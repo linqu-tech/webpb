@@ -2,10 +2,12 @@
 // https://github.com/linqu-tech/webpb
 package test;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import tech.linqu.webpb.runtime.WebpbMessage;
 import tech.linqu.webpb.runtime.WebpbMeta;
 
-public class Test implements WebpbMessage {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class Test6 implements WebpbMessage {
 
     public static final String WEBPB_METHOD = "";
 
@@ -20,18 +22,15 @@ public class Test implements WebpbMessage {
         return WEBPB_META;
     }
 
-    private Integer test1;
+    private String test1;
 
-    private Boolean test2;
+    private Integer test2;
 
-    private Boolean isTest3;
-
-    public Test() {
+    public Test6() {
     }
 
-    public Test(Integer test1, Boolean test2, Boolean isTest3) {
+    public Test6(String test1, Integer test2) {
         this.test1 = test1;
         this.test2 = test2;
-        this.isTest3 = isTest3;
     }
 }

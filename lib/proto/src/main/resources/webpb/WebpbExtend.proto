@@ -57,6 +57,10 @@ message OptMessageOpts {
 
 message JavaMessageOpts {
     repeated string annotation = 1000;
+
+    repeated string implements = 1001;
+
+    optional string extends = 1002;
 }
 
 message TsMessageOpts {
@@ -81,6 +85,8 @@ message OptEnumOpts {
 
 message JavaEnumOpts {
     repeated string annotation = 1000;
+
+    repeated string implements = 1001;
 }
 
 message TsEnumOpts {

@@ -19,39 +19,6 @@ export namespace TestProto {
     test5_3 = 'test5_3',
   }
 
-  export interface IData {
-    data1: string;
-    data2?: number;
-  }
-
-  export class Data implements IData {
-    data1!: string;
-    data2?: number;
-    webpbMeta: () => Webpb.WebpbMeta;
-
-    private constructor(p?: IData) {
-      Webpb.assign(p, this, []);
-      this.webpbMeta = () => (p && {
-        class: 'Data',
-        method: '',
-        context: '',
-        path: ''
-      }) as Webpb.WebpbMeta;
-    }
-
-    static create(properties: IData): Data {
-      return new Data(properties);
-    }
-
-    static fromAlias(data: Record<string, any>): Data {
-      return Data.create(data as any);
-    }
-
-    toWebpbAlias(): any {
-      return this;
-    }
-  }
-
   export interface ITest1 {
     test1: string;
     test2: number;
@@ -90,15 +57,15 @@ export namespace TestProto {
   }
 
   export interface ITest2 {
+    test1: string;
     test2: string;
-    id: string;
-    data: IData;
+    test3: ITest6;
   }
 
   export class Test2 implements ITest2, Webpb.WebpbMessage {
+    test1!: string;
     test2!: string;
-    id!: string;
-    data!: IData;
+    test3!: ITest6;
     webpbMeta: () => Webpb.WebpbMeta;
 
     private constructor(p?: ITest2) {
@@ -108,11 +75,11 @@ export namespace TestProto {
         method: 'GET',
         context: '/test',
         path: `/test/${p.test2}${Webpb.query('?', {
-          id: p.id
+          id: p.test1
         })}${Webpb.query('&', {
-          data1: Webpb.getter(p, 'data.data1')
+          data1: Webpb.getter(p, 'test3.test1')
         })}${Webpb.query('&', {
-          data2: Webpb.getter(p, 'data.data2')
+          data2: Webpb.getter(p, 'test3.test2')
         })}`
       }) as Webpb.WebpbMeta;
     }
@@ -169,6 +136,39 @@ export namespace TestProto {
         'test1': 'aliasTest1',
         'test2': 'aliasTest2',
       });
+    }
+  }
+
+  export interface ITest6 {
+    test1: string;
+    test2?: number;
+  }
+
+  export class Test6 implements ITest6 {
+    test1!: string;
+    test2?: number;
+    webpbMeta: () => Webpb.WebpbMeta;
+
+    private constructor(p?: ITest6) {
+      Webpb.assign(p, this, []);
+      this.webpbMeta = () => (p && {
+        class: 'Test6',
+        method: '',
+        context: '',
+        path: ''
+      }) as Webpb.WebpbMeta;
+    }
+
+    static create(properties: ITest6): Test6 {
+      return new Test6(properties);
+    }
+
+    static fromAlias(data: Record<string, any>): Test6 {
+      return Test6.create(data as any);
+    }
+
+    toWebpbAlias(): any {
+      return this;
     }
   }
 
