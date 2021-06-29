@@ -18,7 +18,7 @@ package tech.linqu.webpb.java.generator;
 
 import static com.google.protobuf.Descriptors.EnumDescriptor;
 import static com.google.protobuf.Descriptors.FileDescriptor;
-import static tech.linqu.webpb.utilities.utils.DescriptorUtils.resolveFileDescriptor;
+import static tech.linqu.webpb.utilities.utils.DescriptorUtils.resolveFile;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.comments.LineComment;
@@ -57,8 +57,7 @@ public final class Generator {
      */
     public Map<String, String> generate(RequestContext context) {
         this.requestContext = context;
-        this.importLookup
-            .update(resolveFileDescriptor(context.getDescriptors(), Const.WEBPB_OPTIONS));
+        this.importLookup.update(resolveFile(context.getDescriptors(), Const.WEBPB_OPTIONS));
 
         Map<String, String> fileMap = new TreeMap<>();
         for (FileDescriptor fileDescriptor : context.getTargetDescriptors()) {

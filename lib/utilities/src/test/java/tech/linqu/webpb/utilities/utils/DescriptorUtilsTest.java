@@ -16,9 +16,9 @@ import static tech.linqu.webpb.utilities.utils.DescriptorUtils.getFieldTypePacka
 import static tech.linqu.webpb.utilities.utils.DescriptorUtils.getFieldTypeSimpleName;
 import static tech.linqu.webpb.utilities.utils.DescriptorUtils.getMapKeyDescriptor;
 import static tech.linqu.webpb.utilities.utils.DescriptorUtils.getMapValueDescriptor;
-import static tech.linqu.webpb.utilities.utils.DescriptorUtils.resolveDescriptor;
-import static tech.linqu.webpb.utilities.utils.DescriptorUtils.resolveEnumDescriptor;
-import static tech.linqu.webpb.utilities.utils.DescriptorUtils.resolveFileDescriptor;
+import static tech.linqu.webpb.utilities.utils.DescriptorUtils.resolveEnum;
+import static tech.linqu.webpb.utilities.utils.DescriptorUtils.resolveFile;
+import static tech.linqu.webpb.utilities.utils.DescriptorUtils.resolveMessage;
 import static tech.linqu.webpb.utilities.utils.DescriptorUtils.validation;
 
 import com.google.protobuf.Descriptors.Descriptor;
@@ -54,30 +54,30 @@ class DescriptorUtilsTest {
     @Test
     void shouldResolveDescriptorSuccess() {
         RequestContext context = createRequest(Dumps.TEST1);
-        assertNotNull(resolveDescriptor(context.getDescriptors(), "Test"));
-        assertNull(resolveDescriptor(context.getDescriptors(), "NotExists"));
+        assertNotNull(resolveMessage(context.getDescriptors(), "Test"));
+        assertNull(resolveMessage(context.getDescriptors(), "NotExists"));
     }
 
     @Test
     void shouldResolveFileDescriptorSuccess() {
         RequestContext context = createRequest(Dumps.TEST1);
-        FileDescriptor descriptor = resolveFileDescriptor(context.getDescriptors(), "Test.proto");
+        FileDescriptor descriptor = resolveFile(context.getDescriptors(), "Test.proto");
         assertNotNull(descriptor);
-        assertNotNull(resolveFileDescriptor(singletonList(descriptor), "Include.proto"));
-        assertNull(resolveFileDescriptor(context.getDescriptors(), "NotExists"));
+        assertNotNull(resolveFile(singletonList(descriptor), "Include.proto"));
+        assertNull(resolveFile(context.getDescriptors(), "NotExists"));
     }
 
     @Test
     void shouldResolveEnumDescriptorSuccess() {
         RequestContext context = createRequest(Dumps.TEST1);
-        assertNotNull(resolveEnumDescriptor(context.getDescriptors(), "Enum"));
-        assertNull(resolveEnumDescriptor(context.getDescriptors(), "NotExists"));
+        assertNotNull(resolveEnum(context.getDescriptors(), "Enum"));
+        assertNull(resolveEnum(context.getDescriptors(), "NotExists"));
     }
 
     @Test
     void shouldGetFieldTypeFilePackageSuccess() {
         RequestContext context = createRequest(Dumps.TEST1);
-        Descriptor descriptor = resolveDescriptor(context.getDescriptors(), "Test");
+        Descriptor descriptor = resolveMessage(context.getDescriptors(), "Test");
         assertNotNull(descriptor);
         assertNull(getFieldTypePackage(descriptor.getFields().get(0)));
         assertEquals("IncludeProto", getFieldTypePackage(descriptor.getFields().get(1)));
@@ -87,7 +87,7 @@ class DescriptorUtilsTest {
     @Test
     void shouldGetFieldTypeSimpleNameSuccess() {
         RequestContext context = createRequest(Dumps.TEST1);
-        Descriptor descriptor = resolveDescriptor(context.getDescriptors(), "Test");
+        Descriptor descriptor = resolveMessage(context.getDescriptors(), "Test");
         assertNotNull(descriptor);
         assertEquals("INT32", getFieldTypeSimpleName(descriptor.getFields().get(0)));
         assertEquals("Message", getFieldTypeSimpleName(descriptor.getFields().get(1)));
@@ -97,7 +97,7 @@ class DescriptorUtilsTest {
     @Test
     void shouldGetFieldTypePackageSuccess() {
         RequestContext context = createRequest(Dumps.TEST1);
-        Descriptor descriptor = resolveDescriptor(context.getDescriptors(), "Test");
+        Descriptor descriptor = resolveMessage(context.getDescriptors(), "Test");
         assertNotNull(descriptor);
         assertNull(getFieldTypePackage(descriptor.getFields().get(0)));
         assertEquals("IncludeProto", getFieldTypePackage(descriptor.getFields().get(1)));
@@ -107,7 +107,7 @@ class DescriptorUtilsTest {
     @Test
     void shouldGetFieldTypeFullNameSuccess() {
         RequestContext context = createRequest(Dumps.TEST1);
-        Descriptor descriptor = resolveDescriptor(context.getDescriptors(), "Test");
+        Descriptor descriptor = resolveMessage(context.getDescriptors(), "Test");
         assertNotNull(descriptor);
         assertEquals("INT32", getFieldTypeFullName(descriptor.getFields().get(0)));
         assertEquals("IncludeProto.Message", getFieldTypeFullName(descriptor.getFields().get(1)));
@@ -117,7 +117,7 @@ class DescriptorUtilsTest {
     @Test
     void shouldGetMapKeyDescriptorSuccess() {
         RequestContext context = createRequest(Dumps.TEST1);
-        Descriptor descriptor = resolveDescriptor(context.getDescriptors(), "Test");
+        Descriptor descriptor = resolveMessage(context.getDescriptors(), "Test");
         assertNotNull(descriptor);
         assertNotNull(getMapKeyDescriptor(descriptor.getFields().get(4)));
     }
@@ -125,7 +125,7 @@ class DescriptorUtilsTest {
     @Test
     void shouldGetMapValueDescriptorSuccess() {
         RequestContext context = createRequest(Dumps.TEST1);
-        Descriptor descriptor = resolveDescriptor(context.getDescriptors(), "Test");
+        Descriptor descriptor = resolveMessage(context.getDescriptors(), "Test");
         assertNotNull(descriptor);
         assertNotNull(getMapValueDescriptor(descriptor.getFields().get(4)));
     }
@@ -133,7 +133,7 @@ class DescriptorUtilsTest {
     @Test
     void shouldValidationSuccess() {
         RequestContext context = createRequest(Dumps.TEST1);
-        Descriptor descriptor = resolveDescriptor(context.getDescriptors(), "Test");
+        Descriptor descriptor = resolveMessage(context.getDescriptors(), "Test");
         ParamGroup group = ParamGroup.of("/{test1}/{test2.id}");
         assertDoesNotThrow(() -> validation(group, descriptor));
     }
@@ -141,7 +141,7 @@ class DescriptorUtilsTest {
     @Test
     void shouldValidationThrowException() {
         RequestContext context = createRequest(Dumps.TEST1);
-        Descriptor descriptor = resolveDescriptor(context.getDescriptors(), "Test");
+        Descriptor descriptor = resolveMessage(context.getDescriptors(), "Test");
         ParamGroup group = ParamGroup.of("/{test1}/{test2.id}?value={notExists}");
         assertThrows(RuntimeException.class, () -> validation(group, descriptor),
             "Invalid accessor notExists");

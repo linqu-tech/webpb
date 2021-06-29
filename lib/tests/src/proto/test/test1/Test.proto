@@ -7,8 +7,8 @@ option java_package = "test";
 import "Include.proto";
 import "Include2.proto";
 
+import "imports/WebpbOptions.proto";
 import "webpb/WebpbExtend.proto";
-import "WebpbOptions.proto";
 
 import "google/protobuf/any.proto";
 

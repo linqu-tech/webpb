@@ -4,8 +4,8 @@ package Include2Proto;
 
 option java_package = "include2";
 
+import "imports/WebpbOptions.proto";
 import "webpb/WebpbExtend.proto";
-import "WebpbOptions.proto";
 
 message Message {
     required int32 id = 1;

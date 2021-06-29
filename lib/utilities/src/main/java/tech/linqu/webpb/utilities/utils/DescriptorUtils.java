@@ -63,7 +63,7 @@ public class DescriptorUtils {
      * @param name        descriptor name
      * @return {@link Descriptor} or null
      */
-    public static Descriptor resolveDescriptor(List<FileDescriptor> descriptors, String name) {
+    public static Descriptor resolveMessage(List<FileDescriptor> descriptors, String name) {
         for (FileDescriptor fileDescriptor : descriptors) {
             for (Descriptor descriptor : fileDescriptor.getMessageTypes()) {
                 if (StringUtils.equalsIgnoreCase(name, descriptor.getName())) {
@@ -81,8 +81,7 @@ public class DescriptorUtils {
      * @param name        descriptor name
      * @return {@link Descriptor} or null
      */
-    public static EnumDescriptor resolveEnumDescriptor(List<FileDescriptor> descriptors,
-                                                       String name) {
+    public static EnumDescriptor resolveEnum(List<FileDescriptor> descriptors, String name) {
         for (FileDescriptor fileDescriptor : descriptors) {
             for (EnumDescriptor descriptor : fileDescriptor.getEnumTypes()) {
                 if (StringUtils.equalsIgnoreCase(name, descriptor.getName())) {
@@ -97,17 +96,15 @@ public class DescriptorUtils {
      * Resolve a file descriptor by name recursively.
      *
      * @param descriptors from descriptors
-     * @param name        descriptor name
+     * @param regex       descriptor name regex
      * @return {@link FileDescriptor} or null
      */
-    public static FileDescriptor resolveFileDescriptor(List<FileDescriptor> descriptors,
-                                                       String name) {
+    public static FileDescriptor resolveFile(List<FileDescriptor> descriptors, String regex) {
         for (FileDescriptor descriptor : descriptors) {
-            if (StringUtils.equalsIgnoreCase(descriptor.getName(), name)) {
+            if (descriptor.getName().matches(regex)) {
                 return descriptor;
             }
-            FileDescriptor fileDescriptor =
-                resolveFileDescriptor(descriptor.getDependencies(), name);
+            FileDescriptor fileDescriptor = resolveFile(descriptor.getDependencies(), regex);
             if (fileDescriptor != null) {
                 return fileDescriptor;
             }
