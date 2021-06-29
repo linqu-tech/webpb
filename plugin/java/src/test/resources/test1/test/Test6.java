@@ -5,16 +5,15 @@ package test;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import tech.linqu.webpb.runtime.WebpbMessage;
 import tech.linqu.webpb.runtime.WebpbMeta;
-import test.message.AbstractClass;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Test2 extends AbstractClass implements WebpbMessage {
+public class Test6 implements WebpbMessage {
 
-    public static final String WEBPB_METHOD = "GET";
+    public static final String WEBPB_METHOD = "";
 
-    public static final String WEBPB_CONTEXT = "/test";
+    public static final String WEBPB_CONTEXT = "";
 
-    public static final String WEBPB_PATH = "/test/{test2}?id={test1}&data1={test3.test1}&data2={test3.test2}";
+    public static final String WEBPB_PATH = "";
 
     public static final WebpbMeta WEBPB_META = new WebpbMeta.Builder().method(WEBPB_METHOD).context(WEBPB_CONTEXT).path(WEBPB_PATH).build();
 
@@ -23,18 +22,15 @@ public class Test2 extends AbstractClass implements WebpbMessage {
         return WEBPB_META;
     }
 
-    private Long test1;
+    private String test1;
 
-    private String test2;
+    private Integer test2;
 
-    private Test6 test3;
-
-    public Test2() {
+    public Test6() {
     }
 
-    public Test2(Long test1, String test2, Test6 test3) {
+    public Test6(String test1, Integer test2) {
         this.test1 = test1;
         this.test2 = test2;
-        this.test3 = test3;
     }
 }

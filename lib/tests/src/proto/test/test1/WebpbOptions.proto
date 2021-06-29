@@ -12,6 +12,9 @@ option (f_opts).java = {
     import: 'com.fasterxml.jackson.databind.ser.std.ToStringSerializer'
     import: 'jakarta.validation.constraints.NotNull'
     import: 'lombok.ToString'
+    import: 'test.message.AbstractClass'
+    import: 'test.message.InterfaceA'
+    import: 'test.message.InterfaceB'
 };
 
 option (f_opts).ts = {

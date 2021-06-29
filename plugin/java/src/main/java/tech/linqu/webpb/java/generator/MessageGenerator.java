@@ -152,9 +152,29 @@ public class MessageGenerator {
     }
 
     private ClassOrInterfaceDeclaration generate(Descriptor descriptor) {
+        ClassOrInterfaceDeclaration declaration = generateMessage(descriptor);
+        generateMessageFields(declaration, descriptor);
+        generateConstructor(declaration, descriptor);
+        generateGettersAndSetters(declaration, descriptor);
+        generateNested(declaration, descriptor);
+        return declaration;
+    }
+
+    private ClassOrInterfaceDeclaration generateMessage(Descriptor descriptor) {
         ClassOrInterfaceDeclaration declaration = new ClassOrInterfaceDeclaration();
         declaration.setName(descriptor.getName());
         declaration.addModifier(Keyword.PUBLIC);
+
+        JavaMessageOpts messageOpts =
+            OptionUtils.getOpts(descriptor, MessageOpts::hasJava).getJava();
+        if (StringUtils.isNotEmpty(messageOpts.getExtends())) {
+            ImportedName importedName = imports.checkAndImport(messageOpts.getExtends());
+            declaration.addExtendedType(importedName.getName().asString());
+        }
+        for (String impl : messageOpts.getImplementsList()) {
+            ImportedName importedName = imports.checkAndImport(impl);
+            declaration.addImplementedType(importedName.getName().asString());
+        }
 
         addWebpbMeta(descriptor, declaration);
 
@@ -162,14 +182,7 @@ public class MessageGenerator {
         addAnnotations(declaration, webpbOpts.getAnnotationList());
         JavaFileOpts fileOpts = OptionUtils.getOpts(fileDescriptor, FileOpts::hasJava).getJava();
         addAnnotations(declaration, fileOpts.getAnnotationList());
-        JavaMessageOpts messageOpts =
-            OptionUtils.getOpts(descriptor, MessageOpts::hasJava).getJava();
         addAnnotations(declaration, messageOpts.getAnnotationList());
-
-        generateMessageFields(declaration, descriptor);
-        generateConstructor(declaration, descriptor);
-        generateGettersAndSetters(declaration, descriptor);
-        generateNested(declaration, descriptor);
         return declaration;
     }
 

@@ -5,9 +5,11 @@ package test;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import tech.linqu.webpb.runtime.WebpbMessage;
 import tech.linqu.webpb.runtime.WebpbMeta;
+import test.message.InterfaceA;
+import test.message.InterfaceB;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Test1 implements WebpbMessage {
+public class Test1 implements InterfaceA, InterfaceB, WebpbMessage {
 
     public static final String WEBPB_METHOD = "GET";
 

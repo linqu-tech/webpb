@@ -111,7 +111,8 @@ public final class Generator {
     public CompilationUnit generateEnum(FileDescriptor fileDescriptor,
                                         EnumDescriptor enumDescriptor) {
         CompilationUnit compilationUnit = createCompilationUnit(fileDescriptor);
-        return new EnumGenerator().generate(compilationUnit, enumDescriptor);
+        return new EnumGenerator()
+            .generate(compilationUnit, importLookup, fileDescriptor, enumDescriptor);
     }
 
     private CompilationUnit createCompilationUnit(FileDescriptor fileDescriptor) {

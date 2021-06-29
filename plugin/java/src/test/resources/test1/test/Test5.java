@@ -2,7 +2,10 @@
 // https://github.com/linqu-tech/webpb
 package test;
 
-public enum Test5 {
+import test.message.InterfaceA;
+import test.message.InterfaceB;
+
+public enum Test5 implements InterfaceA, InterfaceB {
 
     test5_1("text1"), test5_2("text2"), test5_3("test5_3");
 

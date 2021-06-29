@@ -166,7 +166,7 @@ class OptionUtilsTest {
     @Test
     void shouldGetFieldOptsSuccessWhenWithoutOptions() {
         RequestContext context = createRequest(Dumps.TEST1);
-        Descriptor descriptor = resolveDescriptor(context.getDescriptors(), "Data");
+        Descriptor descriptor = resolveDescriptor(context.getDescriptors(), "Test6");
         assertNotNull(descriptor);
         FieldDescriptor fieldDescriptor = descriptor.getFields().get(0);
         assertEquals(FieldOpts.getDefaultInstance(),
