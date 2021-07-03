@@ -27,14 +27,13 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import tech.linqu.webpb.commons.ParamGroup;
-import tech.linqu.webpb.commons.PathParam;
+import tech.linqu.webpb.commons.SegmentGroup;
+import tech.linqu.webpb.commons.UrlSegment;
 import tech.linqu.webpb.runtime.common.MessageContext;
 
 /**
@@ -88,11 +87,11 @@ public class WebpbUtils {
      */
     public static String formatUrl(ObjectMapper objectMapper, WebpbMessage message) {
         MessageContext context = getContext(message);
-        if (context.getParamGroup().isEmpty()) {
+        if (context.getSegmentGroup().isEmpty()) {
             return context.getPath();
         }
         JsonNode data = objectMapper.convertValue(message, JsonNode.class);
-        String path = formatPath(data, context.getParamGroup(), null);
+        String path = formatPath(data, context.getSegmentGroup(), null);
         return emptyOrDefault(context.getContext(), "") + path;
     }
 
@@ -113,11 +112,11 @@ public class WebpbUtils {
             throw new RuntimeException(String
                 .format("Can not concat baseUrl: %s with path: %s", baseUrl, context.getPath()));
         }
-        if (context.getParamGroup().isEmpty()) {
+        if (context.getSegmentGroup().isEmpty()) {
             return concatUrl(baseUrl, context.getPath());
         }
         JsonNode data = objectMapper.convertValue(message, JsonNode.class);
-        String path = formatPath(data, context.getParamGroup(), baseUrl.getQuery());
+        String path = formatPath(data, context.getSegmentGroup(), baseUrl.getQuery());
         String file =
             emptyOrDefault(baseUrl.getPath(), "") + emptyOrDefault(context.getContext(), "") + path;
         return concatUrl(baseUrl, file);
@@ -185,7 +184,7 @@ public class WebpbUtils {
                 .setMethod(HttpMethod.valueOf(meta.getMethod().toUpperCase()))
                 .setContext(meta.getContext())
                 .setPath(meta.getPath())
-                .setParamGroup(ParamGroup.of(meta.getPath()));
+                .setSegmentGroup(SegmentGroup.of(meta.getPath()));
         });
         if (context == MessageContext.NULL_CONTEXT) {
             throw new RuntimeException("Invalid meta method or meta path.");
@@ -193,43 +192,38 @@ public class WebpbUtils {
         return context;
     }
 
-    private static String formatPath(JsonNode data, ParamGroup paramGroup, String query) {
+    private static String formatPath(JsonNode data, SegmentGroup group, String query) {
         StringBuilder builder = new StringBuilder();
-        Iterator<PathParam> iterator = paramGroup.getParams().iterator();
-        String link;
-        while (iterator.hasNext()) {
-            PathParam param = iterator.next();
-            builder.append(param.getPrefix());
-            if (builder.charAt(builder.length() - 1) == '?') {
-                builder.deleteCharAt(builder.length() - 1);
-            }
-            if (hasLength(param.getKey())) {
-                if (hasLength(query)) {
-                    builder.append("?").append(query);
-                    link = "&";
-                } else {
-                    link = "?";
-                }
-                do {
-                    param = param == null ? iterator.next() : param;
-                    String value = resolve(data, param.getAccessor());
-                    if (hasLength(value) && !"null".equals(value)) {
-                        builder.append(link).append(param.getKey()).append("=").append(value);
-                        link = "&";
-                    }
-                    param = null;
-                } while (iterator.hasNext());
-                break;
-            }
-            String value = resolve(data, param.getAccessor());
+        for (UrlSegment segment : group.getPathSegments()) {
+            builder.append(segment.getPrefix());
+            String value = resolve(data, segment.getValue());
             if (!hasLength(value)) {
                 throw new RuntimeException(
-                    String.format("Path variable '%s' not found", param.getAccessor()));
+                    String.format("Path variable '%s' not found", segment.getValue()));
             }
             builder.append(value);
         }
-        if (hasLength(paramGroup.getSuffix())) {
-            builder.append(paramGroup.getSuffix());
+        builder.append(group.getSuffix());
+        String link = "?";
+        if (StringUtils.hasLength(query)) {
+            builder.append("?").append(query);
+            link = "&";
+        }
+        for (UrlSegment segment : group.getQuerySegments()) {
+            if (segment.isAccessor()) {
+                String value = resolve(data, segment.getValue());
+                if (hasLength(value) && !"null".equals(value)) {
+                    builder.append(link).append(segment.getKey()).append("=").append(value);
+                    link = "&";
+                }
+            } else if (StringUtils.hasLength(segment.getKey())) {
+                builder.append(link).append(segment.getKey())
+                    .append("=").append(segment.getValue());
+                link = "&";
+            } else {
+                builder.append(link).append(segment.getValue());
+                link = "&";
+            }
         }
         return builder.toString();
     }
@@ -262,11 +256,14 @@ public class WebpbUtils {
         if (meta == null) {
             return message;
         }
-        ParamGroup group = ParamGroup.of(meta.getPath());
+        SegmentGroup group = SegmentGroup.of(meta.getPath());
         ObjectNode objectNode = objectMapper.createObjectNode();
-        for (PathParam pathParam : group.getParams()) {
-            String key = pathParam.getKey();
-            String accessor = pathParam.getAccessor();
+        for (UrlSegment segment : group.getSegments()) {
+            if (!segment.isAccessor()) {
+                continue;
+            }
+            String key = segment.getKey();
+            String accessor = segment.getValue();
             String value = variablesMap.get(StringUtils.hasLength(key) ? key : accessor);
             if (value != null) {
                 String[] accessors = accessor.split("\\.");

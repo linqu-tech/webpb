@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.springframework.http.HttpMethod;
-import tech.linqu.webpb.commons.ParamGroup;
+import tech.linqu.webpb.commons.SegmentGroup;
 
 /**
  * Context for webpb message.
@@ -25,5 +25,5 @@ public class MessageContext {
 
     String path;
 
-    ParamGroup paramGroup;
+    SegmentGroup segmentGroup;
 }
