@@ -28,7 +28,7 @@ protobuf {
     }
     plugins {
         id("dump") {
-            artifact = "tech.linqu.webpb:protoc-webpb-dump:${Vers.webpb}:all@jar"
+            path = "${rootDir}/plugin/dump/build/libs/protoc-webpb-dump-${Vers.webpb}.jar"
         }
     }
     generateProtoTasks {
@@ -53,4 +53,8 @@ tasks.jar {
         .filter { "generate(\\w*)Proto".toRegex().matches(it.name) }
         .map { it.dependsOn("extractIncludeProto") }
     )
+}
+
+tasks.withType<GenerateProtoTask> {
+    dependsOn(":plugin:dump:build")
 }

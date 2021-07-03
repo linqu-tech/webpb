@@ -36,7 +36,7 @@ protobuf {
     }
     plugins {
         id("webpb") {
-            artifact = "tech.linqu.webpb:protoc-webpb-java:${Vers.webpb}:all@jar"
+            path = "${rootDir}/plugin/java/build/libs/protoc-webpb-java-${Vers.webpb}.jar"
         }
     }
     generateProtoTasks {
@@ -57,4 +57,8 @@ tasks.test {
 
 tasks.bootJar {
     enabled = false
+}
+
+tasks.withType<GenerateProtoTask> {
+    dependsOn(":plugin:java:build")
 }
