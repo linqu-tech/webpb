@@ -95,7 +95,7 @@ class WebpbUtilsTest {
             WebpbMeta.builder().method("GET")
                 .path("/pagination={pagination}&size={pageable.size}&page={pageable.page}")
                 .build()));
-        assertEquals("/?pagination=true&size=20&page=10", url);
+        assertEquals("?pagination=true&size=20&page=10", url);
     }
 
     @Test
@@ -137,7 +137,7 @@ class WebpbUtilsTest {
         String url = WebpbUtils.formatUrl(null, objectMapper,
             new FooRequest(
                 WebpbMeta.builder().method("GET").path("https://domain?data={data}hello").build()));
-        assertEquals("https://domain?data=data123hello", url);
+        assertEquals("https://domain?data={data}hello", url);
     }
 
     @Test

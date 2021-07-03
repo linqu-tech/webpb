@@ -25,7 +25,7 @@ import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Descriptors.FileDescriptor;
 import org.junit.jupiter.api.Test;
-import tech.linqu.webpb.commons.ParamGroup;
+import tech.linqu.webpb.commons.SegmentGroup;
 import tech.linqu.webpb.tests.Dumps;
 import tech.linqu.webpb.utilities.context.RequestContext;
 
@@ -134,7 +134,7 @@ class DescriptorUtilsTest {
     void shouldValidationSuccess() {
         RequestContext context = createRequest(Dumps.TEST1);
         Descriptor descriptor = resolveMessage(context.getDescriptors(), "Test");
-        ParamGroup group = ParamGroup.of("/{test1}/{test2.id}");
+        SegmentGroup group = SegmentGroup.of("/{test1}/{test2.id}");
         assertDoesNotThrow(() -> validation(group, descriptor));
     }
 
@@ -142,7 +142,7 @@ class DescriptorUtilsTest {
     void shouldValidationThrowException() {
         RequestContext context = createRequest(Dumps.TEST1);
         Descriptor descriptor = resolveMessage(context.getDescriptors(), "Test");
-        ParamGroup group = ParamGroup.of("/{test1}/{test2.id}?value={notExists}");
+        SegmentGroup group = SegmentGroup.of("/{test1}/{test2.id}?value={notExists}");
         assertThrows(RuntimeException.class, () -> validation(group, descriptor),
             "Invalid accessor notExists");
     }

@@ -19,25 +19,50 @@ package tech.linqu.webpb.commons;
 /**
  * Path param captured from url.
  */
-public class PathParam {
+public class UrlSegment {
+
+    private final boolean accessor;
 
     private final String prefix;
 
     private final String key;
 
-    private final String accessor;
+    private final String value;
 
     /**
-     * Construct a {@link PathParam}.
+     * Construct a {@link UrlSegment}.
      *
-     * @param prefix   prefix string before this param
-     * @param key      key of the param
-     * @param accessor accessor to resolve value
+     * @param prefix prefix of the segment
+     * @param key    key of the param
+     * @param value  value of the segment
      */
-    public PathParam(String prefix, String key, String accessor) {
+    public UrlSegment(String prefix, String key, String value) {
         this.prefix = prefix;
         this.key = key;
-        this.accessor = accessor;
+        this.accessor = value.startsWith("{") && value.endsWith("}");
+        if (this.accessor) {
+            this.value = value.substring(1, value.length() - 1);
+        } else {
+            this.value = value;
+        }
+    }
+
+    /**
+     * Is query.
+     *
+     * @return is in query
+     */
+    public boolean isQuery() {
+        return key != null && !key.isEmpty();
+    }
+
+    /**
+     * Is accessor.
+     *
+     * @return accessor
+     */
+    public boolean isAccessor() {
+        return accessor;
     }
 
     /**
@@ -59,11 +84,11 @@ public class PathParam {
     }
 
     /**
-     * Get accessor.
+     * Get value.
      *
-     * @return accessor
+     * @return value
      */
-    public String getAccessor() {
-        return accessor;
+    public String getValue() {
+        return value;
     }
 }

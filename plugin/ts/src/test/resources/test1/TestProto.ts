@@ -35,11 +35,13 @@ export namespace TestProto {
         class: 'Test1',
         method: 'GET',
         context: '/test',
-        path: `/test?a=123&${Webpb.query('&', {
-          b: p.test1
-        })}${Webpb.query('&', {
-          d: p.test2
-        })}&e=456`
+        path: `/test${Webpb.query('?', {
+          'a': '123',
+          'b': p.test1,
+          'c': '321',
+          'd': p.test2,
+          'e': '456',
+        })}`
       }) as Webpb.WebpbMeta;
     }
 
@@ -75,11 +77,9 @@ export namespace TestProto {
         method: 'GET',
         context: '/test',
         path: `/test/${p.test2}${Webpb.query('?', {
-          id: p.test1
-        })}${Webpb.query('&', {
-          data1: Webpb.getter(p, 'test3.test1')
-        })}${Webpb.query('&', {
-          data2: Webpb.getter(p, 'test3.test2')
+          'id': p.test1,
+          'data1': Webpb.getter(p, 'test3.test1'),
+          'data2': Webpb.getter(p, 'test3.test2'),
         })}`
       }) as Webpb.WebpbMeta;
     }

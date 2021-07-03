@@ -25,8 +25,8 @@ import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Descriptors.FileDescriptor;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
-import tech.linqu.webpb.commons.ParamGroup;
-import tech.linqu.webpb.commons.PathParam;
+import tech.linqu.webpb.commons.SegmentGroup;
+import tech.linqu.webpb.commons.UrlSegment;
 
 /**
  * Utilities to handle protobuf descriptors.
@@ -185,13 +185,13 @@ public class DescriptorUtils {
     /**
      * Validate the descriptor contains required path variables.
      *
-     * @param group      {@link ParamGroup}
+     * @param group      {@link SegmentGroup}
      * @param descriptor {@link Descriptor}
      */
-    public static void validation(ParamGroup group, Descriptor descriptor) {
-        for (PathParam param : group.getParams()) {
-            if (!validate(param.getAccessor(), descriptor)) {
-                throw new RuntimeException("Invalid accessor " + param.getAccessor());
+    public static void validation(SegmentGroup group, Descriptor descriptor) {
+        for (UrlSegment segment : group.getSegments()) {
+            if (segment.isAccessor() && !validate(segment.getValue(), descriptor)) {
+                throw new RuntimeException("Invalid accessor " + segment.getValue());
             }
         }
     }

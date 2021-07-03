@@ -28,14 +28,13 @@ import static tech.linqu.webpb.utilities.utils.OptionUtils.getOpts;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
-import tech.linqu.webpb.commons.ParamGroup;
-import tech.linqu.webpb.commons.PathParam;
+import tech.linqu.webpb.commons.SegmentGroup;
+import tech.linqu.webpb.commons.UrlSegment;
 import tech.linqu.webpb.ts.utils.Imports;
 import tech.linqu.webpb.ts.utils.SourceBuilder;
 import tech.linqu.webpb.ts.utils.TsUtils;
@@ -159,9 +158,7 @@ public final class Generator {
     }
 
     private void generateEnum(EnumDescriptor descriptor) {
-        builder.indent().append("export enum ")
-            .append(descriptor.getName())
-            .append(" {\n");
+        builder.indent().append("export enum ").append(descriptor.getName()).append(" {\n");
 
         boolean stringValue = OptionUtils.isStringValue(descriptor);
         for (EnumValueDescriptor valueDescriptor : descriptor.getValues()) {
@@ -400,38 +397,30 @@ public final class Generator {
         }
 
         builder.append('`');
-        ParamGroup group = ParamGroup.of(path);
+        SegmentGroup group = SegmentGroup.of(path);
         DescriptorUtils.validation(group, descriptor);
-        Iterator<PathParam> iterator = group.getParams().iterator();
-        while (iterator.hasNext()) {
-            PathParam param = iterator.next();
-            String prefix = StringUtils.removeEnd(param.getPrefix(), "?");
-            builder.append(prefix);
-            String pre = StringUtils.contains(prefix, "?") ? "'&'" : "'?'";
-            if (StringUtils.isNotEmpty(param.getKey())) {
-                do {
-                    builder.append("${Webpb.query(").append(pre).append(", {\n");
-                    PathParam paramFinal = param;
-                    builder.level(() -> builder.indent()
-                        .append(paramFinal.getKey()).append(": ")
-                        .append(getter(paramFinal.getAccessor())).append("\n")
-                    );
-                    builder.indent().append("})}");
-                    if (!iterator.hasNext()) {
-                        break;
-                    }
-                    param = iterator.next();
-                    pre = "'&'";
-                } while (true);
-                if (StringUtils.isNotEmpty(group.getSuffix())) {
-                    builder.append("&").append(group.getSuffix());
-                }
-                builder.append("`\n");
-                return;
-            }
-            builder.append("${").append(getter(param.getAccessor())).append("}");
+        for (UrlSegment segment : group.getPathSegments()) {
+            builder.append(segment.getPrefix());
+            builder.append("${").append(getter(segment.getValue())).append("}");
         }
-        builder.append(group.getSuffix()).append("`\n");
+        builder.append(group.getSuffix());
+        if (!group.getQuerySegments().isEmpty()) {
+            builder.append("${Webpb.query('?', {\n");
+            builder.level(() -> {
+                for (UrlSegment segment : group.getQuerySegments()) {
+                    builder.indent()
+                        .append("'").append(segment.getKey()).append("': ");
+                    if (segment.isAccessor()) {
+                        builder.append(getter(segment.getValue()));
+                    } else {
+                        builder.append("'").append(segment.getValue()).append("'");
+                    }
+                    builder.append(",\n");
+                }
+            });
+            builder.indent().append("})}");
+        }
+        builder.append("`\n");
     }
 
     private String getter(String value) {
