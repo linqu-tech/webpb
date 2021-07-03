@@ -23,7 +23,7 @@ protobuf {
     }
     plugins {
         id("ts") {
-            artifact = "tech.linqu.webpb:protoc-webpb-ts:${Vers.webpb}:all@jar"
+            path = "${rootDir}/plugin/ts/build/libs/protoc-webpb-ts-${Vers.webpb}.jar"
         }
     }
     generateProtoTasks {
@@ -36,4 +36,8 @@ protobuf {
             }
         }
     }
+}
+
+tasks.withType<GenerateProtoTask> {
+    dependsOn(":plugin:ts:build")
 }
