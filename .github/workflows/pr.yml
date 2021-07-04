@@ -45,6 +45,8 @@ jobs:
     env:
       GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
       GPG_SIGNING_PASSWORD: ${{ secrets.GPG_SIGNING_PASSWORD }}
+      NEXUS_REPO_PASSWORD: ${{ secrets.NEXUS_REPO_PASSWORD }}
+      NEXUS_REPO_USERNAME: ${{ secrets.NEXUS_REPO_USERNAME }}
     steps:
       - uses: actions/checkout@v2
       - name: Setup JDK
