@@ -3,13 +3,11 @@ package utils
 import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
-import org.gradle.api.artifacts.repositories.PasswordCredentials
 import org.gradle.api.attributes.Category
 import org.gradle.api.attributes.DocsType
 import org.gradle.api.attributes.Usage
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
-import org.gradle.kotlin.dsl.credentials
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.the
 import org.gradle.plugins.signing.SigningExtension
@@ -60,11 +58,18 @@ fun Project.signAndPublish(artifactId: String, configuration: Action<MavenPublic
             val release = uri(Props.releaseRepo)
             val snapshot = uri(Props.snapshotRepo)
             url = if (version.toString().endsWith("SNAPSHOT")) snapshot else release
-            credentials(PasswordCredentials::class)
+            credentials {
+                username = System.getenv("NEXUS_REPO_USERNAME")
+                password = System.getenv("NEXUS_REPO_PASSWORD")
+            }
         }
     }
     configuration.execute(publication)
-    project.the<SigningExtension>().sign(publication)
+    val signing = the<SigningExtension>()
+    val signingKey = System.getenv("GPG_SIGNING_KEY")
+    val signingPassword = System.getenv("GPG_SIGNING_PASSWORD")
+    signing.useInMemoryPgpKeys(signingKey, signingPassword)
+    signing.sign(publication)
 }
 
 fun Project.createConfiguration(
