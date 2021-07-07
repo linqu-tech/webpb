@@ -20,6 +20,7 @@ import static tech.linqu.webpb.commons.Utils.uncheckedCall;
 
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import java.net.URL;
@@ -43,7 +44,7 @@ public class WebpbClient {
 
     private final Consumer<Map<String, Object>> attributes;
 
-    private final ObjectMapper formatMapper = new ObjectMapper();
+    private final ObjectMapper formatMapper = createFormatMapper();
 
     /**
      * {@link ObjectMapper} used when send request and receive response.
@@ -72,6 +73,16 @@ public class WebpbClient {
     }
 
     /**
+     * Create an {@link ObjectMapper} for formatting.
+     *
+     * @return {@link ObjectMapper}
+     */
+    protected ObjectMapper createFormatMapper() {
+        return new ObjectMapper()
+            .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+    }
+
+    /**
      * Create an {@link ObjectMapper}.
      *
      * @return {@link ObjectMapper}
@@ -79,6 +90,7 @@ public class WebpbClient {
     protected ObjectMapper createObjectMapper() {
         return new ObjectMapper()
             .configure(MapperFeature.PROPAGATE_TRANSIENT_MARKER, true)
+            .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
             .setAnnotationIntrospector(new JacksonAnnotationIntrospector() {
                 @Override
                 public boolean hasIgnoreMarker(AnnotatedMember m) {

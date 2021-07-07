@@ -67,8 +67,10 @@ fun Project.signAndPublish(artifactId: String, configuration: Action<MavenPublic
     configuration.execute(publication)
     val signing = the<SigningExtension>()
     val signingKey = System.getenv("GPG_SIGNING_KEY")
-    val signingPassword = System.getenv("GPG_SIGNING_PASSWORD")
-    signing.useInMemoryPgpKeys(signingKey, signingPassword)
+    if (signingKey != null) {
+        val signingPassword = System.getenv("GPG_SIGNING_PASSWORD")
+        signing.useInMemoryPgpKeys(signingKey, signingPassword)
+    }
     signing.sign(publication)
 }
 
