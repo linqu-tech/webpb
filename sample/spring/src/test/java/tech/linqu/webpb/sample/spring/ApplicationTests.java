@@ -2,7 +2,6 @@ package tech.linqu.webpb.sample.spring;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mockStatic;
 
 import org.junit.jupiter.api.Test;

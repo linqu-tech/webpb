@@ -17,7 +17,7 @@
 package tech.linqu.webpb.runtime;
 
 import static org.springframework.util.StringUtils.hasLength;
-import static tech.linqu.webpb.commons.Utils.emptyOrDefault;
+import static tech.linqu.webpb.commons.Utils.orEmpty;
 import static tech.linqu.webpb.commons.Utils.uncheckedCall;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -27,6 +27,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.http.HttpMethod;
@@ -87,12 +89,15 @@ public class WebpbUtils {
      */
     public static String formatUrl(ObjectMapper objectMapper, WebpbMessage message) {
         MessageContext context = getContext(message);
-        if (context.getSegmentGroup().isEmpty()) {
-            return context.getPath();
+        String path = context.getPath();
+        if (!context.getSegmentGroup().isEmpty()) {
+            JsonNode data = objectMapper.convertValue(message, JsonNode.class);
+            path = formatPath(data, context.getSegmentGroup(), null);
         }
-        JsonNode data = objectMapper.convertValue(message, JsonNode.class);
-        String path = formatPath(data, context.getSegmentGroup(), null);
-        return emptyOrDefault(context.getContext(), "") + path;
+        if (!path.startsWith("/")) {
+            return path;
+        }
+        return Paths.get("/", orEmpty(context.getContext()), path).toString();
     }
 
     /**
@@ -112,14 +117,13 @@ public class WebpbUtils {
             throw new RuntimeException(String
                 .format("Can not concat baseUrl: %s with path: %s", baseUrl, context.getPath()));
         }
-        if (context.getSegmentGroup().isEmpty()) {
-            return concatUrl(baseUrl, context.getPath());
+        String path = context.getPath();
+        if (!context.getSegmentGroup().isEmpty()) {
+            JsonNode data = objectMapper.convertValue(message, JsonNode.class);
+            path = formatPath(data, context.getSegmentGroup(), baseUrl.getQuery());
         }
-        JsonNode data = objectMapper.convertValue(message, JsonNode.class);
-        String path = formatPath(data, context.getSegmentGroup(), baseUrl.getQuery());
-        String file =
-            emptyOrDefault(baseUrl.getPath(), "") + emptyOrDefault(context.getContext(), "") + path;
-        return concatUrl(baseUrl, file);
+        Path file = Paths.get("/", orEmpty(baseUrl.getPath()), orEmpty(context.getContext()), path);
+        return concatUrl(baseUrl, file.toString());
     }
 
     private static String concatUrl(URL baseUrl, String file) {
