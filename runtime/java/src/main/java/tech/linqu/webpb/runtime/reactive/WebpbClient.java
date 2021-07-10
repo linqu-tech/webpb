@@ -18,11 +18,7 @@ package tech.linqu.webpb.runtime.reactive;
 
 import static tech.linqu.webpb.commons.Utils.uncheckedCall;
 
-import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
-import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import java.net.URL;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -32,7 +28,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import tech.linqu.webpb.runtime.WebpbMessage;
 import tech.linqu.webpb.runtime.WebpbUtils;
-import tech.linqu.webpb.runtime.common.InQuery;
 import tech.linqu.webpb.runtime.common.MessageContext;
 
 /**
@@ -44,12 +39,12 @@ public class WebpbClient {
 
     private final Consumer<Map<String, Object>> attributes;
 
-    private final ObjectMapper formatMapper = createFormatMapper();
+    private final ObjectMapper urlObjectMapper = WebpbUtils.createUrlObjectMapper();
 
     /**
      * {@link ObjectMapper} used when send request and receive response.
      */
-    protected final ObjectMapper objectMapper = createObjectMapper();
+    protected final ObjectMapper transportMapper = WebpbUtils.createTransportMapper();
 
     /**
      * WebpbClient constructor.
@@ -70,33 +65,6 @@ public class WebpbClient {
     public WebpbClient(WebClient webClient, Consumer<Map<String, Object>> attributes) {
         this.webClient = webClient;
         this.attributes = attributes;
-    }
-
-    /**
-     * Create an {@link ObjectMapper} for formatting.
-     *
-     * @return {@link ObjectMapper}
-     */
-    protected ObjectMapper createFormatMapper() {
-        return new ObjectMapper()
-            .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-    }
-
-    /**
-     * Create an {@link ObjectMapper}.
-     *
-     * @return {@link ObjectMapper}
-     */
-    protected ObjectMapper createObjectMapper() {
-        return new ObjectMapper()
-            .configure(MapperFeature.PROPAGATE_TRANSIENT_MARKER, true)
-            .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
-            .setAnnotationIntrospector(new JacksonAnnotationIntrospector() {
-                @Override
-                public boolean hasIgnoreMarker(AnnotatedMember m) {
-                    return super.hasIgnoreMarker(m) || m.hasAnnotation(InQuery.class);
-                }
-            });
     }
 
     /**
@@ -123,9 +91,9 @@ public class WebpbClient {
                                                          Class<T> responseType) {
         MessageContext context = WebpbUtils.getContext(message);
         return Mono
-            .just(uncheckedCall(() -> objectMapper.writeValueAsString(message)))
+            .just(uncheckedCall(() -> transportMapper.writeValueAsString(message)))
             .flatMap(body -> {
-                String url = WebpbUtils.formatUrl(formatMapper, message);
+                String url = WebpbUtils.formatUrl(urlObjectMapper, message);
                 return webClient
                     .method(context.getMethod())
                     .uri(url)
@@ -137,7 +105,8 @@ public class WebpbClient {
                         this::createException
                     )
                     .bodyToMono(byte[].class)
-                    .map(data -> uncheckedCall(() -> objectMapper.readValue(data, responseType)));
+                    .map(
+                        data -> uncheckedCall(() -> transportMapper.readValue(data, responseType)));
             });
     }
 
@@ -159,7 +128,7 @@ public class WebpbClient {
      * @return formatted url
      */
     public String formatUrl(URL baseUrl, WebpbMessage message) {
-        return WebpbUtils.formatUrl(baseUrl, this.formatMapper, message);
+        return WebpbUtils.formatUrl(baseUrl, this.urlObjectMapper, message);
     }
 
     /**
@@ -169,6 +138,6 @@ public class WebpbClient {
      * @return formatted url
      */
     public String formatUrl(WebpbMessage message) {
-        return WebpbUtils.formatUrl(null, this.formatMapper, message);
+        return WebpbUtils.formatUrl(null, this.urlObjectMapper, message);
     }
 }

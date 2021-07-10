@@ -20,9 +20,13 @@ import static org.springframework.util.StringUtils.hasLength;
 import static tech.linqu.webpb.commons.Utils.orEmpty;
 import static tech.linqu.webpb.commons.Utils.uncheckedCall;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
+import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
@@ -35,6 +39,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import tech.linqu.webpb.commons.SegmentGroup;
 import tech.linqu.webpb.commons.UrlSegment;
+import tech.linqu.webpb.runtime.common.InQuery;
 import tech.linqu.webpb.runtime.common.MessageContext;
 
 /**
@@ -44,14 +49,38 @@ public class WebpbUtils {
 
     private static final Map<Class<?>, MessageContext> contextCache = new ConcurrentHashMap<>();
 
-    private static final ObjectMapper objectMapper;
+    private static final ObjectMapper urlObjectMapper = createUrlObjectMapper();
 
-    static {
-        objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    }
+    private static final ObjectMapper transportMapper = createTransportMapper();
 
     private WebpbUtils() {
+    }
+
+    /**
+     * Create an {@link ObjectMapper} for formatting.
+     *
+     * @return {@link ObjectMapper}
+     */
+    public static ObjectMapper createUrlObjectMapper() {
+        return new ObjectMapper()
+            .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+    }
+
+    /**
+     * Create an {@link ObjectMapper}.
+     *
+     * @return {@link ObjectMapper}
+     */
+    public static ObjectMapper createTransportMapper() {
+        return new ObjectMapper()
+            .configure(MapperFeature.PROPAGATE_TRANSIENT_MARKER, true)
+            .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+            .setAnnotationIntrospector(new JacksonAnnotationIntrospector() {
+                @Override
+                public boolean hasIgnoreMarker(AnnotatedMember m) {
+                    return super.hasIgnoreMarker(m) || m.hasAnnotation(InQuery.class);
+                }
+            });
     }
 
     /**
@@ -76,7 +105,7 @@ public class WebpbUtils {
      * @return formatted url
      */
     public static String formatUrl(WebpbMessage message) {
-        return formatUrl(objectMapper, message);
+        return formatUrl(urlObjectMapper, message);
     }
 
     /**
@@ -259,7 +288,7 @@ public class WebpbUtils {
             return message;
         }
         SegmentGroup group = SegmentGroup.of(meta.getPath());
-        ObjectNode objectNode = objectMapper.createObjectNode();
+        ObjectNode objectNode = urlObjectMapper.createObjectNode();
         for (UrlSegment segment : group.getSegments()) {
             if (!segment.isAccessor()) {
                 continue;
@@ -274,8 +303,38 @@ public class WebpbUtils {
             }
         }
         try {
-            return objectMapper.readerForUpdating(message).readValue(objectNode);
+            return urlObjectMapper.readerForUpdating(message).readValue(objectNode);
         } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Serialize a {@link WebpbMessage} to string.
+     *
+     * @param message {@link WebpbMessage}
+     * @return value
+     */
+    public static String serialize(WebpbMessage message) {
+        try {
+            return transportMapper.writeValueAsString(message);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Deserialize a {@link WebpbMessage} from string value.
+     *
+     * @param value string value
+     * @param type  message type
+     * @param <T>   type
+     * @return message
+     */
+    public static <T extends WebpbMessage> T deserialize(String value, Class<T> type) {
+        try {
+            return transportMapper.readValue(value, type);
+        } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
     }
@@ -285,7 +344,7 @@ public class WebpbUtils {
             String accessor = accessors[i];
             ObjectNode subNode = (ObjectNode) objectNode.get(accessor);
             if (subNode == null) {
-                subNode = objectMapper.createObjectNode();
+                subNode = urlObjectMapper.createObjectNode();
                 objectNode.set(accessor, subNode);
             }
             objectNode = subNode;

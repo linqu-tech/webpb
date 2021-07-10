@@ -201,5 +201,16 @@ class WebpbUtilsTest {
         assertEquals(12345678, message.getId());
         assertEquals(111, message.getPageable().getSize());
     }
+
+    @Test
+    void givenWebpbMessage_whenSerialize_ThenReturnString() {
+        assertEquals("{\"data\":\"data123\"}", WebpbUtils.serialize(new FooRequest()));
+    }
+
+    @Test
+    void givenDataString_whenDeserialize_ThenReturnMessage() {
+        FooRequest message = WebpbUtils.deserialize("{\"data\":\"data123\"}", FooRequest.class);
+        assertEquals("data123", message.getData());
+    }
 }
 
