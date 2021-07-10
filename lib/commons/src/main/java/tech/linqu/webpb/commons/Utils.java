@@ -28,13 +28,12 @@ public class Utils {
     }
 
     /**
-     * Return orelse if value is empty.
+     * Return an empty string if value is null.
      *
-     * @param value  string value
-     * @param orelse default value
+     * @param value string value
      * @return string
      */
-    public static String emptyOrDefault(String value, String orelse) {
-        return (value == null || value.isEmpty()) ? orelse : value;
+    public static String orEmpty(String value) {
+        return (value == null) ? "" : value;
     }
 }

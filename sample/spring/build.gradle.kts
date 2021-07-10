@@ -26,7 +26,7 @@ dependencies {
     testCompileOnly("org.projectlombok:lombok:${Vers.lombok}")
     testImplementation("org.junit.jupiter:junit-jupiter-api:${Vers.jupiter}")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.springframework:spring-web:${Vers.springFramework}")
+    testImplementation("org.springframework.boot:spring-boot-starter-web")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 }
 

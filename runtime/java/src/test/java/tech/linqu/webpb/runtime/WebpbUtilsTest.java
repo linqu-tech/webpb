@@ -107,6 +107,30 @@ class WebpbUtilsTest {
     }
 
     @Test
+    void shouldFormatUrlSuccessGivenWithContext() throws MalformedURLException {
+        WebpbUtils.clearContextCache();
+        String url = WebpbUtils.formatUrl(new URL("https://domain"), objectMapper,
+            new FooRequest(WebpbMeta.builder().method("GET").context("ctx").path("/").build()));
+        assertEquals("https://domain/ctx", url);
+    }
+
+    @Test
+    void shouldFormatUrlSuccessGivenWithoutBaseUrl() {
+        WebpbUtils.clearContextCache();
+        String url = WebpbUtils.formatUrl(
+            new FooRequest(WebpbMeta.builder().method("GET").context("ctx").path("/a/b").build()));
+        assertEquals("/ctx/a/b", url);
+    }
+
+    @Test
+    void shouldFormatUrlSuccessGivenWithoutBaseUrlAndPathIsUrl() {
+        WebpbUtils.clearContextCache();
+        String url = WebpbUtils.formatUrl(new FooRequest(
+            WebpbMeta.builder().method("GET").context("ctx").path("https://a.com/b").build()));
+        assertEquals("https://a.com/b", url);
+    }
+
+    @Test
     void shouldFormatUrlSuccessGivenPathIsUrlWhenWithoutBaseUrl() {
         WebpbUtils.clearContextCache();
         String url = WebpbUtils.formatUrl(null, objectMapper,

@@ -21,21 +21,22 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import tech.linqu.webpb.runtime.WebpbMessage;
 import tech.linqu.webpb.runtime.WebpbUtils;
 import tech.linqu.webpb.runtime.reactive.WebpbClient;
 import tech.linqu.webpb.sample.proto.common.PageablePb;
@@ -46,11 +47,9 @@ import tech.linqu.webpb.sample.proto.store.StoreVisitRequest;
 import tech.linqu.webpb.sample.spring.config.WebMvcConfiguration;
 
 @ExtendWith(SpringExtension.class)
-@WebMvcTest(StoreController.class)
 @ImportAutoConfiguration(WebMvcConfiguration.class)
+@WebMvcTest(StoreController.class)
 class StoreControllerTest {
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
     private MockMvc mvc;
@@ -58,20 +57,26 @@ class StoreControllerTest {
     @MockBean
     private WebpbClient webpbClient;
 
+    private MockHttpServletRequestBuilder request(WebpbMessage message) {
+        return MockMvcRequestBuilders
+            .request(
+                HttpMethod.valueOf(message.webpbMeta().getMethod()),
+                WebpbUtils.formatUrl(message)
+            )
+            .contentType(MediaType.APPLICATION_JSON);
+    }
+
     @Test
     public void givenStoreId_whenGetStore_thenReturnStore() throws Exception {
         int storeId = 123;
         String customer = "fakeName";
-        StoreVisitRequest request = new StoreVisitRequest((long) storeId, customer);
-        String url = WebpbUtils.formatUrl(objectMapper, request);
-        assertEquals("/stores/123", url);
-
         when(webpbClient.request(any(), any()))
             .thenReturn(new StoreGreetingResponse("Welcome, " + customer));
 
-        mvc.perform(post(url)
-            .content("{\"customer\": \"" + customer + "\"}")
-            .contentType(MediaType.APPLICATION_JSON))
+        mvc
+            .perform(request(new StoreVisitRequest((long) storeId, customer))
+                .content("{\"customer\": \"" + customer + "\"}")
+            )
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.store.id", is(storeId)))
             .andExpect(jsonPath("$.store.name", is("store-" + storeId)))
@@ -81,12 +86,8 @@ class StoreControllerTest {
 
     @Test
     public void givenPageable_whenGetStores_thenReturnStoreList() throws Exception {
-        StoreListRequest request = new StoreListRequest(new PageablePb(true, 2, 8, null));
-        String url = WebpbUtils.formatUrl(objectMapper, request);
-        assertEquals("/stores?page=2&size=8", url);
-
-        mvc.perform(get(url)
-            .contentType(MediaType.APPLICATION_JSON))
+        mvc
+            .perform(request(new StoreListRequest(new PageablePb(true, 2, 8, null))))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.paging.page", is(2)))
             .andExpect(jsonPath("$.stores", hasSize(8)));
@@ -95,22 +96,18 @@ class StoreControllerTest {
     @Test
     public void givenLargePageSize_whenGetStores_thenReturnBadRequest() throws Exception {
         StoreListRequest request = new StoreListRequest(new PageablePb(true, 2, 11, null));
-        String url = WebpbUtils.formatUrl(objectMapper, request);
+        String url = WebpbUtils.formatUrl(request);
         assertEquals("/stores?page=2&size=11", url);
 
-        mvc.perform(get(url)
-            .contentType(MediaType.APPLICATION_JSON))
+        mvc
+            .perform(request(new StoreListRequest(new PageablePb(true, 2, 11, null))))
             .andExpect(status().isBadRequest());
     }
 
     @Test
     public void givenNoPageable_whenGetStores_thenReturnStoreList() throws Exception {
-        StoreListRequest request = new StoreListRequest(new PageablePb());
-        String url = WebpbUtils.formatUrl(objectMapper, request);
-        assertEquals("/stores", url);
-
-        mvc.perform(get(url)
-            .contentType(MediaType.APPLICATION_JSON))
+        mvc
+            .perform(request(new StoreListRequest(new PageablePb())))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.paging.page", is(1)))
             .andExpect(jsonPath("$.stores", hasSize(10)));
@@ -119,13 +116,10 @@ class StoreControllerTest {
     @Test
     public void givenCustomer_whenGreeting_thenReturnGreetingMessage() throws Exception {
         String customer = "fakeName";
-        StoreGreetingRequest request = new StoreGreetingRequest(customer);
-        String url = WebpbUtils.formatUrl(objectMapper, request);
-        assertEquals("/stores/greeting", url);
-
-        mvc.perform(post(url)
-            .content("{\"customer\": \"" + customer + "\"}")
-            .contentType(MediaType.APPLICATION_JSON))
+        mvc
+            .perform(request(new StoreGreetingRequest(customer))
+                .content("{\"customer\": \"" + customer + "\"}")
+            )
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.greeting", is("Welcome, " + customer)));
     }

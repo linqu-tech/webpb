@@ -29,17 +29,12 @@ class UtilsTest {
     }
 
     @Test
-    void shouldEmptyOrDefaultReturnValueGivenValueIsNotEmpty() {
-        assertEquals("hello", Utils.emptyOrDefault("hello", ""));
+    void shouldOrEmptyReturnValueGivenValueIsNotEmpty() {
+        assertEquals("hello", Utils.orEmpty("hello"));
     }
 
     @Test
-    void shouldEmptyOrDefaultReturnDefaultGivenValueIsNull() {
-        assertEquals("abc", Utils.emptyOrDefault(null, "abc"));
-    }
-
-    @Test
-    void shouldEmptyOrDefaultReturnDefaultGivenValueIsEmpty() {
-        assertEquals("abc", Utils.emptyOrDefault("", "abc"));
+    void shouldOrEmptyReturnEmptyStringGivenValueIsNull() {
+        assertEquals("", Utils.orEmpty(null));
     }
 }

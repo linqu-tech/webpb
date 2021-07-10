@@ -17,7 +17,7 @@
 package tech.linqu.webpb.runtime;
 
 import static org.springframework.util.StringUtils.hasLength;
-import static tech.linqu.webpb.commons.Utils.emptyOrDefault;
+import static tech.linqu.webpb.commons.Utils.orEmpty;
 import static tech.linqu.webpb.commons.Utils.uncheckedCall;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -87,12 +88,15 @@ public class WebpbUtils {
      */
     public static String formatUrl(ObjectMapper objectMapper, WebpbMessage message) {
         MessageContext context = getContext(message);
-        if (context.getSegmentGroup().isEmpty()) {
-            return context.getPath();
+        String path = context.getPath();
+        if (!context.getSegmentGroup().isEmpty()) {
+            JsonNode data = objectMapper.convertValue(message, JsonNode.class);
+            path = formatPath(data, context.getSegmentGroup(), null);
         }
-        JsonNode data = objectMapper.convertValue(message, JsonNode.class);
-        String path = formatPath(data, context.getSegmentGroup(), null);
-        return emptyOrDefault(context.getContext(), "") + path;
+        if (!path.startsWith("/")) {
+            return path;
+        }
+        return joinPath(context.getContext(), path);
     }
 
     /**
@@ -112,14 +116,12 @@ public class WebpbUtils {
             throw new RuntimeException(String
                 .format("Can not concat baseUrl: %s with path: %s", baseUrl, context.getPath()));
         }
-        if (context.getSegmentGroup().isEmpty()) {
-            return concatUrl(baseUrl, context.getPath());
+        String path = context.getPath();
+        if (!context.getSegmentGroup().isEmpty()) {
+            JsonNode data = objectMapper.convertValue(message, JsonNode.class);
+            path = formatPath(data, context.getSegmentGroup(), baseUrl.getQuery());
         }
-        JsonNode data = objectMapper.convertValue(message, JsonNode.class);
-        String path = formatPath(data, context.getSegmentGroup(), baseUrl.getQuery());
-        String file =
-            emptyOrDefault(baseUrl.getPath(), "") + emptyOrDefault(context.getContext(), "") + path;
-        return concatUrl(baseUrl, file);
+        return concatUrl(baseUrl, joinPath(baseUrl.getPath(), context.getContext(), path));
     }
 
     private static String concatUrl(URL baseUrl, String file) {
@@ -289,5 +291,29 @@ public class WebpbUtils {
             objectNode = subNode;
         }
         return objectNode;
+    }
+
+    private static String joinPath(String... segments) {
+        if (segments == null || segments.length == 0) {
+            return "/";
+        }
+        StringBuilder builder = new StringBuilder();
+        for (String segment : segments) {
+            segment = orEmpty(segment);
+            trimSlash(builder);
+            if (segment.startsWith("/")) {
+                builder.append(segment);
+            } else {
+                builder.append("/").append(segment);
+            }
+        }
+        trimSlash(builder);
+        return URI.create(builder.toString()).normalize().toString();
+    }
+
+    private static void trimSlash(StringBuilder builder) {
+        if (builder.length() > 0 && builder.charAt(builder.length() - 1) == '/') {
+            builder.deleteCharAt(builder.length() - 1);
+        }
     }
 }
