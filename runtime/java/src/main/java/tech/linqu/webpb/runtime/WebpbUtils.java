@@ -26,9 +26,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.http.HttpMethod;
@@ -97,7 +96,7 @@ public class WebpbUtils {
         if (!path.startsWith("/")) {
             return path;
         }
-        return Paths.get("/", orEmpty(context.getContext()), path).toString();
+        return joinPath(context.getContext(), path);
     }
 
     /**
@@ -122,8 +121,7 @@ public class WebpbUtils {
             JsonNode data = objectMapper.convertValue(message, JsonNode.class);
             path = formatPath(data, context.getSegmentGroup(), baseUrl.getQuery());
         }
-        Path file = Paths.get("/", orEmpty(baseUrl.getPath()), orEmpty(context.getContext()), path);
-        return concatUrl(baseUrl, file.toString());
+        return concatUrl(baseUrl, joinPath(baseUrl.getPath(), context.getContext(), path));
     }
 
     private static String concatUrl(URL baseUrl, String file) {
@@ -293,5 +291,29 @@ public class WebpbUtils {
             objectNode = subNode;
         }
         return objectNode;
+    }
+
+    private static String joinPath(String... segments) {
+        if (segments == null || segments.length == 0) {
+            return "/";
+        }
+        StringBuilder builder = new StringBuilder();
+        for (String segment : segments) {
+            segment = orEmpty(segment);
+            trimSlash(builder);
+            if (segment.startsWith("/")) {
+                builder.append(segment);
+            } else {
+                builder.append("/").append(segment);
+            }
+        }
+        trimSlash(builder);
+        return URI.create(builder.toString()).normalize().toString();
+    }
+
+    private static void trimSlash(StringBuilder builder) {
+        if (builder.length() > 0 && builder.charAt(builder.length() - 1) == '/') {
+            builder.deleteCharAt(builder.length() - 1);
+        }
     }
 }
