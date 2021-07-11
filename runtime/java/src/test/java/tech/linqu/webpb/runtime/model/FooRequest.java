@@ -18,6 +18,7 @@ public class FooRequest implements WebpbMessage {
 
     public static final WebpbMeta WEBPB_META = WebpbMeta.builder().build();
 
+    @JsonIgnore
     private WebpbMeta webpbMeta = WebpbMeta.builder()
         .method("POST")
         .path(

@@ -27,8 +27,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -44,11 +44,10 @@ import tech.linqu.webpb.sample.proto.store.StoreGreetingRequest;
 import tech.linqu.webpb.sample.proto.store.StoreGreetingResponse;
 import tech.linqu.webpb.sample.proto.store.StoreListRequest;
 import tech.linqu.webpb.sample.proto.store.StoreVisitRequest;
-import tech.linqu.webpb.sample.spring.config.WebMvcConfiguration;
 
+@AutoConfigureMockMvc
 @ExtendWith(SpringExtension.class)
-@ImportAutoConfiguration(WebMvcConfiguration.class)
-@WebMvcTest(StoreController.class)
+@SpringBootTest
 class StoreControllerTest {
 
     @Autowired
