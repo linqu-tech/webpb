@@ -56,7 +56,13 @@ module.exports = merge(common, {
       },
       {
         test: /\.s?css$/i,
-        use: ['style-loader', 'css-loader?sourceMap=true', 'postcss-loader', 'sass-loader'],
+        use: ['style-loader',
+          {
+            loader: "css-loader",
+            options: {
+              sourceMap: true
+            }
+          }, 'postcss-loader', 'sass-loader'],
       },
     ],
   },
