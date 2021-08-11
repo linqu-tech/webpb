@@ -13,8 +13,17 @@ public class Imports {
 
     private final String packageName;
 
+    private boolean importWebpb;
+
     public Imports(String packageName) {
         this.packageName = packageName + ".";
+    }
+
+    /**
+     * Import Webpb.
+     */
+    public void importWebpb() {
+        this.importWebpb = true;
     }
 
     /**
@@ -38,6 +47,9 @@ public class Imports {
      * @param builder {@link StringBuilder}
      */
     public void updateBuilder(StringBuilder builder) {
+        if (importWebpb) {
+            builder.append("import * as Webpb from 'webpb';\n\n");
+        }
         for (String type : imported) {
             builder.append("import { ")
                 .append(type).append(" } from './").append(type).append("';\n");

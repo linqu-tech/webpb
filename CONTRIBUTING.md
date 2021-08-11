@@ -1,12 +1,12 @@
-# Contributing to Webpb
+# Contributing
 
-### Conventional Commits
+## Conventional Commits
 
 Check if your commit messages meet the [conventional commit format](https://conventionalcommits.org).
 
 The conventional config extends from [config-conventional](https://github.com/conventional-changelog/commitlint/tree/master/%40commitlint/config-conventional).
 
-#### Type
+### Type
 
 Must be one of the following:
 
@@ -22,7 +22,7 @@ Must be one of the following:
 - **style**: Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)
 - **test**: Adding missing tests or correcting existing tests
 
-#### Scope
+### Scope
 
 The following is the list of supported scopes:
 
@@ -39,12 +39,12 @@ The following is the list of supported scopes:
 - `runtime.ts`
 - `sample`
 
-### Create a commit
+## Create a commit
 
 Run `npm install` in root directory, then you will get [Commitizen](https://github.com/commitizen-tools/commitizen) installed.
 
 Use `npm run cz`create a commit.
 
-### Workflow validation
+## Workflow validation
 
 Commit message will be validated by workflow. If the validation is fail, amend the commit and rerun validation action.

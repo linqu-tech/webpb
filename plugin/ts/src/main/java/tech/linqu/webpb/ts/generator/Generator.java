@@ -110,7 +110,6 @@ public final class Generator {
         StringBuilder builder = new StringBuilder();
         builder.append("// " + Const.HEADER + "\n");
         builder.append("// " + Const.GIT_URL + "\n\n");
-        builder.append("import * as Webpb from 'webpb';\n\n");
         imports.updateBuilder(builder);
         this.builder.prepend(builder.toString());
         this.builder.alignNewline(1);
@@ -195,6 +194,7 @@ public final class Generator {
             .append("export class ").append(className)
             .append(" implements ").append(toInterfaceName(className));
         if (StringUtils.isNotEmpty(messageOpts.getPath())) {
+            imports.importWebpb();
             builder.append(", Webpb.WebpbMessage {\n");
         } else {
             builder.append(" {\n");
@@ -202,6 +202,7 @@ public final class Generator {
 
         builder.level(() -> {
             generateMessageFields(descriptor, false);
+            imports.importWebpb();
             builder.indent().append("webpbMeta: () => Webpb.WebpbMeta;").alignNewline(2);
             generateConstructor(descriptor, messageOpts, className);
             generateFromAlias(descriptor, className);
@@ -234,6 +235,7 @@ public final class Generator {
 
     private void generateFromAliasWithAlias(Descriptor descriptor, String className) {
         builder.level(() -> {
+            imports.importWebpb();
             builder.indent().append("const properties = Webpb.toAlias(data, {");
             boolean generated = builder.level(() -> {
                 boolean v = false;
@@ -282,6 +284,7 @@ public final class Generator {
             return;
         }
         builder.level(() -> {
+            imports.importWebpb();
             builder.indent().append("return Webpb.toAlias(this, {");
             boolean generated = builder.level(() -> {
                 boolean v = false;
@@ -355,6 +358,7 @@ public final class Generator {
             builder.indent().append("private constructor(p?: ").append(interfaceName)
                 .append(") {\n");
             builder.level(() -> {
+                imports.importWebpb();
                 builder.indent().append("Webpb.assign(p, this, ")
                     .append(generateOmitted(descriptor)).append(");\n");
                 builder.indent().append("this.webpbMeta = () => (p && {\n");
@@ -380,6 +384,7 @@ public final class Generator {
             generateMetaPath(descriptor, Utils.normalize(messageOpts.getPath()));
         });
         builder.trimDuplicatedNewline();
+        imports.importWebpb();
         builder.indent().append("}) as Webpb.WebpbMeta;").alignNewline(2);
     }
 
@@ -405,6 +410,7 @@ public final class Generator {
         }
         builder.append(group.getSuffix());
         if (!group.getQuerySegments().isEmpty()) {
+            imports.importWebpb();
             builder.append("${Webpb.query('?', {\n");
             builder.level(() -> {
                 for (UrlSegment segment : group.getQuerySegments()) {
@@ -426,6 +432,7 @@ public final class Generator {
     private String getter(String value) {
         StringBuilder builder = new StringBuilder();
         if (value.contains(".")) {
+            imports.importWebpb();
             builder.append("Webpb.getter(p, '").append(value).append("')");
         } else {
             builder.append("p.").append(value);
