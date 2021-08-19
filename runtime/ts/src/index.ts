@@ -72,7 +72,7 @@ export function toAlias(data: any, aliases: { [key: string]: string }): any {
   if (!data || typeof data !== 'object' || Array.isArray(data)) {
     return data;
   }
-  const obj = {};
+  const obj: Record<string, unknown> = {};
   for (const key of Object.keys(data)) {
     const value = data[key];
     const toAlias = value['toAlias'];

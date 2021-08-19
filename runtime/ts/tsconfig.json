@@ -7,7 +7,7 @@
     "lib": ["ES2017"],
     "module": "commonjs",
     "noFallthroughCasesInSwitch": true,
-    "noImplicitAny": false,
+    "noImplicitAny": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,
     "noUnusedLocals": true,
