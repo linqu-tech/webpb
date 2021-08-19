@@ -7,41 +7,15 @@ module.exports = {
     app: Path.resolve(__dirname, '../src/scripts/index.ts'),
     styles: Path.resolve(__dirname, '../src/styles/index.scss'),
   },
-  output: {
-    path: Path.join(__dirname, '../dist'),
-    filename: 'js/[name].js',
-  },
-  optimization: {
-    splitChunks: {
-      chunks: 'all',
-      name: false,
-    },
-  },
-  plugins: [
-    new CleanWebpackPlugin({
-      cleanStaleWebpackAssets: false
-    }),
-    new HtmlWebpackPlugin({
-      template: Path.resolve(__dirname, '../src/index.html'),
-    }),
-  ],
-  resolve: {
-    preferRelative: true,
-    alias: {
-      'build': Path.resolve(__dirname, '../build'),
-      '@proto': Path.resolve(__dirname, '../src/scripts/proto'),
-      '@scripts': Path.resolve(__dirname, '../src/scripts')
-    },
-    extensions: ['.ts', '.js']
-  },
   module: {
     rules: [
       {
-        test: /\.mjs$/,
         include: /node_modules/,
+        test: /\.mjs$/,
         type: 'javascript/auto',
       },
       {
+        // eslint-disable-next-line max-len
         test: /\.(ico|jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2)(\?.*)?$/,
         use: {
           loader: 'file-loader',
@@ -51,5 +25,32 @@ module.exports = {
         },
       },
     ],
+  },
+  optimization: {
+    splitChunks: {
+      chunks: 'all',
+      name: false,
+    },
+  },
+  output: {
+    filename: 'js/[name].js',
+    path: Path.join(__dirname, '../dist'),
+  },
+  plugins: [
+    new CleanWebpackPlugin({
+      cleanStaleWebpackAssets: false,
+    }),
+    new HtmlWebpackPlugin({
+      template: Path.resolve(__dirname, '../src/index.html'),
+    }),
+  ],
+  resolve: {
+    alias: {
+      '@proto': Path.resolve(__dirname, '../src/scripts/proto'),
+      '@scripts': Path.resolve(__dirname, '../src/scripts'),
+      build: Path.resolve(__dirname, '../build'),
+    },
+    extensions: ['.ts', '.js'],
+    preferRelative: true,
   },
 };

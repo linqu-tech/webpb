@@ -1,5 +1,5 @@
-import { JSDOM } from "jsdom";
+import { JSDOM } from 'jsdom';
 
 const jsdom = new JSDOM();
-(global as any).document = jsdom.window.document;
-(global as any).window = jsdom.window;
+(global as { document: unknown }).document = jsdom.window.document;
+(global as { window: unknown }).window = jsdom.window;

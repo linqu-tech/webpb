@@ -10,7 +10,7 @@
     "lib": ["DOM", "ES2015"],
     "module": "commonjs",
     "noFallthroughCasesInSwitch": true,
-    "noImplicitAny": false,
+    "noImplicitAny": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,
     "noUnusedLocals": true,
@@ -18,7 +18,7 @@
     "pretty": true,
     "removeComments": true,
     "strict": true,
-    "strictNullChecks": false,
+    "strictNullChecks": true,
     "strictPropertyInitialization": false,
     "target": "es6",
     "paths": {

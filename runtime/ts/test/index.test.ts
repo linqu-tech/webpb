@@ -53,9 +53,9 @@ describe('index', () => {
   });
 
   it('should to alias success', function () {
-    const b = { b: 2, c: 3 };
+    const b: Record<string, unknown> = { b: 2, c: 3 };
     b['toAlias'] = () => toAlias(b, { b: 'b_' });
-    const a = { a: 1, b: b, c: 3 };
+    const a: Record<string, unknown> = { a: 1, b: b, c: 3 };
     expect(toAlias(a, { a: 'a_' })).toMatchObject({
       a_: 1, b: { b_: 2, c: 3 }, c: 3
     });
