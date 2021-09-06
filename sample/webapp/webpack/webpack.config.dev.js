@@ -14,7 +14,6 @@ module.exports = merge(common, {
       'Access-Control-Allow-Origin': '*',
     },
     hot: true,
-    inline: true,
     port: 4200,
   },
   devtool: 'eval-cheap-source-map',
