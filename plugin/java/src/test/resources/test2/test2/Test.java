@@ -2,7 +2,6 @@
 // https://github.com/linqu-tech/webpb
 package test2;
 
-import java.beans.Transient;
 import tech.linqu.webpb.runtime.WebpbMessage;
 import tech.linqu.webpb.runtime.WebpbMeta;
 
@@ -49,11 +48,6 @@ public class Test implements WebpbMessage {
         return this.test2;
     }
 
-    @Transient
-    public boolean isTest2() {
-        return this.test2 != null && this.test2;
-    }
-
     public Test setTest2(Boolean test2) {
         this.test2 = test2;
         return this;
@@ -61,11 +55,6 @@ public class Test implements WebpbMessage {
 
     public Boolean getIsTest3() {
         return this.isTest3;
-    }
-
-    @Transient
-    public boolean isIsTest3() {
-        return this.isTest3 != null && this.isTest3;
     }
 
     public Test setIsTest3(Boolean isTest3) {
