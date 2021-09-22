@@ -44,7 +44,7 @@ public class WebpbClient {
     /**
      * {@link ObjectMapper} used when send request and receive response.
      */
-    protected final ObjectMapper transportMapper = WebpbUtils.createTransportMapper();
+    protected ObjectMapper transportMapper = WebpbUtils.createTransportMapper();
 
     /**
      * WebpbClient constructor.
