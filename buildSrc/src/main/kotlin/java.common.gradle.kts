@@ -32,7 +32,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:${Vers.jupiter}")
     testImplementation("org.mockito:mockito-core:${Vers.mockito}")
     testImplementation("org.mockito:mockito-inline:${Vers.mockito}")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${Vers.jupiter}")
 }
 
 tasks.test {
