@@ -157,7 +157,7 @@ public class EnumGenerator {
             if (this.stringValue) {
                 literalExpr = new IntegerLiteralExpr("\"" + valueDescriptor.getName() + "\"");
             } else {
-                literalExpr = new IntegerLiteralExpr(String.valueOf(valueDescriptor.getIndex()));
+                literalExpr = new IntegerLiteralExpr(String.valueOf(valueDescriptor.getNumber()));
             }
         } else {
             literalExpr = new StringLiteralExpr(opts.getValue());

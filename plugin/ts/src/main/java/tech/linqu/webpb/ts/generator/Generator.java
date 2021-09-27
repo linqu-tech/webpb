@@ -174,7 +174,7 @@ public final class Generator {
                     }
                     builder.append("'");
                 } else {
-                    builder.append(valueDescriptor.getIndex());
+                    builder.append(valueDescriptor.getNumber());
                 }
                 builder.append(",\n");
             });
