@@ -4,5 +4,6 @@
 export namespace Test5Proto {
   export enum Test {
     DEFAULT = 0,
+    OTHER = 100,
   }
 }

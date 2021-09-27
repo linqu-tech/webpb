@@ -4,7 +4,7 @@ package test5;
 
 public enum Test {
 
-    DEFAULT(0);
+    DEFAULT(0), OTHER(100);
 
     private int value;
 
@@ -16,6 +16,8 @@ public enum Test {
         switch(value) {
             case 0:
                 return DEFAULT;
+            case 100:
+                return OTHER;
             default:
                 return null;
         }

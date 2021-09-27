@@ -16,4 +16,5 @@ enum Test {
     };
 
     DEFAULT = 0;
+    OTHER = 100;
 }
