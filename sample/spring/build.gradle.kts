@@ -24,15 +24,13 @@ dependencies {
     protobuf(project(":sample:proto"))
     testAnnotationProcessor("org.projectlombok:lombok:${Vers.lombok}")
     testCompileOnly("org.projectlombok:lombok:${Vers.lombok}")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:${Vers.jupiter}")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-starter-web")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${Vers.jupiter}")
 }
 
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:${Vers.protoc}"
+        artifact = "com.google.protobuf:protoc:${Vers.protobuf}"
     }
     plugins {
         id("webpb") {

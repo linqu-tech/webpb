@@ -19,7 +19,7 @@ repositories {
 
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:${Vers.protoc}"
+        artifact = "com.google.protobuf:protoc:${Vers.protobuf}"
     }
     plugins {
         id("ts") {

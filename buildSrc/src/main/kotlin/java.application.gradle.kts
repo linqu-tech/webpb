@@ -10,6 +10,6 @@ plugins {
 }
 
 dependencies {
-    implementation("com.google.protobuf:protobuf-java:${Vers.protobufJava}")
+    implementation("com.google.protobuf:protobuf-java:${Vers.protobuf}")
     implementation("org.apache.commons:commons-lang3:${Vers.commonsLang3}")
 }
