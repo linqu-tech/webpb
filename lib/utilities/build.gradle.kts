@@ -13,7 +13,7 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:${Vers.lombok}")
     compileOnly("org.projectlombok:lombok:${Vers.lombok}")
     compileOnly(project(":lib:tests"))
-    implementation("com.google.protobuf:protobuf-java:${Vers.protobufJava}")
+    implementation("com.google.protobuf:protobuf-java:${Vers.protobuf}")
     implementation("commons-io:commons-io:${Vers.commonsIo}")
     implementation("org.apache.commons:commons-lang3:${Vers.commonsLang3}")
     implementation(project(":lib:commons"))
@@ -40,7 +40,7 @@ tasks.processResources {
 
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:${Vers.protoc}"
+        artifact = "com.google.protobuf:protoc:${Vers.protobuf}"
     }
     generateProtoTasks {
         ofSourceSet("main").forEach {

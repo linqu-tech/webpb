@@ -17,7 +17,7 @@ object Vers {
     lateinit var jupiter: String
     lateinit var lombok: String
     lateinit var mockito: String
-    lateinit var protobufJava: String
+    lateinit var protobuf: String
     lateinit var protoc: String
     lateinit var reactorNetty: String
     lateinit var servletApi: String
