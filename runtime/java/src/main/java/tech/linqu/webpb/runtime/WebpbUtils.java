@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
@@ -72,9 +73,10 @@ public class WebpbUtils {
      * @return {@link ObjectMapper}
      */
     public static ObjectMapper createTransportMapper() {
-        return new ObjectMapper()
+        return JsonMapper.builder()
             .configure(MapperFeature.PROPAGATE_TRANSIENT_MARKER, true)
             .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+            .build()
             .setAnnotationIntrospector(new JacksonAnnotationIntrospector() {
                 @Override
                 public boolean hasIgnoreMarker(AnnotatedMember m) {
