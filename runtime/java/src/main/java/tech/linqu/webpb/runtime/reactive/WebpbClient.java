@@ -16,8 +16,6 @@
 
 package tech.linqu.webpb.runtime.reactive;
 
-import static tech.linqu.webpb.commons.Utils.uncheckedCall;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URL;
 import java.util.Map;
@@ -41,10 +39,7 @@ public class WebpbClient {
 
     private final ObjectMapper urlObjectMapper = WebpbUtils.createUrlObjectMapper();
 
-    /**
-     * {@link ObjectMapper} used when send request and receive response.
-     */
-    protected ObjectMapper transportMapper = WebpbUtils.createTransportMapper();
+    protected TransportMapper transportMapper = new JsonTransportMapper();
 
     /**
      * WebpbClient constructor.
@@ -65,6 +60,15 @@ public class WebpbClient {
     public WebpbClient(WebClient webClient, Consumer<Map<String, Object>> attributes) {
         this.webClient = webClient;
         this.attributes = attributes;
+    }
+
+    /**
+     * Update {@link TransportMapper}.
+     *
+     * @param transportMapper {@link TransportMapper}
+     */
+    public void setTransportMapper(TransportMapper transportMapper) {
+        this.transportMapper = transportMapper;
     }
 
     /**
@@ -91,7 +95,7 @@ public class WebpbClient {
                                                          Class<T> responseType) {
         MessageContext context = WebpbUtils.getContext(message);
         return Mono
-            .just(uncheckedCall(() -> transportMapper.writeValueAsString(message)))
+            .just(transportMapper.writeValue(message))
             .flatMap(body -> {
                 String url = WebpbUtils.formatUrl(urlObjectMapper, message);
                 return webClient
@@ -105,8 +109,7 @@ public class WebpbClient {
                         this::createException
                     )
                     .bodyToMono(byte[].class)
-                    .map(
-                        data -> uncheckedCall(() -> transportMapper.readValue(data, responseType)));
+                    .map(data -> transportMapper.readValue(data, responseType));
             });
     }
 
