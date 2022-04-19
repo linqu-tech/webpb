@@ -39,6 +39,9 @@ public class WebpbClient {
 
     private final ObjectMapper urlObjectMapper = WebpbUtils.createUrlObjectMapper();
 
+    /**
+     * {@link TransportMapper}.
+     */
     protected TransportMapper transportMapper = new JsonTransportMapper();
 
     /**
