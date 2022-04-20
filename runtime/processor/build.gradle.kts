@@ -9,6 +9,7 @@ dependencies {
     api(project(":runtime:java"))
     compileOnly(files(org.gradle.internal.jvm.Jvm.current().toolsJar))
     testImplementation("com.google.testing.compile:compile-testing:${Vers.compileTesting}")
+    testImplementation("org.springframework:spring-messaging:${Vers.springFramework}")
     testImplementation("org.springframework:spring-web:${Vers.springFramework}")
     testImplementation(files(org.gradle.internal.jvm.Jvm.current().toolsJar))
 }

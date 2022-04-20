@@ -31,14 +31,7 @@ import tech.linqu.webpb.runtime.WebpbMessage;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @MessageMapping
-public @interface WebpbMessagingMapping {
-
-    /**
-     * {@link MessageMapping#value()}.
-     *
-     * @return string array
-     */
-    String[] value() default {};
+public @interface WebpbMessageMapping {
 
     /**
      * Specify {@link WebpbMessage} for this annotation.
