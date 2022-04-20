@@ -12,74 +12,74 @@ import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import org.junit.jupiter.api.Test;
 
-class WebpbRequestMappingProcessorTest {
+class WebpbMessageMappingProcessorTest {
 
     @Test
     void shouldProcessSample1Success() {
-        Compilation compilation = javac().withProcessors(new WebpbRequestMappingProcessor())
-            .compile(forResource("request/Sample1.java"));
+        Compilation compilation = javac().withProcessors(new WebpbMessageMappingProcessor())
+            .compile(forResource("message/Sample1.java"));
         assertThat(compilation).succeeded();
     }
 
     @Test
     void shouldProcessSample2Success() {
-        Compilation compilation = javac().withProcessors(new WebpbRequestMappingProcessor())
-            .compile(forResource("request/Sample2.java"));
+        Compilation compilation = javac().withProcessors(new WebpbMessageMappingProcessor())
+            .compile(forResource("message/Sample2.java"));
         assertThat(compilation).succeeded();
     }
 
     @Test
     void shouldProcessSample3Success() {
-        Compilation compilation = javac().withProcessors(new WebpbRequestMappingProcessor())
-            .compile(forResource("request/Sample3.java"));
+        Compilation compilation = javac().withProcessors(new WebpbMessageMappingProcessor())
+            .compile(forResource("message/Sample3.java"));
         assertThat(compilation).succeeded();
     }
 
     @Test
     void shouldProcessSample4Success() {
-        Compilation compilation = javac().withProcessors(new WebpbRequestMappingProcessor())
-            .compile(forResource("request/Sample4.java"));
+        Compilation compilation = javac().withProcessors(new WebpbMessageMappingProcessor())
+            .compile(forResource("message/Sample4.java"));
         assertThat(compilation).succeeded();
     }
 
     @Test
     void shouldProcessSample5Success() {
-        Compilation compilation = javac().withProcessors(new WebpbRequestMappingProcessor())
-            .compile(forResource("request/Sample5.java"));
+        Compilation compilation = javac().withProcessors(new WebpbMessageMappingProcessor())
+            .compile(forResource("message/Sample5.java"));
         assertThat(compilation).succeeded();
     }
 
     @Test
     void shouldProcessSample6Success() {
-        Compilation compilation = javac().withProcessors(new WebpbRequestMappingProcessor())
-            .compile(forResource("request/Sample6.java"));
+        Compilation compilation = javac().withProcessors(new WebpbMessageMappingProcessor())
+            .compile(forResource("message/Sample6.java"));
         assertThat(compilation).succeeded();
     }
 
     @Test
     void shouldProcessSample7Success() {
-        Compilation compilation = javac().withProcessors(new WebpbRequestMappingProcessor())
-            .compile(forResource("request/Sample7.java"));
+        Compilation compilation = javac().withProcessors(new WebpbMessageMappingProcessor())
+            .compile(forResource("message/Sample7.java"));
         assertThat(compilation).succeeded();
     }
 
     @Test
     void shouldProcessSample8Success() {
-        Compilation compilation = javac().withProcessors(new WebpbRequestMappingProcessor())
-            .compile(forResource("request/Sample8.java"));
+        Compilation compilation = javac().withProcessors(new WebpbMessageMappingProcessor())
+            .compile(forResource("message/Sample8.java"));
         assertThat(compilation).succeeded();
     }
 
     @Test
     void shouldProcessSampleFailed() {
-        Compilation compilation = javac().withProcessors(new WebpbRequestMappingProcessor())
-            .compile(forResource("request/SampleFailed1.java"));
+        Compilation compilation = javac().withProcessors(new WebpbMessageMappingProcessor())
+            .compile(forResource("message/SampleFailed1.java"));
         assertThat(compilation).failed();
     }
 
     @Test
     void shouldInitFailed() {
-        WebpbRequestMappingProcessor processor = new WebpbRequestMappingProcessor();
+        WebpbMessageMappingProcessor processor = new WebpbMessageMappingProcessor();
         ProcessingEnvironment env = mock(ProcessingEnvironment.class);
         Messager messager = mock(Messager.class);
         when(env.getMessager()).thenReturn(messager);
