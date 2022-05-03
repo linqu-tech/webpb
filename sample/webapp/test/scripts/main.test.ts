@@ -1,7 +1,5 @@
 import { HttpService, Main } from '@scripts';
-import { StoreProto } from '@proto';
-import StoreVisitResponse = StoreProto.StoreVisitResponse;
-import StoreListResponse = StoreProto.StoreListResponse;
+import { StoreListResponse, StoreVisitResponse } from '@proto/StoreProto';
 
 describe('main', () => {
   const createElement = (id: string) => {

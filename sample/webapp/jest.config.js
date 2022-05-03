@@ -1,19 +1,10 @@
-const { pathsToModuleNameMapper } = require('ts-jest/utils');
+const { pathsToModuleNameMapper } = require('ts-jest');
 const { compilerOptions } = require('./tsconfig');
 
 module.exports = {
   bail: true,
   collectCoverage: true,
   collectCoverageFrom: ['src/**/*.ts'],
-  errorOnDeprecated: true,
-  moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, { prefix: '<rootDir>/' }),
-  preset: 'ts-jest',
-  rootDir: './',
-  "setupFiles": [
-    "./test/setup/jsdom.ts"
-  ],
-  testEnvironment: 'node',
-  testMatch: ['<rootDir>/test/**/*(*.)@(test).ts'],
   coverageThreshold: {
     global: {
       branches: 100,
@@ -22,4 +13,13 @@ module.exports = {
       statements: 100,
     },
   },
+  errorOnDeprecated: true,
+  moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, {
+    prefix: '<rootDir>/',
+  }),
+  preset: 'ts-jest',
+  rootDir: './',
+  setupFiles: ['./test/setup/jsdom.ts'],
+  testEnvironment: 'node',
+  testMatch: ['<rootDir>/test/**/*(*.)@(test).ts'],
 };

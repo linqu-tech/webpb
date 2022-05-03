@@ -3,35 +3,33 @@
 
 import * as Webpb from 'webpb';
 
-export namespace Test3Proto {
-  export interface ITest {
-    test1: number;
+export interface ITest {
+  test1: number;
+}
+
+export class Test implements ITest {
+  test1!: number;
+  webpbMeta: () => Webpb.WebpbMeta;
+
+  private constructor(p?: ITest) {
+    Webpb.assign(p, this, []);
+    this.webpbMeta = () => (p && {
+      class: 'Test',
+      method: '',
+      context: '',
+      path: ''
+    }) as Webpb.WebpbMeta;
   }
 
-  export class Test implements ITest {
-    test1!: number;
-    webpbMeta: () => Webpb.WebpbMeta;
+  static create(properties: ITest): Test {
+    return new Test(properties);
+  }
 
-    private constructor(p?: ITest) {
-      Webpb.assign(p, this, []);
-      this.webpbMeta = () => (p && {
-        class: 'Test',
-        method: '',
-        context: '',
-        path: ''
-      }) as Webpb.WebpbMeta;
-    }
+  static fromAlias(data: Record<string, any>): Test {
+    return Test.create(data as any);
+  }
 
-    static create(properties: ITest): Test {
-      return new Test(properties);
-    }
-
-    static fromAlias(data: Record<string, any>): Test {
-      return Test.create(data as any);
-    }
-
-    toWebpbAlias(): any {
-      return this;
-    }
+  toWebpbAlias(): any {
+    return this;
   }
 }

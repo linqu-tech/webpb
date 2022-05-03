@@ -3,35 +3,33 @@
 
 import * as Webpb from 'webpb';
 
-export namespace IgnoredProto {
-  export interface IIgnoreTest {
-    test1: number;
+export interface IIgnoreTest {
+  test1: number;
+}
+
+export class IgnoreTest implements IIgnoreTest {
+  test1!: number;
+  webpbMeta: () => Webpb.WebpbMeta;
+
+  private constructor(p?: IIgnoreTest) {
+    Webpb.assign(p, this, []);
+    this.webpbMeta = () => (p && {
+      class: 'IgnoreTest',
+      method: '',
+      context: '',
+      path: ''
+    }) as Webpb.WebpbMeta;
   }
 
-  export class IgnoreTest implements IIgnoreTest {
-    test1!: number;
-    webpbMeta: () => Webpb.WebpbMeta;
+  static create(properties: IIgnoreTest): IgnoreTest {
+    return new IgnoreTest(properties);
+  }
 
-    private constructor(p?: IIgnoreTest) {
-      Webpb.assign(p, this, []);
-      this.webpbMeta = () => (p && {
-        class: 'IgnoreTest',
-        method: '',
-        context: '',
-        path: ''
-      }) as Webpb.WebpbMeta;
-    }
+  static fromAlias(data: Record<string, any>): IgnoreTest {
+    return IgnoreTest.create(data as any);
+  }
 
-    static create(properties: IIgnoreTest): IgnoreTest {
-      return new IgnoreTest(properties);
-    }
-
-    static fromAlias(data: Record<string, any>): IgnoreTest {
-      return IgnoreTest.create(data as any);
-    }
-
-    toWebpbAlias(): any {
-      return this;
-    }
+  toWebpbAlias(): any {
+    return this;
   }
 }
