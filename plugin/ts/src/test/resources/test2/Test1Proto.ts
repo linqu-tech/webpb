@@ -3,32 +3,30 @@
 
 import * as Webpb from 'webpb';
 
-export namespace Test1Proto {
-  export interface ITest {
+export interface ITest {
+}
+
+export class Test implements ITest {
+  webpbMeta: () => Webpb.WebpbMeta;
+
+  private constructor() {
+    this.webpbMeta = () => ({
+      class: 'Test',
+      method: '',
+      context: '',
+      path: ''
+    }) as Webpb.WebpbMeta;
   }
 
-  export class Test implements ITest {
-    webpbMeta: () => Webpb.WebpbMeta;
+  static create(): Test {
+    return new Test();
+  }
 
-    private constructor() {
-      this.webpbMeta = () => ({
-        class: 'Test',
-        method: '',
-        context: '',
-        path: ''
-      }) as Webpb.WebpbMeta;
-    }
+  static fromAlias(_data?: Record<string, any>): Test {
+    return Test.create();
+  }
 
-    static create(): Test {
-      return new Test();
-    }
-
-    static fromAlias(_data?: Record<string, any>): Test {
-      return Test.create();
-    }
-
-    toWebpbAlias(): any {
-      return this;
-    }
+  toWebpbAlias(): any {
+    return this;
   }
 }

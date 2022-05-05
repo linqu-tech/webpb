@@ -5,7 +5,6 @@ element.setAttribute('id', 'logger');
 document.body.appendChild(element);
 
 describe('logger', () => {
-
   it('when reset logger then logger is empty', () => {
     const logger = new Logger();
     logger.reset();

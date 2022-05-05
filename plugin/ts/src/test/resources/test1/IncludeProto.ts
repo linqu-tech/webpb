@@ -3,72 +3,70 @@
 
 import * as Webpb from 'webpb';
 
-export namespace IncludeProto {
-  export enum Enum {
-    DEFAULT = 0,
+export enum Enum {
+  DEFAULT = 0,
+}
+
+export interface IMessage {
+  id: number;
+}
+
+export class Message implements IMessage {
+  id!: number;
+  webpbMeta: () => Webpb.WebpbMeta;
+
+  private constructor(p?: IMessage) {
+    Webpb.assign(p, this, []);
+    this.webpbMeta = () => (p && {
+      class: 'Message',
+      method: '',
+      context: '',
+      path: ''
+    }) as Webpb.WebpbMeta;
   }
 
-  export interface IMessage {
-    id: number;
+  static create(properties: IMessage): Message {
+    return new Message(properties);
   }
 
-  export class Message implements IMessage {
-    id!: number;
+  static fromAlias(data: Record<string, any>): Message {
+    return Message.create(data as any);
+  }
+
+  toWebpbAlias(): any {
+    return this;
+  }
+}
+
+export namespace Message {
+  export interface INested {
+    test1: number;
+  }
+
+  export class Nested implements INested {
+    test1!: number;
     webpbMeta: () => Webpb.WebpbMeta;
 
-    private constructor(p?: IMessage) {
+    private constructor(p?: INested) {
       Webpb.assign(p, this, []);
       this.webpbMeta = () => (p && {
-        class: 'Message',
+        class: 'Nested',
         method: '',
         context: '',
         path: ''
       }) as Webpb.WebpbMeta;
     }
 
-    static create(properties: IMessage): Message {
-      return new Message(properties);
+    static create(properties: INested): Nested {
+      return new Nested(properties);
     }
 
-    static fromAlias(data: Record<string, any>): Message {
-      return Message.create(data as any);
+    static fromAlias(data: Record<string, any>): Nested {
+      return Nested.create(data as any);
     }
 
     toWebpbAlias(): any {
       return this;
-    }
-  }
-
-  export namespace Message {
-    export interface INested {
-      test1: number;
-    }
-
-    export class Nested implements INested {
-      test1!: number;
-      webpbMeta: () => Webpb.WebpbMeta;
-
-      private constructor(p?: INested) {
-        Webpb.assign(p, this, []);
-        this.webpbMeta = () => (p && {
-          class: 'Nested',
-          method: '',
-          context: '',
-          path: ''
-        }) as Webpb.WebpbMeta;
-      }
-
-      static create(properties: INested): Nested {
-        return new Nested(properties);
-      }
-
-      static fromAlias(data: Record<string, any>): Nested {
-        return Nested.create(data as any);
-      }
-
-      toWebpbAlias(): any {
-        return this;
-      }
     }
   }
 }

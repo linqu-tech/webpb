@@ -94,6 +94,10 @@ public final class Generator {
         return new Generator();
     }
 
+    private static boolean shouldIgnore(String packageName) {
+        return StringUtils.isEmpty(packageName) || packageName.contains("google.protobuf");
+    }
+
     /**
      * Entrance of the generator.
      *
@@ -116,20 +120,12 @@ public final class Generator {
         return this.builder.toString();
     }
 
-    private static boolean shouldIgnore(String packageName) {
-        return StringUtils.isEmpty(packageName) || packageName.contains("google.protobuf");
-    }
-
     private void generateTypes() {
-        builder.append("export namespace ").append(fileDescriptor.getPackage()).append(" {\n");
-        builder.level(() -> {
-            for (EnumDescriptor enumDescriptor : fileDescriptor.getEnumTypes()) {
-                generateEnum(enumDescriptor);
-            }
-            handleDescriptors(fileDescriptor.getMessageTypes());
-            builder.trimDuplicatedNewline();
-        });
-        builder.closeBracket();
+        for (EnumDescriptor enumDescriptor : fileDescriptor.getEnumTypes()) {
+            generateEnum(enumDescriptor);
+        }
+        handleDescriptors(fileDescriptor.getMessageTypes());
+        builder.trimDuplicatedNewline();
     }
 
     private void handleDescriptors(List<Descriptor> descriptors) {

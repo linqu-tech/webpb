@@ -46,7 +46,10 @@ module.exports = {
   ],
   resolve: {
     alias: {
-      '@proto': Path.resolve(__dirname, '../src/scripts/proto'),
+      '@proto': Path.resolve(
+        __dirname,
+        '../build/generated/source/proto/main/ts'
+      ),
       '@scripts': Path.resolve(__dirname, '../src/scripts'),
       build: Path.resolve(__dirname, '../build'),
     },
