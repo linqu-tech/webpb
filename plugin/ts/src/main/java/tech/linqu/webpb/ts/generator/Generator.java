@@ -101,7 +101,9 @@ public final class Generator {
     /**
      * Entrance of the generator.
      *
-     * @return {@link SourceBuilder}
+     * @param requestContext {@link RequestContext}
+     * @param fileDescriptor {@link FileDescriptor}
+     * @return generated content
      */
     public String generate(RequestContext requestContext, FileDescriptor fileDescriptor) {
         if (shouldIgnore(fileDescriptor.getPackage())) {

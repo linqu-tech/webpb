@@ -1,7 +1,7 @@
 ## PR Checklist
 Please check if your PR fulfills the following requirements:
 
-- [ ] The commit message follows our guidelines: https://github.com/linqu-tech/webpb/blob/master/CONTRIBUTING.md#commit
+- [ ] The commit message follows our guidelines: https://github.com/linqu-tech/webpb/blob/master/CONTRIBUTING.md
 - [ ] Tests for the changes have been added (for bug fixes / features)
 - [ ] Docs have been added / updated (for bug fixes / features)
 

@@ -1,3 +1,8 @@
+export type Constructor<T> = {
+  new (): T;
+  fromAlias<T, D>(this: Constructor<T>, data: Partial<D>): T;
+};
+
 export interface WebpbMessage {
   webpbMeta(): WebpbMeta;
 

@@ -16,6 +16,7 @@ object Vers {
     lateinit var javaparser: String
     lateinit var jupiter: String
     lateinit var lombok: String
+    lateinit var jakartaXml: String
     lateinit var mockito: String
     lateinit var protobuf: String
     lateinit var protoc: String

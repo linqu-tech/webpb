@@ -6,6 +6,17 @@ plugins {
     `maven-publish`
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+
 repositories {
     gradlePluginPortal()
 }
@@ -19,6 +30,7 @@ for (key in properties.stringPropertyNames()) {
     ext.set(key, properties.getProperty(key))
 }
 
+val versionJacoco: String by project
 val versionPluginCoveralls: String by project
 val versionPluginDependencyManagement: String by project
 val versionPluginProtobuf: String by project
@@ -30,6 +42,7 @@ dependencies {
     implementation("com.github.kt3k.coveralls:com.github.kt3k.coveralls.gradle.plugin:${versionPluginCoveralls}")
     implementation("com.google.protobuf:protobuf-gradle-plugin:${versionPluginProtobuf}")
     implementation("io.spring.gradle:dependency-management-plugin:${versionPluginDependencyManagement}")
+    implementation("org.jacoco:org.jacoco.agent:${versionJacoco}")
     implementation("org.springframework.boot:spring-boot-gradle-plugin:${versionPluginSpringBoot}")
     implementation(kotlin("script-runtime"))
 }

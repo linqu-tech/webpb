@@ -16,7 +16,6 @@
 
 package tech.linqu.webpb.java.generator;
 
-import static com.google.protobuf.Descriptors.FieldDescriptor.JavaType.BOOLEAN;
 import static com.google.protobuf.Descriptors.FieldDescriptor.JavaType.ENUM;
 import static com.google.protobuf.Descriptors.FieldDescriptor.Type.BOOL;
 import static com.google.protobuf.Descriptors.FieldDescriptor.Type.BYTES;
@@ -51,13 +50,11 @@ import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.AssignExpr;
-import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.expr.NameExpr;
-import com.github.javaparser.ast.expr.NullLiteralExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
@@ -101,6 +98,7 @@ import tech.linqu.webpb.utilities.utils.Utils;
 public class MessageGenerator {
 
     private static final Map<FieldDescriptor.Type, Type> TYPES;
+    private static final JavaParser JAVA_PARSER = new JavaParser();
 
     static {
         Map<FieldDescriptor.Type, Type> map = new HashMap<>();
@@ -122,8 +120,6 @@ public class MessageGenerator {
         TYPES = map;
     }
 
-    private static final JavaParser JAVA_PARSER = new JavaParser();
-
     private Imports imports;
 
     private RequestContext requestContext;
@@ -133,8 +129,12 @@ public class MessageGenerator {
     /**
      * Entrance of the generator.
      *
-     * @param descriptor {@link Descriptor}.
-     * @return {@link ClassOrInterfaceDeclaration}
+     * @param unit           {@link CompilationUnit}
+     * @param requestContext {@link RequestContext}
+     * @param importLookup   {@link ImportLookup}
+     * @param fileDescriptor {@link FileDescriptor}
+     * @param descriptor     {@link Descriptor}
+     * @return {@link CompilationUnit}
      */
     public CompilationUnit generate(CompilationUnit unit,
                                     RequestContext requestContext,
