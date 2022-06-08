@@ -34,6 +34,7 @@ public class SourceBuilder {
      * Make sure there are count of tail newlines.
      *
      * @param count count
+     * @return {@link SourceBuilder}
      */
     public SourceBuilder alignNewline(int count) {
         Utils.alignNewline(this.builder, count);

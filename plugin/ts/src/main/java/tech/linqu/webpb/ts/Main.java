@@ -29,7 +29,10 @@ import tech.linqu.webpb.utilities.descriptor.WebpbExtend;
 public class Main {
 
     /**
-     * The main method.
+     * main.
+     *
+     * @param args arguments
+     * @throws Exception throws exception
      */
     public static void main(String[] args) throws Exception {
         RequestContext context = new RequestContext(WebpbExtend.FileOpts::hasTs);

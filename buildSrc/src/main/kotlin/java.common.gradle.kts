@@ -26,6 +26,7 @@ repositories {
 
 dependencies {
     annotationProcessor("org.projectlombok:lombok:${Vers.lombok}")
+    compileOnly("jakarta.xml.bind:jakarta.xml.bind-api:${Vers.jakartaXml}")
     compileOnly("org.projectlombok:lombok:${Vers.lombok}")
     testAnnotationProcessor("org.projectlombok:lombok:${Vers.lombok}")
     testCompileOnly("org.projectlombok:lombok:${Vers.lombok}")

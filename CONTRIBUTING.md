@@ -22,28 +22,11 @@ Must be one of the following:
 - **style**: Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)
 - **test**: Adding missing tests or correcting existing tests
 
-### Scope
-
-The following is the list of supported scopes:
-
-- `aggregation`
-- `lib.commons`
-- `lib.tests`
-- `lib.utilities`
-- `plugin.dump`
-- `plugin.java`
-- `plugin.ts`
-- `proto`
-- `runtime.java`
-- `runtime.processor`
-- `runtime.ts`
-- `sample`
-
 ## Create a commit
 
 Run `npm install` in root directory, then you will get [Commitizen](https://github.com/commitizen-tools/commitizen) installed.
 
-Use `npm run cz`create a commit.
+Use `npm run cz` or `npx cz` create a commit.
 
 ## Workflow validation
 

@@ -25,7 +25,10 @@ import com.google.protobuf.compiler.PluginProtos.CodeGeneratorResponse;
 public class Main {
 
     /**
-     * The main method.
+     * main.
+     *
+     * @param args arguments
+     * @throws Exception throws exception
      */
     public static void main(String[] args) throws Exception {
         CodeGeneratorRequest request = CodeGeneratorRequest.parseFrom(System.in);
